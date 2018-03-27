@@ -80,18 +80,24 @@ while True:
         priceInfo = HuobiClient.priceInfo
         buyPrice = priceInfo[symbol]["buy"]
         sellPrice = priceInfo[symbol]["sell"]
+        print('\nBase:', currentBase, ",Buy:", nextBuy, ',Sell:', nextSell,
+              '|buy1:', buyPrice, '(+', round(nextSell - buyPrice, 4), ')',
+              ',sell1:', sellPrice, '(', round(nextBuy - sellPrice, 4), ')',
+              )
         orderInfo = {}
-        if buyPrice <= nextBuy:
-            buyOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_BUY, buyPrice + 0.0001, transaction)
+        if nextBuy >= sellPrice:
+            buyOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_BUY, sellPrice, transaction)
             orderInfo = buyOrder
-        elif sellPrice >= nextSell:
-            sellOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_SELL, sellPrice - 0.0001, transaction)
+        elif nextSell <= buyPrice:
+            sellOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_SELL, buyPrice, transaction)
             orderInfo = sellOrder
         if orderInfo != {}:
             order_process(orderInfo)
             currentBase = orderInfo.avgPrice
             config.read("config.ini")
             config.set("trade", "currentBase", str(currentBase))
+            fp = open("config.ini", "w")
+            config.write(fp)
             nextBuy = round(currentBase * (100 - percentage) * 0.01, 4)
             nextSell = round(currentBase * (100 + percentage) * 0.01, 4)
     except Exception as err:

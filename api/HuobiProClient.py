@@ -92,7 +92,7 @@ def cancel_my_order(my_order_info):
     print(u'\n-----------------------------------------spot cancel order----------------------------------------------')
     result = cancel_order(my_order_info.orderId)
     if result['status'] == 'ok':
-        print(u"order", result['data'], "canceled")
+        # print(u"order", result['data'], "canceled")
         write_log(my_order_info)
         write_log(my_order_info, "order " + result['data'] + " canceled")
     else:
@@ -185,9 +185,9 @@ def get_coin_price(symbol):
 def get_trade_price(symbol, order_type):
     get_coin_price(symbol)
     if order_type == TRADE_BUY:
-        return priceInfo[symbol]["buy"] + orderDiff
+        return priceInfo[symbol]["sell"]
     else:
-        return priceInfo[symbol]["sell"] - orderDiff
+        return priceInfo[symbol]["buy"]
 
 
 def write_log(my_order_info, text=""):

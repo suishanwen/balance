@@ -79,16 +79,18 @@ while True:
         HuobiClient.get_coin_price(symbol)
         priceInfo = HuobiClient.priceInfo
         buyPrice = priceInfo[symbol]["buy"]
+        buyAmount = priceInfo[symbol]["buyAmount"]
         sellPrice = priceInfo[symbol]["sell"]
+        sellAmount = priceInfo[symbol]["sellAmount"]
         print('\nBase:', currentBase, ",Buy:", nextBuy, ',Sell:', nextSell,
               '|buy1:', buyPrice, '(+', round(nextSell - buyPrice, 4), ')',
               ',sell1:', sellPrice, '(', round(nextBuy - sellPrice, 4), ')',
               )
         orderInfo = {}
-        if nextBuy >= sellPrice:
+        if nextBuy >= sellPrice and sellAmount >= transaction:
             buyOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_BUY, sellPrice, transaction)
             orderInfo = buyOrder
-        elif nextSell <= buyPrice:
+        elif nextSell <= buyPrice and buyAmount >= transaction:
             sellOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_SELL, buyPrice, transaction)
             orderInfo = sellOrder
         if orderInfo != {}:

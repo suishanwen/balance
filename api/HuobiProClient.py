@@ -27,7 +27,7 @@ accountId = config.get("account", "id")
 # global variable
 accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
                BALANCE_HT: {"total": 0, "available": 0, "freezed": 0}}
-priceInfo = {SYMBOL_HT: {"sell": 0, "buy": 0}}
+priceInfo = {SYMBOL_HT: {"sell": 0, 'sellAmount': 0, "buy": 0, 'buyAmount': 0}}
 orderList = []
 
 
@@ -179,7 +179,9 @@ def get_coin_price(symbol):
     data = get_ticker(symbol)
     if data["status"] == 'ok':
         priceInfo[symbol]["sell"] = round(float(data["tick"]["ask"][0]), 5)
+        priceInfo[symbol]["sellAmount"] = float(data["tick"]["ask"][1])
         priceInfo[symbol]["buy"] = round(float(data["tick"]["bid"][0]), 5)
+        priceInfo[symbol]["buyAmount"] = float(data["tick"]["bid"][1])
 
 
 def get_trade_price(symbol, order_type):

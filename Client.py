@@ -12,9 +12,7 @@ importlib.reload(sys)
 config = configparser.ConfigParser()
 config.read("config.ini")
 
-HuobiClient.get_trade("htusdt")
-# HuobiClient.get_accounts()
-# HuobiClient.get_account_info([HuobiClient.BALANCE_HT, HuobiClient.BALANCE_USDT])
+HuobiClient.get_account_info([HuobiClient.BALANCE_HT, HuobiClient.BALANCE_USDT])
 
 symbol = HuobiClient.SYMBOL_HT
 transaction = float(config.get("trade", "transaction"))

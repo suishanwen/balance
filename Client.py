@@ -104,7 +104,7 @@ while True:
             orderInfo = sellOrder
         if orderInfo != {}:
             order_process(orderInfo)
-            if transaction - orderInfo.dealAmount < 0.1:
+            if orderInfo.amount < 0.1:
                 currentBase = orderInfo.avgPrice
                 config.read("config.ini")
                 config.set("trade", "currentBase", str(currentBase))

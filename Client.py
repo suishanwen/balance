@@ -55,19 +55,28 @@ def cal_avg_reward(my_order_info):
          str(round(sell_reward - buy_cost - fee, 5))]))
 
 
+# def order_process(my_order_info):
+#     my_order_info.set_amount(my_order_info.get_unhandled_amount())
+#     state = HuobiClient.trade(my_order_info)
+#     # dealed or part dealed
+#     if state != 'partial-canceled' and state != 'canceled':
+#         my_order_info.set_transaction("minus")
+#         if state == 'filled':
+#             HuobiClient.write_log(my_order_info)
+#     else:
+#         my_order_info.set_price(0)
+#         order_process(my_order_info)
+#         return
+#     if state != 'filled' and (my_order_info.dealAmount != 0 or state == "failed"):
+#         order_process(my_order_info)
+
 def order_process(my_order_info):
     my_order_info.set_amount(my_order_info.get_unhandled_amount())
     state = HuobiClient.trade(my_order_info)
-    # dealed or part dealed
-    if state != 'partial-canceled' and state != 'canceled':
-        my_order_info.set_transaction("minus")
-        if state == 'filled':
-            HuobiClient.write_log(my_order_info)
-    else:
+    if my_order_info.amount < 0.1 and state == 'filled':
+        HuobiClient.write_log(my_order_info)
+    elif my_order_info.dealAmount > 0:
         my_order_info.set_price(0)
-        order_process(my_order_info)
-        return
-    if state != 'filled' and (my_order_info.dealAmount != 0 or state == "failed"):
         order_process(my_order_info)
 
 
@@ -95,13 +104,14 @@ while True:
             orderInfo = sellOrder
         if orderInfo != {}:
             order_process(orderInfo)
-            currentBase = orderInfo.avgPrice
-            config.read("config.ini")
-            config.set("trade", "currentBase", str(currentBase))
-            fp = open("config.ini", "w")
-            config.write(fp)
-            nextBuy = round(currentBase * (100 - percentage) * 0.01, 4)
-            nextSell = round(currentBase * (100 + percentage) * 0.01, 4)
+            if transaction - orderInfo.dealAmount < 0.1:
+                currentBase = orderInfo.avgPrice
+                config.read("config.ini")
+                config.set("trade", "currentBase", str(currentBase))
+                fp = open("config.ini", "w")
+                config.write(fp)
+                nextBuy = round(currentBase * (100 - percentage) * 0.01, 4)
+                nextSell = round(currentBase * (100 + percentage) * 0.01, 4)
     except Exception as err:
         print(err)
     time.sleep(0.1)

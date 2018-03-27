@@ -2,7 +2,6 @@ import sys
 import importlib
 import time
 import configparser
-from threading import Thread
 import api.HuobiProClient as HuobiClient
 
 sys.path.append("/home/myRobot")
@@ -16,6 +15,9 @@ HuobiClient.get_account_info([HuobiClient.BALANCE_HT, HuobiClient.BALANCE_USDT])
 
 symbol = HuobiClient.SYMBOL_HT
 transaction = float(config.get("trade", "transaction"))
+currentBase = float(config.get("trade", "currentBase"))
+percentage = float(config.get("trade", "percentage"))
+
 
 def cal_avg_reward(my_order_info):
     order_buy_list = list(filter(lambda order_in: order_in["type"] == HuobiClient.TRADE_BUY, HuobiClient.orderList))
@@ -69,29 +71,29 @@ def order_process(my_order_info):
         order_process(my_order_info)
 
 
+nextBuy = round(currentBase * (100 - percentage) * 0.01, 4)
+nextSell = round(currentBase * (100 + percentage) * 0.01, 4)
+
 while True:
     try:
         HuobiClient.get_coin_price(symbol)
         priceInfo = HuobiClient.priceInfo
         buyPrice = priceInfo[symbol]["buy"]
         sellPrice = priceInfo[symbol]["sell"]
-        percentage = round((sellPrice - buyPrice) / buyPrice * 100, 2)
-        print(percentage, "%")
-        buyAmount = round(transaction / (buyPrice + 0.0001), 2)
-        if percentage > 0.01:
-            HuobiClient.write_log({},
-                                  "----------------------------------" + str(
-                                      percentage) + "%------------------------------------")
-            buyOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_BUY, buyPrice + 0.0001, buyAmount)
-            sellOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_SELL, sellPrice - 0.0001, buyAmount)
-
-            t1 = Thread(target=order_process, args=(buyOrder,))
-            t2 = Thread(target=order_process, args=(sellOrder,))
-            t1.start()
-            t2.start()
-            while t1.is_alive() or t2.is_alive():
-                time.sleep(0.1)
-            cal_avg_reward({})
+        orderInfo = {}
+        if buyPrice <= nextBuy:
+            buyOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_BUY, buyPrice + 0.0001, transaction)
+            orderInfo = buyOrder
+        elif sellPrice >= nextSell:
+            sellOrder = HuobiClient.MyOrderInfo(symbol, HuobiClient.TRADE_SELL, sellPrice - 0.0001, transaction)
+            orderInfo = sellOrder
+        if orderInfo != {}:
+            order_process(orderInfo)
+            currentBase = orderInfo.avgPrice
+            config.read("config.ini")
+            config.set("trade", "currentBase", str(currentBase))
+            nextBuy = round(currentBase * (100 - percentage) * 0.01, 4)
+            nextSell = round(currentBase * (100 + percentage) * 0.01, 4)
     except Exception as err:
         print(err)
     time.sleep(0.1)

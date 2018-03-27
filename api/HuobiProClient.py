@@ -58,7 +58,6 @@ class MyOrderInfo:
         self.dealAmount = deal_amount
 
     def set_transaction(self, trans_type):
-        print(self)
         if trans_type == 'plus':
             self.transaction = round(self.transaction + self.dealAmount * self.avgPrice, 3)
         else:
@@ -94,6 +93,7 @@ def cancel_my_order(my_order_info):
     result = cancel_order(my_order_info.orderId)
     if result['status'] == 'ok':
         print(u"order", result['data'], "canceled")
+        write_log(my_order_info)
         write_log(my_order_info, "order " + result['data'] + " canceled")
     else:
         print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")

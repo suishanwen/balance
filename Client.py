@@ -64,6 +64,7 @@ def order_process(my_order_info):
     else:
         my_order_info.set_price(0)
         order_process(my_order_info)
+        return
     if state != 'filled' and (my_order_info.dealAmount != 0 or state == "failed"):
         order_process(my_order_info)
 
@@ -77,7 +78,7 @@ while True:
         percentage = round((sellPrice - buyPrice) / buyPrice * 100, 2)
         print(percentage, "%")
         buyAmount = round(transaction / (buyPrice + 0.0001), 2)
-        if percentage > 0.2:
+        if percentage > 0.01:
             HuobiClient.write_log({},
                                   "----------------------------------" + str(
                                       percentage) + "%------------------------------------")

@@ -83,6 +83,9 @@ def order_process(my_order_info):
 
 
 ret = round(random.uniform(0.01, 0.1), 3)
+num = random.randint(1, 10)
+if num > 5:
+    ret = -ret
 nextBuy = round(currentBase * (100 - percentage - ret) * 0.01, 4)
 nextSell = round(currentBase * (100 + percentage - ret) * 0.01, 4)
 
@@ -115,6 +118,9 @@ while True:
                 config.write(fp)
                 fp.close()
                 ret = round(random.uniform(0.01, 0.1), 3)
+                num = random.randint(1, 10)
+                if num > 5:
+                    ret = -ret
                 nextBuy = round(currentBase * (100 - percentage - ret) * 0.01, 4)
                 nextSell = round(currentBase * (100 + percentage - ret) * 0.01, 4)
     except Exception as err:

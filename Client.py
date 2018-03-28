@@ -50,6 +50,7 @@ def cal_avg_reward(my_order_info):
 
     fp = open("config.ini", "w")
     config.write(fp)
+    fp.close()
     HuobiClient.write_log(my_order_info, ' '.join(
         ["avgPriceDiff:", str(avg_reward), "fee", str(round(fee, 5)), "transactionReward:",
          str(round(sell_reward - buy_cost - fee, 5))]))
@@ -110,6 +111,7 @@ while True:
                 config.set("trade", "currentBase", str(currentBase))
                 fp = open("config.ini", "w")
                 config.write(fp)
+                fp.close()
                 nextBuy = round(currentBase * (100 - percentage) * 0.01, 4)
                 nextSell = round(currentBase * (100 + percentage) * 0.01, 4)
     except Exception as err:

@@ -157,15 +157,13 @@ def trade(my_order_info):
         wait_count = 0
         state = ''
         deal_amount_bak = my_order_info.dealAmount
-        while wait_count < (tradeWaitCount + 1) and state != 'filled':
+        while wait_count < tradeWaitCount and state != 'filled':
             state = check_order_status(my_order_info, wait_count)
             time.sleep(0.1)
             wait_count += 1
             if wait_count == tradeWaitCount and state != 'filled':
                 trade_price = get_trade_price(my_order_info.symbol, my_order_info.orderType)
-                if my_order_info.orderType == TRADE_BUY and trade_price == my_order_info.price + orderDiff:
-                    wait_count -= 1
-                elif my_order_info.orderType == TRADE_SELL and trade_price == my_order_info.price - orderDiff:
+                if trade_price == my_order_info.price:
                     wait_count -= 1
         if state != 'filled':
             state = cancel_my_order(my_order_info)

@@ -3,6 +3,7 @@ import importlib
 import time
 import configparser
 import api.HuobiProClient as HuobiClient
+import random
 
 sys.path.append("/home/myRobot")
 importlib.reload(sys)
@@ -81,8 +82,9 @@ def order_process(my_order_info):
         order_process(my_order_info)
 
 
-nextBuy = round(currentBase * (100 - percentage) * 0.01, 4)
-nextSell = round(currentBase * (100 + percentage) * 0.01, 4)
+ret = round(random.uniform(0.01, 0.1), 3)
+nextBuy = round(currentBase * (100 - percentage - ret) * 0.01, 4)
+nextSell = round(currentBase * (100 + percentage - ret) * 0.01, 4)
 
 while True:
     try:
@@ -112,8 +114,9 @@ while True:
                 fp = open("config.ini", "w")
                 config.write(fp)
                 fp.close()
-                nextBuy = round(currentBase * (100 - percentage) * 0.01, 4)
-                nextSell = round(currentBase * (100 + percentage) * 0.01, 4)
+                ret = round(random.uniform(0.01, 0.1), 3)
+                nextBuy = round(currentBase * (100 - percentage - ret) * 0.01, 4)
+                nextSell = round(currentBase * (100 + percentage - ret) * 0.01, 4)
     except Exception as err:
         print(err)
     time.sleep(0.1)

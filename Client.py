@@ -111,7 +111,7 @@ while True:
         if orderInfo != {}:
             order_process(orderInfo)
             if orderInfo.amount < 0.1:
-                currentBase = orderInfo.avgPrice
+                currentBase = round(orderInfo.avgPrice, 4)
                 config.read("config.ini")
                 config.set("trade", "currentBase", str(currentBase))
                 fp = open("config.ini", "w")

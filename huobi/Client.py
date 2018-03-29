@@ -1,12 +1,14 @@
 import sys
 import importlib
+
+sys.path.append("/home/balance")
+importlib.reload(sys)
+
 import time
 import configparser
 import api.HuobiProClient as HuobiClient
 import random
 
-sys.path.append("/home/balance")
-importlib.reload(sys)
 
 # read config
 config = configparser.ConfigParser()

@@ -10,7 +10,7 @@ importlib.reload(sys)
 
 # read config
 config = configparser.ConfigParser()
-config.read("config.ini")
+config.read("huobi/config.ini")
 
 HuobiClient.get_account_info([HuobiClient.BALANCE_HT, HuobiClient.BALANCE_USDT])
 

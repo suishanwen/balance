@@ -17,7 +17,7 @@ TRADE_SELL = "sell-limit"
 
 # read config
 config = configparser.ConfigParser()
-config.read("huobi/config.ini")
+config.read("config.ini")
 
 # getConfig
 tradeWaitCount = int(config.get("trade", "tradeWaitCount"))

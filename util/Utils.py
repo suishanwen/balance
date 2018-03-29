@@ -18,7 +18,7 @@ import configparser
 
 # read config
 configBase = configparser.ConfigParser()
-configBase.read("key.ini")
+configBase.read("../key.ini")
 
 # 此处填写APIKEY
 # init apikey,secretkey,url

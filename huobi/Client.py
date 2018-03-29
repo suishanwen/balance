@@ -12,7 +12,7 @@ import random
 
 # read config
 config = configparser.ConfigParser()
-config.read("huobi/config.ini")
+config.read("config.ini")
 
 HuobiClient.get_account_info([HuobiClient.BALANCE_HT, HuobiClient.BALANCE_USDT])
 

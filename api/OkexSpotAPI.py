@@ -18,20 +18,20 @@ class OkexSpot:
             params = 'symbol=%(symbol)s' %{'symbol':symbol}
         return httpGet(self.__url,TICKER_RESOURCE,params)
 
-    #获取OKCOIN现货市场深度信息
-    def depth(self,symbol = ''):
+    # 获取OKCOIN现货市场深度信息
+    def depth(self, symbol='', size=1):
         DEPTH_RESOURCE = "/api/v1/depth.do"
-        params=''
-        if symbol:
-            params = 'symbol=%(symbol)s' %{'symbol':symbol}
-        return httpGet(self.__url,DEPTH_RESOURCE,params)
-
-    #获取OKCOIN现货历史交易信息
-    def trades(self, symbol='', size=1):
-        TRADES_RESOURCE = "/api/v1/trades.do"
         params = ''
         if symbol:
             params = 'symbol=%(symbol)s&size=%(size)d' % {'symbol': symbol, 'size': size}
+        return httpGet(self.__url, DEPTH_RESOURCE, params)
+
+    # 获取OKCOIN现货历史交易信息
+    def trades(self, symbol=''):
+        TRADES_RESOURCE = "/api/v1/trades.do"
+        params = ''
+        if symbol:
+            params = 'symbol=%(symbol)s' % {'symbol': symbol}
         return httpGet(self.__url, TRADES_RESOURCE, params)
 
     # 获取OKCOIN现货历史交易信息

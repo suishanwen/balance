@@ -11,7 +11,7 @@ from api.OkexSpotAPI import OkexSpot
 BALANCE_OKB = "okb"
 BALANCE_USDT = "usdt"
 
-SYMBOL_OKB = "okb-usdt"
+SYMBOL_OKB = "okb_usdt"
 
 TRADE_BUY = "buy-limit"
 TRADE_SELL = "sell-limit"
@@ -181,11 +181,10 @@ def trade(my_order_info):
 
 def get_coin_price(symbol):
     data = okcoinSpot.depth(symbol)
-    if data["result"]:
-        priceInfo[symbol]["sell"] = round(float(data["asks"][0]), 5)
-        priceInfo[symbol]["sellAmount"] = float(data["asks"][1])
-        priceInfo[symbol]["buy"] = round(float(data["bids"][0]), 5)
-        priceInfo[symbol]["buyAmount"] = float(data["bids"][1])
+    priceInfo[symbol]["sell"] = float(data["asks"][0][0])
+    priceInfo[symbol]["sellAmount"] = float(data["asks"][0][1])
+    priceInfo[symbol]["buy"] = float(data["bids"][0][0])
+    priceInfo[symbol]["buyAmount"] = float(data["bids"][0][1])
 
 
 def get_trade_price(symbol, order_type):

@@ -5,7 +5,7 @@ import configparser
 import api.HuobiProClient as HuobiClient
 import random
 
-sys.path.append("/home/myRobot")
+sys.path.append("/home/balance")
 importlib.reload(sys)
 
 # read config

@@ -24,7 +24,7 @@ percentage = float(config.get("trade", "percentage"))
 def order_process(my_order_info):
     my_order_info.set_amount(my_order_info.get_unhandled_amount())
     state = OkexClient.trade(my_order_info)
-    if my_order_info.amount < 0.1 and state == 'filled':
+    if my_order_info.amount < 1 and state == 2:
         OkexClient.write_log(my_order_info)
     elif my_order_info.dealAmount > 0:
         my_order_info.set_price(0)

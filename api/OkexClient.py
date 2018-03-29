@@ -13,8 +13,8 @@ BALANCE_USDT = "usdt"
 
 SYMBOL_OKB = "okb_usdt"
 
-TRADE_BUY = "buy-limit"
-TRADE_SELL = "sell-limit"
+TRADE_BUY = "buy"
+TRADE_SELL = "sell"
 
 # read config
 configBase = configparser.ConfigParser()
@@ -75,7 +75,7 @@ class MyOrderInfo:
         return round(self.transaction / price, accuracy)
 
     def get_unhandled_amount(self, accuracy=2):
-        return round(float(self.amount) - float(self.dealAmount), accuracy)
+        return round(self.amount - self.dealAmount, accuracy)
 
 
 def get_coin_num(symbol):
@@ -87,7 +87,7 @@ def make_order(my_order_info):
         u'\n---------------------------------------------spot order--------------------------------------------------')
     result = okcoinSpot.trade(my_order_info.symbol, my_order_info.orderType, my_order_info.price, my_order_info.amount)
     if result['result']:
-        print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
+        print("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
               my_order_info.amount, "  ", fromTimeStamp(int(time.time())))
         return result['order_id']
     else:
@@ -155,10 +155,10 @@ def check_order_status(my_order_info, wait_count=0):
 def trade(my_order_info):
     if my_order_info.price == 0:
         my_order_info.set_price(get_trade_price(my_order_info.symbol, my_order_info.orderType))
-    if my_order_info.amount < 0.1:
+    if my_order_info.amount < 1:
         return 2
     order_id = make_order(my_order_info)
-    if order_id != "-1":
+    if order_id != -1:
         my_order_info.set_order_id(order_id)
         wait_count = 0
         status = 0
@@ -199,7 +199,7 @@ def write_log(my_order_info, text=""):
     f = open(r'log.txt', 'a')
     if text == "":
         f.writelines(' '.join(
-            ["\n", my_order_info.orderId, my_order_info.symbol, my_order_info.orderType, str(my_order_info.price),
+            ["\n", str(my_order_info.orderId), my_order_info.symbol, my_order_info.orderType, str(my_order_info.price),
              str(my_order_info.avgPrice),
              str(my_order_info.dealAmount),
              str(round(my_order_info.avgPrice * my_order_info.dealAmount, 3)), str(fromTimeStamp(int(time.time())))]))
@@ -211,7 +211,6 @@ def write_log(my_order_info, text=""):
 def get_account_info():
     print(u'---------------------------------------spot account info------------------------------------------------')
     my_account_info = okcoinSpot.userinfo()
-    print(my_account_info)
     if my_account_info["result"]:
         freezed = fromDict(my_account_info, "info", "funds", "freezed")
         free = fromDict(my_account_info, "info", "funds", "free")

@@ -31,7 +31,7 @@ def order_process(my_order_info):
         order_process(my_order_info)
 
 
-ret = round(random.uniform(0.01, 0.1), 3)
+ret = round(random.uniform(0.01 * percentage, 0.1 * percentage), 3)
 num = random.randint(1, 10)
 if num > 5:
     ret = -ret
@@ -66,7 +66,7 @@ while True:
                 fp = open("config.ini", "w")
                 config.write(fp)
                 fp.close()
-                ret = round(random.uniform(0.01, 0.1), 3)
+                ret = round(random.uniform(0.01 * percentage, 0.1 * percentage), 3)
                 num = random.randint(1, 10)
                 if num > 5:
                     ret = -ret

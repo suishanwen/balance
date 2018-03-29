@@ -14,9 +14,9 @@ import random
 config = configparser.ConfigParser()
 config.read("config.ini")
 
-OkexClient.showAccountInfo()
+OkexClient.get_account_info()
 
-# symbol = HuobiClient.SYMBOL_HT
+symbol = OkexClient.SYMBOL_OKB
 transaction = float(config.get("trade", "transaction"))
 currentBase = float(config.get("trade", "currentBase"))
 percentage = float(config.get("trade", "percentage"))

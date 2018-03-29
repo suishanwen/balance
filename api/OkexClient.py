@@ -1,10 +1,20 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 # encoding: utf-8
 
-import time, sys, configparser
-from util.MyUtil import fromDict, fromTimeStamp, sendEmail
+import time
+import sys
+
+from api.HuobiProAPI import *
+from util.MyUtil import fromDict, fromTimeStamp
 from api.OkexSpotAPI import OkexSpot
+
+BALANCE_OKB = "okb"
+BALANCE_USDT = "usdt"
+
+SYMBOL_OKB = "okb-usdt"
+
+TRADE_BUY = "buy-limit"
+TRADE_SELL = "sell-limit"
 
 # read config
 configBase = configparser.ConfigParser()
@@ -22,222 +32,195 @@ okcoinSpot = OkexSpot(okcoinRESTURL, apikey, secretkey)
 
 # getConfig
 tradeWaitCount = int(config.get("trade", "tradeWaitCount"))
-orderDiff = float(config.get("trade", "orderDiff"))
-
 # global variable
-orderInfo = {"symbol": "", "type": "", "price": 0, "amount": 0, "avgPrice": 0, "dealAmount": 0, "transaction": 0}
+accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
+               BALANCE_OKB: {"total": 0, "available": 0, "freezed": 0}}
+priceInfo = {SYMBOL_OKB: {"sell": 0, 'sellAmount': 0, "buy": 0, 'buyAmount': 0}}
 orderList = []
 
 
-def setOrderInfo(symbol, type, amount=0, transaction=0):
-    global orderInfo
-    orderInfo['symbol'] = symbol
-    orderInfo['type'] = type
-    orderInfo['amount'] = amount
-    orderInfo['price'] = 0
-    orderInfo['dealAmount'] = 0
-    if amount > 0:
-        orderInfo['transaction'] = 0
-    elif transaction != 0:
-        orderInfo['transaction'] = transaction
+class MyOrderInfo:
+    def __init__(self, symbol, order_type, price=0, amount=0, transaction=0):
+        self.orderId = ""
+        self.symbol = symbol
+        self.orderType = order_type
+        self.amount = amount
+        self.transaction = transaction
+        self.price = price
+        self.dealAmount = 0
+        self.avgPrice = 0
 
+    def set_order_id(self, order_id):
+        self.orderId = order_id
 
-def setPrice(price):
-    global orderInfo
-    orderInfo['price'] = price
+    def set_price(self, price):
+        self.price = price
 
+    def set_avg_price(self, avg_price):
+        self.avgPrice = avg_price
 
-def setAvgPrice(avgPrice):
-    global orderInfo
-    orderInfo['avgPrice'] = avgPrice
+    def set_amount(self, amount):
+        self.amount = amount
 
+    def set_deal_amount(self, deal_amount):
+        self.dealAmount = deal_amount
 
-def setDealAmount(dealAmount):
-    global orderInfo
-    orderInfo['dealAmount'] = dealAmount
-
-
-def setTransaction(type):
-    global orderInfo
-    print(orderInfo)
-    if type == "plus":
-        orderInfo['transaction'] = round(orderInfo['transaction'] + orderInfo['dealAmount'] * orderInfo['avgPrice'], 2)
-    else:
-        orderInfo['transaction'] = round(orderInfo['transaction'] - orderInfo['dealAmount'] * orderInfo['avgPrice'], 2)
-
-
-def getBuyAmount(price, accuracy=2):
-    global orderInfo
-    return round(orderInfo['transaction'] / price, accuracy)
-
-
-def getUnhandledAmount():
-    global orderInfo
-    return round(float(orderInfo["amount"]) - float(orderInfo["dealAmount"]), 5)
-
-
-def getCoinNum(symbol):
-    myAccountInfo = okcoinSpot.userinfo()
-    if myAccountInfo["result"]:
-        free = fromDict(myAccountInfo, "info", "funds", "free")
-        if symbol == "btc_cny":
-            return float(free["btc"])
+    def set_transaction(self, trans_type):
+        if trans_type == 'plus':
+            self.transaction = round(self.transaction + self.dealAmount * self.avgPrice, 3)
         else:
-            return float(free["ltc"])
-    else:
-        print("getCoinNum Fail,Try again!")
-        getCoinNum(symbol)
+            self.transaction = round(self.transaction - self.dealAmount * self.avgPrice, 3)
+
+    def get_buy_amount(self, price, accuracy=2):
+        return round(self.transaction / price, accuracy)
+
+    def get_unhandled_amount(self, accuracy=2):
+        return round(float(self.amount) - float(self.dealAmount), accuracy)
 
 
-def makeOrder(symbol, type, price, amount):
+def get_coin_num(symbol):
+    return fromDict(accountInfo, symbol, "available")
+
+
+def make_order(my_order_info):
     print(
         u'\n---------------------------------------------spot order--------------------------------------------------')
-    result = okcoinSpot.trade(symbol, type, price, amount)
+    result = okcoinSpot.trade(my_order_info.symbol, my_order_info.orderType, my_order_info.price, my_order_info.amount)
     if result['result']:
-        setPrice(price)
-        print("OrderId", result['order_id'], symbol, type, price, amount, "  ", fromTimeStamp(int(time.time())))
+        print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
+              my_order_info.amount, "  ", fromTimeStamp(int(time.time())))
         return result['order_id']
     else:
-        print("order failed！", symbol, type, price, amount)
-        global orderInfo
-        print(orderInfo)
+        print("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price, my_order_info.amount)
         return "-1"
 
 
-def cancelOrder(symbol, orderId):
+def cancel_my_order(my_order_info):
     print(u'\n-----------------------------------------spot cancel order----------------------------------------------')
-    result = okcoinSpot.cancelOrder(symbol, orderId)
+    result = okcoinSpot.cancelOrder(my_order_info.symbol, my_order_info.orderId)
     if result['result']:
-        print(u"order", result['order_id'], "canceled")
+        write_log(my_order_info)
+        write_log(my_order_info, "order " + result['order_id'] + " canceled")
     else:
-        print(u"order", orderId, "not canceled or cancel failed！！！")
-    status = checkOrderStatus(symbol, orderId)
+        print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
+    status = check_order_status(my_order_info)
     if status != -1 and status != 2:  # not canceled or cancel failed(part dealed) continue cancel
-        cancelOrder(symbol, orderId)
+        cancel_my_order(my_order_info)
     return status
 
 
-def addOrderList(order):
+def add_order_list(order):
     global orderList
-    orderList = list(filter(lambda orderIn: orderIn["order_id"] != order["order_id"], orderList))
+    orderList = list(filter(lambda order_in: order_in["order_id"] != order["order_id"], orderList))
     if order["deal_amount"] > 0:
         orderList.append(order)
 
 
-def checkOrderStatus(symbol, orderId, watiCount=0):
-    global tradeWaitCount
-    orderResult = okcoinSpot.orderinfo(symbol, orderId)
-    if orderResult["result"]:
-        orders = orderResult["orders"]
+def check_order_status(my_order_info, wait_count=0):
+    order_id = my_order_info.orderId
+    order_result = okcoinSpot.orderinfo(my_order_info.symbol, my_order_info.orderId)
+    if order_result["result"]:
+        orders = order_result["orders"]
         if len(orders) > 0:
             order = orders[0]
-            orderId = order["order_id"]
+            order_id = order["order_id"]
             status = order["status"]
-            setDealAmount(order["deal_amount"])
-            setAvgPrice(order["avg_price"])
-            addOrderList(order)
+            my_order_info.set_deal_amount(float(order["deal_amount"]))
+            my_order_info.set_avg_price(order["avg_price"])
+            add_order_list(order)
             if status == -1:
-                print("order", orderId, "canceled")
+                print("order", order_id, "canceled")
             elif status == 0:
-                if watiCount == tradeWaitCount:
+                if wait_count == tradeWaitCount:
                     print("timeout no deal")
                 else:
                     print("no deal", end=" ")
                     sys.stdout.flush()
             elif status == 1:
-                global orderInfo
-                if watiCount == tradeWaitCount:
-                    print("part dealed ", orderInfo["dealAmount"])
+                if wait_count == tradeWaitCount:
+                    print("part dealed ", my_order_info.dealAmount)
                 else:
-                    print("part dealed ", orderInfo["dealAmount"], end=" ")
+                    print("part dealed ", my_order_info.dealAmount, end=" ")
                     sys.stdout.flush()
             elif status == 2:
-                print("order", orderId, "complete deal")
+                print("order", order_id, "complete deal")
             elif status == 3:
-                print("order", orderId, "canceling")
+                print("order", order_id, "canceling")
             return status
     else:
-        print(orderId, " order not found")
-        return -2
+        print(order_id, "checkOrderStatus failed,try again.")
+        check_order_status(my_order_info, wait_count)
 
 
-def trade(symbol, type, amount, price=0):
-    global tradeWaitCount, orderInfo, orderDiff
-    if price == 0:
-        price = getTradePrice(symbol, type)
-    if type == "buy":
-        amount = getBuyAmount(price, 4)
-    if amount < 0.01:
+def trade(my_order_info):
+    if my_order_info.price == 0:
+        my_order_info.set_price(get_trade_price(my_order_info.symbol, my_order_info.orderType))
+    if my_order_info.amount < 0.1:
         return 2
-    orderId = makeOrder(symbol, type, price, amount)
-    if orderId != "-1":
-        watiCount = 0
+    order_id = make_order(my_order_info)
+    if order_id != "-1":
+        my_order_info.set_order_id(order_id)
+        wait_count = 0
         status = 0
-        global orderInfo
-        dealAmountBak = orderInfo["dealAmount"]
-        while watiCount < (tradeWaitCount + 1) and status != 2:
-            status = checkOrderStatus(symbol, orderId, watiCount)
-            time.sleep(0.5)
-            watiCount += 1
-            if watiCount == tradeWaitCount and status != 2:
-                if getTradePrice(symbol, type) == orderInfo["price"]:
-                    watiCount -= 1
+        deal_amount_bak = my_order_info.dealAmount
+        while wait_count < tradeWaitCount and status != 2:
+            status = check_order_status(my_order_info, wait_count)
+            time.sleep(0.1)
+            wait_count += 1
+            if wait_count == tradeWaitCount and status != 2:
+                trade_price = get_trade_price(my_order_info.symbol, my_order_info.orderType)
+                if trade_price == my_order_info.price:
+                    wait_count -= 1
         if status != 2:
-            status = cancelOrder(symbol, orderId)
-            setDealAmount(dealAmountBak + orderInfo["dealAmount"])
+            status = cancel_my_order(my_order_info)
+            my_order_info.set_deal_amount(deal_amount_bak + my_order_info.dealAmount)
         return status
     else:
         return -2
 
 
-def getCoinPrice(symbol, type):
-    if symbol == "btc_cny":
-        if type == "buy":
-            return round(float(okcoinSpot.ticker('btc_cny')["ticker"]["buy"]), 2)
-        else:
-            return round(float(okcoinSpot.ticker('btc_cny')["ticker"]["sell"]), 2)
+def get_coin_price(symbol):
+    data = okcoinSpot.depth(symbol)
+    if data["result"]:
+        priceInfo[symbol]["sell"] = round(float(data["asks"][0]), 5)
+        priceInfo[symbol]["sellAmount"] = float(data["asks"][1])
+        priceInfo[symbol]["buy"] = round(float(data["bids"][0]), 5)
+        priceInfo[symbol]["buyAmount"] = float(data["bids"][1])
+
+
+def get_trade_price(symbol, order_type):
+    get_coin_price(symbol)
+    if order_type == TRADE_BUY:
+        return priceInfo[symbol]["sell"]
     else:
-        if type == "buy":
-            return round(float(okcoinSpot.ticker('ltc_cny')["ticker"]["buy"]), 2)
-        else:
-            return round(float(okcoinSpot.ticker('ltc_cny')["ticker"]["sell"]), 2)
+        return priceInfo[symbol]["buy"]
 
 
-def getTradePrice(symbol, type):
-    if symbol == "btc_cny":
-        if type == "buy":
-            return round(float(okcoinSpot.ticker('btc_cny')["ticker"]["buy"]) + orderDiff, 2)
-        else:
-            return round(float(okcoinSpot.ticker('btc_cny')["ticker"]["sell"]) - orderDiff, 2)
-    else:
-        if type == "buy":
-            return round(float(okcoinSpot.ticker('ltc_cny')["ticker"]["buy"]) + orderDiff, 2)
-        else:
-            return round(float(okcoinSpot.ticker('ltc_cny')["ticker"]["sell"]) - orderDiff, 2)
-
-
-def writeLog(text=""):
-    global orderInfo
+def write_log(my_order_info, text=""):
     f = open(r'log.txt', 'a')
     if text == "":
         f.writelines(' '.join(
-            ["\n", orderInfo["symbol"], orderInfo["type"], str(orderInfo["price"]), str(orderInfo["avgPrice"]),
-             str(orderInfo["dealAmount"]),
-             str(round(orderInfo["avgPrice"] * orderInfo["dealAmount"], 2)), str(fromTimeStamp(int(time.time())))]))
+            ["\n", my_order_info.orderId, my_order_info.symbol, my_order_info.orderType, str(my_order_info.price),
+             str(my_order_info.avgPrice),
+             str(my_order_info.dealAmount),
+             str(round(my_order_info.avgPrice * my_order_info.dealAmount, 3)), str(fromTimeStamp(int(time.time())))]))
     else:
         f.writelines("\n" + text)
     f.close()
 
 
-def showAccountInfo():
+def get_account_info():
     print(u'---------------------------------------spot account info------------------------------------------------')
-    myAccountInfo = okcoinSpot.userinfo()
-    print(myAccountInfo)
-    if myAccountInfo["result"]:
-        freezed = fromDict(myAccountInfo, "info", "funds", "freezed")
-        free = fromDict(myAccountInfo, "info", "funds", "free")
+    my_account_info = okcoinSpot.userinfo()
+    print(my_account_info)
+    if my_account_info["result"]:
+        freezed = fromDict(my_account_info, "info", "funds", "freezed")
+        free = fromDict(my_account_info, "info", "funds", "free")
         print(u"USDT", free["usdt"], "freezed", freezed["usdt"])
         print(u"OKB", free["okb"], "freezed", freezed["okb"])
     else:
-        print("showAccountInfo Fail,Try again!")
-        showAccountInfo()
+        print("getAccountInfo Fail,Try again!")
+        get_account_info()
+
+# getAccountInfo([BALANCE_HT, BALANCE_USDT])
+# getCoinPrice(SYMBOL_HT)

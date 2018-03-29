@@ -24,15 +24,15 @@ class OkexSpot:
         params=''
         if symbol:
             params = 'symbol=%(symbol)s' %{'symbol':symbol}
-        return httpGet(self.__url,DEPTH_RESOURCE,params) 
+        return httpGet(self.__url,DEPTH_RESOURCE,params)
 
     #获取OKCOIN现货历史交易信息
-    def trades(self,symbol = ''):
+    def trades(self, symbol='', size=1):
         TRADES_RESOURCE = "/api/v1/trades.do"
-        params=''
+        params = ''
         if symbol:
-            params = 'symbol=%(symbol)s' %{'symbol':symbol}
-        return httpGet(self.__url,TRADES_RESOURCE,params)
+            params = 'symbol=%(symbol)s&size=%(size)d' % {'symbol': symbol, 'size': size}
+        return httpGet(self.__url, TRADES_RESOURCE, params)
 
     # 获取OKCOIN现货历史交易信息
     def klines(self, symbol='',type='15min',size='',since='',):
@@ -61,7 +61,7 @@ class OkexSpot:
             params['price'] = price
         if amount:
             params['amount'] = amount
-            
+
         params['sign'] = buildMySign(params,self.__secretkey)
         return httpPost(self.__url,TRADE_RESOURCE,params)
 
@@ -138,4 +138,4 @@ class OkexSpot:
 
 
 
-    
+

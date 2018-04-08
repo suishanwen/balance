@@ -80,7 +80,7 @@ def get_next_buy_sell_rate(client):
 def get_next_buy_sell_info(client):
     amount = float(config.get("trade", "amount"))
     percentage = float(config.get("trade", "percentage"))
-    current_base = float(config.get("trade", "currentBase"))
+    current_base = float(config.get("trade", "currentbase"))
     buy_rate, sell_rate = get_next_buy_sell_rate(client)
     _ret = round(random.uniform(0.01 * percentage, 0.1 * percentage), 3)
     _num = random.randint(1, 10)
@@ -94,7 +94,7 @@ def get_next_buy_sell_info(client):
 
 
 def __main__(client, symbol):
-    current_base = float(config.get("trade", "currentBase"))
+    current_base = float(config.get("trade", "currentbase"))
     min_amount = float(config.get("trade", "minamount"))
     client.get_account_info()
     counter = 0

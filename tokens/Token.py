@@ -57,10 +57,10 @@ def get_next_buy_sell_rate(client):
         elif trend_count == 3 and seconds_now_diff < 1800:
             buy_sell_rate = 3, 1
         # <60min buy four times
-        elif trend_count == 4 and seconds_now_diff < 1800:
+        elif trend_count == 4 and seconds_now_diff < 3600:
             buy_sell_rate = 4, 1
-        # <60min buy five times
-        elif trend_count == 5 and seconds_now_diff < 1800:
+        # <4h buy five times
+        elif trend_count == 5 and seconds_now_diff < 14400:
             buy_sell_rate = 5, 1
         # <15min sell twice
         elif trend_count == -2 and seconds_now_diff < 900:
@@ -69,11 +69,11 @@ def get_next_buy_sell_rate(client):
         elif trend_count == -3 and seconds_now_diff < 1800:
             buy_sell_rate = 1, 3
         # <60min sell four times
-        elif trend_count == -4 and seconds_now_diff < 1800:
+        elif trend_count == -4 and seconds_now_diff < 3600:
             buy_sell_rate = 1, 4
-        # <60min sell five times
-        elif trend_count == -5 and seconds_now_diff < 1800:
-            buy_sell_rate = 1, 4
+        # <4h sell five times
+        elif trend_count == -5 and seconds_now_diff < 14400:
+            buy_sell_rate = 1, 5
     return buy_sell_rate
 
 

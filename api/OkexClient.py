@@ -181,7 +181,7 @@ class OkexClient:
                  str(my_order_info.price),
                  str(my_order_info.avgPrice),
                  str(my_order_info.dealAmount),
-                 str(round(my_order_info.avgPrice * my_order_info.dealAmount, 3)),
+                 str(round(my_order_info.avgPrice * my_order_info.dealAmount, 4)),
                  str(fromTimeStamp(int(time.time())))]))
         else:
             f.writelines("\n" + text)

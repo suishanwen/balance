@@ -163,6 +163,7 @@ def trade(my_order_info):
         wait_count = 0
         status = 0
         deal_amount_bak = my_order_info.dealAmount
+        avg_price_bak = my_order_info.avgPrice
         while wait_count < tradeWaitCount and status != 2:
             status = check_order_status(my_order_info, wait_count)
             time.sleep(0.1)
@@ -171,9 +172,12 @@ def trade(my_order_info):
                 trade_price = get_trade_price(my_order_info.symbol, my_order_info.orderType)
                 if trade_price == my_order_info.price:
                     wait_count -= 1
+        my_order_info.set_avg_price(
+            (deal_amount_bak * avg_price_bak + my_order_info.dealAmount * my_order_info.avgPirce) / (
+                    deal_amount_bak + my_order_info.dealAmount))
+        my_order_info.set_deal_amount(deal_amount_bak + my_order_info.dealAmount)
         if status != 2:
             status = cancel_my_order(my_order_info)
-            my_order_info.set_deal_amount(deal_amount_bak + my_order_info.dealAmount)
         return status
     else:
         return -2

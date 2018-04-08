@@ -8,6 +8,7 @@ import time
 import configparser
 import api.OkexClient as OkexClient
 import random
+import json
 
 # read config
 config = configparser.ConfigParser()
@@ -29,6 +30,21 @@ def order_process(my_order_info):
     elif my_order_info.dealAmount > 0:
         my_order_info.set_price(0)
         order_process(my_order_info)
+
+
+def reOrgHistory(my_order_info):
+    history_list = []
+    history = ""
+    try:
+        history = config.get("trade", "history")
+    except Exception as err:
+        print(err)
+    if history != "":
+        history_list = json.loads(history)
+    history_list.insert(0, my_order_info.__dict__)
+    if len(history_list) > 5:
+        history_list.pop()
+    return json.dumps(history_list)
 
 
 ret = round(random.uniform(0.01 * percentage, 0.1 * percentage), 3)
@@ -63,6 +79,7 @@ while True:
                 currentBase = round(orderInfo.avgPrice, 4)
                 config.read("config.ini")
                 config.set("trade", "currentBase", str(currentBase))
+                config.set("trade", "history", str(reOrgHistory(orderInfo)))
                 fp = open("config.ini", "w")
                 config.write(fp)
                 fp.close()

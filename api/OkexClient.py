@@ -174,7 +174,7 @@ def trade(my_order_info):
                 if trade_price == my_order_info.price:
                     wait_count -= 1
         my_order_info.set_avg_price(
-            (deal_amount_bak * avg_price_bak + my_order_info.dealAmount * my_order_info.avgPirce) / (
+            (deal_amount_bak * avg_price_bak + my_order_info.dealAmount * my_order_info.avgPrice) / (
                     deal_amount_bak + my_order_info.dealAmount))
         my_order_info.set_deal_amount(deal_amount_bak + my_order_info.dealAmount)
         if status != 2:

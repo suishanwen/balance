@@ -49,6 +49,7 @@ class MyOrderInfo:
         self.price = price
         self.dealAmount = 0
         self.avgPrice = 0
+        self.triggerSeconds = int(time.time())
 
     def set_order_id(self, order_id):
         self.orderId = order_id
@@ -127,7 +128,7 @@ def check_order_status(my_order_info, wait_count=0):
             status = order["status"]
             my_order_info.set_deal_amount(float(order["deal_amount"]))
             my_order_info.set_avg_price(order["avg_price"])
-            add_order_list(order)
+            # add_order_list(order)
             if status == -1:
                 print("order", order_id, "canceled")
             elif status == 0:

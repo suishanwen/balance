@@ -59,7 +59,7 @@ while True:
             orderInfo = sellOrder
         if orderInfo != {}:
             order_process(orderInfo)
-            if orderInfo.amount < 0.1:
+            if orderInfo.amount < 1:
                 currentBase = round(orderInfo.avgPrice, 4)
                 config.read("config.ini")
                 config.set("trade", "currentBase", str(currentBase))

@@ -50,26 +50,26 @@ def get_next_buy_sell_rate(client):
         else:
             trend_count -= 1
         seconds_now_diff = seconds_now - history["triggerSeconds"]
-        # <15min buy twice
-        if trend_count == 2 and seconds_now_diff < 900:
+        # <30min buy twice
+        if trend_count == 2 and seconds_now_diff < 1800:
             buy_sell_rate = 2, 1
-        # <30min buy three times
-        elif trend_count == 3 and seconds_now_diff < 1800:
+        # <60min buy three times
+        elif trend_count == 3 and seconds_now_diff < 3600:
             buy_sell_rate = 3, 1
-        # <60min buy four times
-        elif trend_count == 4 and seconds_now_diff < 3600:
+        # <2h buy four times
+        elif trend_count == 4 and seconds_now_diff < 7200:
             buy_sell_rate = 4, 1
         # <4h buy five times
         elif trend_count == 5 and seconds_now_diff < 14400:
             buy_sell_rate = 5, 1
-        # <15min sell twice
-        elif trend_count == -2 and seconds_now_diff < 900:
+        # <30min sell twice
+        elif trend_count == -2 and seconds_now_diff < 1800:
             buy_sell_rate = 1, 2
-        # <30min sell three times
-        elif trend_count == -3 and seconds_now_diff < 1800:
+        # <60min sell three times
+        elif trend_count == -3 and seconds_now_diff < 3600:
             buy_sell_rate = 1, 3
-        # <60min sell four times
-        elif trend_count == -4 and seconds_now_diff < 3600:
+        # <2h sell four times
+        elif trend_count == -4 and seconds_now_diff < 7200:
             buy_sell_rate = 1, 4
         # <4h sell five times
         elif trend_count == -5 and seconds_now_diff < 14400:

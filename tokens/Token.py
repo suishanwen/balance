@@ -99,11 +99,11 @@ def modify_amount_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_amount, _ne
     current_base = float(config.get("trade", "currentbase"))
     buy_rate = math.floor((current_base - _avg_sell) / (current_base - _next_buy))
     buy_amount_rate = _next_buy_amount / amount
-    if buy_rate > buy_amount_rate:
+    if buy_rate > 1 and buy_rate > buy_amount_rate:
         return buy_rate * amount, _next_sell_amount
     sell_rate = math.floor((_avg_buy - current_base) / (_next_sell - current_base))
     sell_amount_rate = _next_sell_amount / amount
-    if sell_rate > sell_amount_rate:
+    if sell_rate > 1 and sell_rate > sell_amount_rate:
         return _next_buy_amount, sell_rate * amount
     return _next_buy_amount, _next_sell_amount
 

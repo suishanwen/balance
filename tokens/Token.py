@@ -2,6 +2,7 @@ import time
 import configparser
 import random
 import json
+import math
 import api.OrderInfo as OrderInfo
 
 # read config
@@ -93,7 +94,22 @@ def get_next_buy_sell_info(client):
     return _next_buy, _next_buy_amount, _next_sell, _next_sell_amount
 
 
+def modify_amount_by_price(avg_buy, avg_sell, next_buy, next_buy_amount, next_sell, next_sell_amount):
+    amount = float(config.get("trade", "amount"))
+    current_base = float(config.get("trade", "currentbase"))
+    buy_rate = math.floor((current_base - avg_sell) / (current_base - next_buy))
+    buy_amount_rate = next_buy_amount / amount
+    if buy_rate > buy_amount_rate:
+        return buy_rate * amount, next_sell_amount
+    sell_rate = math.floor((avg_buy - current_base) / (next_sell - current_base))
+    sell_amount_rate = next_sell_amount / amount
+    if sell_rate > sell_amount_rate:
+        return next_buy_amount, sell_rate * amount
+    return next_buy_amount, next_sell_amount
+
+
 def __main__(client, symbol):
+    global buy, avg_buy, buy_amount, sell, avg_sell, sell_amount
     current_base = float(config.get("trade", "currentbase"))
     min_amount = float(config.get("trade", "minamount"))
     client.get_account_info()
@@ -105,13 +121,13 @@ def __main__(client, symbol):
                 next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
                 counter = 0
             client.get_coin_price(symbol)
-            buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info1(symbol)
-            if (next_buy >= avg_sell and sell_amount < next_buy_amount) or (
-                    next_sell <= avg_buy and buy_amount < next_sell_amount):
-                buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info2(symbol)
-                if (next_buy >= avg_sell and sell_amount < next_buy_amount) or (
-                        next_sell <= avg_buy and buy_amount < next_sell_amount):
-                    buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info3(symbol)
+            for i in range(3):
+                buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
+                next_buy_amount, next_sell_amount = modify_amount_by_price(avg_buy, avg_sell, next_buy, next_buy_amount,
+                                                                           next_sell, next_sell_amount)
+                if not ((next_buy >= avg_sell and sell_amount < next_buy_amount) or (
+                        next_sell <= avg_buy and buy_amount < next_sell_amount)):
+                    break
             print('\nBase:', current_base, ",Buy:", next_buy, ',Sell:', next_sell,
                   '|buy1-3:', buy, '(+', round(next_sell - buy, 4), ')',
                   ',sell1-3:', sell, '(', round(next_buy - sell, 4), ')',

@@ -153,6 +153,14 @@ class HuobiProClient:
             price_info["buy3"] = bids[2][0]
             price_info["buyAmount3"] = bids[2][1]
 
+    def get_price_info(self, symbol, depth):
+        if depth == 1:
+            return self.get_price_info1(symbol)
+        elif depth == 2:
+            return self.get_price_info2(symbol)
+        elif depth == 3:
+            return self.get_price_info3(symbol)
+
     def get_price_info1(self, symbol):
         price_info = self.priceInfo[symbol]
         return price_info["buy1"], price_info["buy1"], price_info["buyAmount1"], price_info["sell1"], price_info[

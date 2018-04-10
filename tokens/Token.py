@@ -128,18 +128,29 @@ def __main__(client, symbol):
                 if not ((next_buy >= avg_sell and sell_amount < next_buy_amount) or (
                         next_sell <= avg_buy and buy_amount < next_sell_amount)):
                     break
-            print('\nBase:', current_base, ",Buy:", next_buy, ',Sell:', next_sell,
-                  '|buy1-3:', buy, '(+', round(next_sell - buy, 4), ')',
-                  ',sell1-3:', sell, '(', round(next_buy - sell, 4), ')',
-                  )
-            order_info = {}
+            print(
+                "\nBase:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
+                    current_base,
+                    next_sell,
+                    next_sell_amount,
+                    buy,
+                    buy_amount,
+                    round(
+                        next_sell - buy,
+                        4),
+                    next_buy,
+                    next_buy_amount,
+                    sell,
+                    sell_amount,
+                    round(
+                        next_buy - sell,
+                        4)))
+            order_info = None
             if next_buy >= avg_sell and sell_amount >= next_buy_amount:
-                buy_order = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount)
-                order_info = buy_order
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount)
             elif next_sell <= avg_buy and buy_amount >= next_sell_amount:
-                sell_order = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount)
-                order_info = sell_order
-            if order_info != {}:
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount)
+            if order_info is not None:
                 order_process(client, order_info)
                 if order_info.amount < min_amount:
                     current_base = round(order_info.avgPrice, 4)

@@ -97,11 +97,11 @@ def get_next_buy_sell_info(client):
 def modify_amount_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_amount, _next_sell, _next_sell_amount):
     amount = float(config.get("trade", "amount"))
     current_base = float(config.get("trade", "currentbase"))
-    buy_rate = math.floor((current_base - avg_sell) / (current_base - _next_buy))
+    buy_rate = math.floor((current_base - _avg_sell) / (current_base - _next_buy))
     buy_amount_rate = _next_buy_amount / amount
     if buy_rate > buy_amount_rate:
         return buy_rate * amount, _next_sell_amount
-    sell_rate = math.floor((avg_buy - current_base) / (_next_sell - current_base))
+    sell_rate = math.floor((_avg_buy - current_base) / (_next_sell - current_base))
     sell_amount_rate = _next_sell_amount / amount
     if sell_rate > sell_amount_rate:
         return _next_buy_amount, sell_rate * amount

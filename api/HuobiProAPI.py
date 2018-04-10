@@ -29,7 +29,7 @@ def get_kline(symbol, period, size=150):
 
 
 # 获取marketdepth
-def get_depth(symbol, _type):
+def get_depth(symbol, _type='step0'):
     """
     :param symbol
     :param _type: 可选值：{ percent10, step0, step1, step2, step3, step4, step5 }

@@ -105,17 +105,23 @@ def __main__(client, symbol):
                 next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
                 counter = 0
             client.get_coin_price(symbol)
-            buy_price, buy_amount, sell_price, sell_amount = client.get_price_info(symbol)
+            buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info1(symbol)
+            if (next_buy >= avg_sell and sell_amount < next_buy_amount) or (
+                    next_sell <= avg_buy and buy_amount < next_sell_amount):
+                buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info2(symbol)
+                if (next_buy >= avg_sell and sell_amount < next_buy_amount) or (
+                        next_sell <= avg_buy and buy_amount < next_sell_amount):
+                    buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info3(symbol)
             print('\nBase:', current_base, ",Buy:", next_buy, ',Sell:', next_sell,
-                  '|buy1:', buy_price, '(+', round(next_sell - buy_price, 4), ')',
-                  ',sell1:', sell_price, '(', round(next_buy - sell_price, 4), ')',
+                  '|buy1-3:', buy, '(+', round(next_sell - buy, 4), ')',
+                  ',sell1-3:', sell, '(', round(next_buy - sell, 4), ')',
                   )
             order_info = {}
-            if next_buy >= sell_price and sell_amount >= next_buy_amount:
-                buy_order = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell_price, next_buy_amount)
+            if next_buy >= avg_sell and sell_amount >= next_buy_amount:
+                buy_order = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount)
                 order_info = buy_order
-            elif next_sell <= buy_price and buy_amount >= next_sell_amount:
-                sell_order = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy_price, next_sell_amount)
+            elif next_sell <= avg_buy and buy_amount >= next_sell_amount:
+                sell_order = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount)
                 order_info = sell_order
             if order_info != {}:
                 order_process(client, order_info)

@@ -19,7 +19,7 @@ class OkexSpot:
         return httpGet(self.__url,TICKER_RESOURCE,params)
 
     # 获取OKCOIN现货市场深度信息
-    def depth(self, symbol='', size=1):
+    def depth(self, symbol='', size=3):
         DEPTH_RESOURCE = "/api/v1/depth.do"
         params = ''
         if symbol:

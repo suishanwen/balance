@@ -45,7 +45,7 @@ class HuobiProClient:
             u'\n-------------------------------------------spot order------------------------------------------------')
         result = send_order(account_id, my_order_info.amount, my_order_info.symbol, my_order_info.orderType,
                             my_order_info.price)
-        if result['status'] == 'ok':
+        if result.get('status') == 'ok':
             print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                   my_order_info.amount, "  ", fromTimeStamp(int(time.time())))
             return result['data']
@@ -58,7 +58,7 @@ class HuobiProClient:
         print(
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = cancel_order(my_order_info.orderId)
-        if result['status'] == 'ok':
+        if result.get('status') == 'ok':
             # print(u"order", result['data'], "canceled")
             self.write_log(my_order_info)
             self.write_log(my_order_info, "order " + result['data'] + " canceled")
@@ -73,7 +73,7 @@ class HuobiProClient:
     def check_order_status(self, my_order_info, wait_count=0):
         order_id = my_order_info.orderId
         order_result = order_info(order_id)
-        if order_result["status"] == 'ok':
+        if order_result.get('status') == 'ok':
             order = order_result["data"]
             order_id = order["id"]
             state = order["state"]
@@ -136,7 +136,7 @@ class HuobiProClient:
 
     def get_coin_price(self, symbol):
         data = get_depth(symbol)
-        if data["status"] == 'ok':
+        if data.get('status') == 'ok':
             price_info = self.priceInfo[symbol]
             asks = data["tick"]["asks"]
             bids = data["tick"]["bids"]
@@ -205,7 +205,7 @@ class HuobiProClient:
             u'---------------------------------------spot account info------------------------------------------------')
         my_account_info = get_balance(account_id)
         symbol = [self.BALANCE_USDT, self.BALANCE_HT]
-        if my_account_info["status"] == 'ok':
+        if my_account_info.get('status') == 'ok':
             data = fromDict(my_account_info, "data", "list")
             for sy in symbol:
                 _sy = list(filter(lambda x: x["currency"] == sy, data))

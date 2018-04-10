@@ -55,7 +55,7 @@ class OkexClient:
             u'\n-------------------------------------------spot order------------------------------------------------')
         result = okcoinSpot.trade(my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                                   my_order_info.amount)
-        if result['result']:
+        if result.get('result'):
             print("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                   my_order_info.amount, "  ", fromTimeStamp(int(time.time())))
             return result['order_id']
@@ -68,7 +68,7 @@ class OkexClient:
         print(
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = okcoinSpot.cancelOrder(my_order_info.symbol, my_order_info.orderId)
-        if result['result']:
+        if result.get('result'):
             self.write_log(my_order_info)
             self.write_log(my_order_info, "order " + result['order_id'] + " canceled")
         else:
@@ -81,7 +81,7 @@ class OkexClient:
     def check_order_status(self, my_order_info, wait_count=0):
         order_id = my_order_info.orderId
         order_result = okcoinSpot.orderinfo(my_order_info.symbol, my_order_info.orderId)
-        if order_result["result"]:
+        if order_result.get('result'):
             orders = order_result["orders"]
             if len(orders) > 0:
                 order = orders[0]
@@ -146,20 +146,21 @@ class OkexClient:
     def get_coin_price(self, symbol):
         data = okcoinSpot.depth(symbol)
         price_info = self.priceInfo[symbol]
-        asks = data["asks"]
-        bids = data["bids"]
-        price_info["sell1"] = asks[2][0]
-        price_info["sellAmount1"] = asks[2][1]
-        price_info["buy1"] = bids[0][0]
-        price_info["buyAmount1"] = bids[0][1]
-        price_info["sell2"] = asks[1][0]
-        price_info["sellAmount2"] = asks[1][1]
-        price_info["buy2"] = bids[1][0]
-        price_info["buyAmount2"] = bids[1][1]
-        price_info["sell3"] = asks[0][0]
-        price_info["sellAmount3"] = asks[0][1]
-        price_info["buy3"] = bids[2][0]
-        price_info["buyAmount3"] = bids[2][1]
+        if data.get("asks") is not None:
+            asks = data["asks"]
+            bids = data["bids"]
+            price_info["sell1"] = asks[2][0]
+            price_info["sellAmount1"] = asks[2][1]
+            price_info["buy1"] = bids[0][0]
+            price_info["buyAmount1"] = bids[0][1]
+            price_info["sell2"] = asks[1][0]
+            price_info["sellAmount2"] = asks[1][1]
+            price_info["buy2"] = bids[1][0]
+            price_info["buyAmount2"] = bids[1][1]
+            price_info["sell3"] = asks[0][0]
+            price_info["sellAmount3"] = asks[0][1]
+            price_info["buy3"] = bids[2][0]
+            price_info["buyAmount3"] = bids[2][1]
 
     def get_price_info1(self, symbol):
         price_info = self.priceInfo[symbol]
@@ -199,7 +200,7 @@ class OkexClient:
         print(
             u'---------------------------------------spot account info------------------------------------------------')
         my_account_info = okcoinSpot.userinfo()
-        if my_account_info["result"]:
+        if my_account_info.get('result'):
             freezed = fromDict(my_account_info, "info", "funds", "freezed")
             free = fromDict(my_account_info, "info", "funds", "free")
             print(u"USDT", free["usdt"], "freezed", freezed["usdt"])

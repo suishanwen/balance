@@ -91,7 +91,7 @@ def get_next_buy_sell_info(client):
     _next_sell = round(current_base * (100 + percentage * sell_rate - _ret) * 0.01, 4)
     _next_buy_amount = amount * buy_rate
     _next_sell_amount = amount * sell_rate
-    return _next_buy, _next_buy_amount, _next_sell, _next_sell_amount
+    return _next_buy, _next_buy_amount, _next_buy_amount, _next_sell, _next_sell_amount, _next_sell_amount
 
 
 def modify_amount_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_amount, _next_sell, _next_sell_amount):
@@ -114,17 +114,20 @@ def __main__(client, symbol):
     min_amount = float(config.get("trade", "minamount"))
     client.get_account_info()
     counter = 0
-    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
+    next_buy, next_buy_amount, next_buy_amount_b, next_sell, next_sell_amount, next_sell_amount_b = \
+        get_next_buy_sell_info(client)
     while True:
         try:
             if counter > 300:
-                next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
+                next_buy, next_buy_amount, next_buy_amount_b, next_sell, next_sell_amount, next_sell_amount_b = \
+                    get_next_buy_sell_info(client)
                 counter = 0
             client.get_coin_price(symbol)
             for i in range(3):
                 buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
-                next_buy_amount, next_sell_amount = modify_amount_by_price(avg_buy, avg_sell, next_buy, next_buy_amount,
-                                                                           next_sell, next_sell_amount)
+                next_buy_amount, next_sell_amount = modify_amount_by_price(avg_buy, avg_sell, next_buy,
+                                                                           next_buy_amount_b,
+                                                                           next_sell, next_sell_amount_b)
                 if not ((next_buy >= avg_sell and sell_amount < next_buy_amount) or (
                         next_sell <= avg_buy and buy_amount < next_sell_amount)):
                     break
@@ -160,7 +163,8 @@ def __main__(client, symbol):
                     fp = open("config.ini", "w")
                     config.write(fp)
                     fp.close()
-                    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
+                    next_buy, next_buy_amount, next_buy_amount_b, next_sell, next_sell_amount, next_sell_amount_b = \
+                        get_next_buy_sell_info(client)
         except Exception as err:
             print(err)
         time.sleep(0.1)

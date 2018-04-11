@@ -29,6 +29,8 @@ class MyOrderInfo:
 
     def set_deal_amount(self, deal_amount):
         self.dealAmount = deal_amount
+
+    def reset_total_deal_amount(self, deal_amount):
         self.totalDealAmount += deal_amount
 
     def set_transaction(self, trans_type):

@@ -134,6 +134,7 @@ class OkexClient:
             if status != 2:
                 status = self.cancel_my_order(my_order_info)
             if my_order_info.dealAmount > 0:
+                my_order_info.reset_total_deal_amount(my_order_info.dealAmount)
                 if my_order_info.orderType == self.TRADE_SELL:
                     my_order_info.set_transaction("plus")
                 else:

@@ -122,7 +122,6 @@ class OkexClient:
             my_order_info.set_order_id(order_id)
             wait_count = 0
             status = 0
-            deal_amount_bak = my_order_info.dealAmount
             avg_price_bak = my_order_info.avgPrice
             while wait_count < trade_wait_count and status != 2:
                 status = self.check_order_status(my_order_info, wait_count)
@@ -132,13 +131,16 @@ class OkexClient:
                     trade_price = self.get_trade_price(my_order_info.symbol, my_order_info.orderType)
                     if trade_price == my_order_info.price:
                         wait_count -= 1
-            deal_amount = deal_amount_bak + my_order_info.dealAmount
-            if deal_amount > 0:
-                my_order_info.set_avg_price(
-                    (deal_amount_bak * avg_price_bak + my_order_info.dealAmount * my_order_info.avgPrice) / deal_amount)
-            my_order_info.set_deal_amount(deal_amount)
             if status != 2:
                 status = self.cancel_my_order(my_order_info)
+            if my_order_info.dealAmount > 0:
+                if my_order_info.orderType == self.TRADE_SELL:
+                    my_order_info.set_transaction("plus")
+                else:
+                    my_order_info.set_transaction("minus")
+                my_order_info.set_avg_price(
+                    ((my_order_info.totalDealAmount - my_order_info.dealAmount) * avg_price_bak
+                     + my_order_info.dealAmount * my_order_info.avgPrice) / my_order_info.totalDealAmount)
             return status
         else:
             return -2
@@ -225,7 +227,7 @@ class OkexClient:
                  str(my_order_info.price),
                  str(my_order_info.avgPrice),
                  str(my_order_info.dealAmount),
-                 str(round(my_order_info.avgPrice * my_order_info.dealAmount, 4)),
+                 str(my_order_info.transaction),
                  str(fromTimeStamp(int(time.time())))]))
         else:
             f.writelines("\n" + text)

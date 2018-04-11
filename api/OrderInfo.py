@@ -2,15 +2,17 @@ import time
 
 
 class MyOrderInfo:
-    def __init__(self, symbol, order_type, price=0, amount=0, transaction=0):
+    def __init__(self, symbol, order_type, price=0, amount=0):
         self.orderId = ""
         self.symbol = symbol
         self.orderType = order_type
-        self.amount = amount
-        self.transaction = transaction
         self.price = price
+        self.totalAmount = amount
+        self.totalDealAmount = 0
+        self.amount = 0
         self.dealAmount = 0
         self.avgPrice = 0
+        self.transaction = 0
         self.triggerSeconds = int(time.time())
 
     def set_order_id(self, order_id):
@@ -27,6 +29,7 @@ class MyOrderInfo:
 
     def set_deal_amount(self, deal_amount):
         self.dealAmount = deal_amount
+        self.totalDealAmount += deal_amount
 
     def set_transaction(self, trans_type):
         if trans_type == 'plus':
@@ -34,8 +37,8 @@ class MyOrderInfo:
         else:
             self.transaction = round(self.transaction - self.dealAmount * self.avgPrice, 3)
 
-    def get_buy_amount(self, price, accuracy=2):
+    def get_buy_amount(self, price, accuracy=4):
         return round(self.transaction / price, accuracy)
 
-    def get_unhandled_amount(self, accuracy=2):
-        return round(self.amount - self.dealAmount, accuracy)
+    def get_unhandled_amount(self, accuracy=4):
+        return round(self.totalAmount - self.totalDealAmount, accuracy)

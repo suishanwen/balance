@@ -125,7 +125,7 @@ class OkexClient:
             avg_price_bak = my_order_info.avgPrice
             while wait_count < trade_wait_count and status != 2:
                 status = self.check_order_status(my_order_info, wait_count)
-                time.sleep(0.1)
+                # time.sleep(0.1)
                 wait_count += 1
                 if wait_count == trade_wait_count and status != 2:
                     trade_price = self.get_trade_price(my_order_info.symbol, my_order_info.orderType)

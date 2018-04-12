@@ -59,8 +59,6 @@ class HuobiProClient:
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = cancel_order(my_order_info.orderId)
         if result.get('status') == 'ok':
-            # print(u"order", result['data'], "canceled")
-            self.write_log(my_order_info)
             self.write_log(my_order_info, "order " + result['data'] + " canceled")
         else:
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")

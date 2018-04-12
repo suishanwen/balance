@@ -15,7 +15,9 @@ def order_process(client, my_order_info):
     state = client.trade(my_order_info)
     if my_order_info.amount < client.MIN_AMOUNT and state == client.COMPLETE_STATUS:
         client.write_log(my_order_info)
-    elif my_order_info.dealAmount > 0:
+    elif my_order_info.totalDealAmount > 0:
+        if state == 'canceled' or state == 'partial-canceled' or state == -1:
+            client.write_log(my_order_info)
         my_order_info.set_price(0)
         order_process(client, my_order_info)
 

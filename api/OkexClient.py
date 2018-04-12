@@ -69,7 +69,6 @@ class OkexClient:
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = okcoinSpot.cancelOrder(my_order_info.symbol, my_order_info.orderId)
         if result.get('result'):
-            self.write_log(my_order_info)
             self.write_log(my_order_info, "order " + result['order_id'] + " canceled")
         else:
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")

@@ -13,7 +13,8 @@ config.read("config.ini")
 def order_process(client, my_order_info):
     my_order_info.set_amount(my_order_info.get_unhandled_amount())
     state = client.trade(my_order_info)
-    if my_order_info.totalAmount - my_order_info.totalDealAmount < client.MIN_AMOUNT and state == client.COMPLETE_STATUS:
+    if my_order_info.totalAmount - my_order_info.totalDealAmount < client.MIN_AMOUNT \
+            and state == client.COMPLETE_STATUS:
         client.write_log(my_order_info)
     elif my_order_info.totalDealAmount > 0:
         if state == 'canceled' or state == 'partial-canceled' or state == -1:

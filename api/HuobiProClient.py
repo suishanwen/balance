@@ -16,7 +16,7 @@ trade_wait_count = int(config.get("trade", "tradewaitcount"))
 account_id = config.get("account", "id")
 
 
-class HuobiProClient:
+class HuobiProClient(object):
     BALANCE_HT = "ht"
     BALANCE_USDT = "usdt"
 
@@ -40,7 +40,8 @@ class HuobiProClient:
     def get_coin_num(self, symbol):
         return fromDict(self.accountInfo, symbol, "available")
 
-    def make_order(self, my_order_info):
+    @classmethod
+    def make_order(cls, my_order_info):
         print(
             u'\n-------------------------------------------spot order------------------------------------------------')
         result = send_order(account_id, my_order_info.amount, my_order_info.symbol, my_order_info.orderType,
@@ -214,7 +215,8 @@ class HuobiProClient:
             print("getAccountInfo Fail,Try again!")
             self.get_account_info()
 
-    def write_log(self, my_order_info, text=""):
+    @classmethod
+    def write_log(cls, my_order_info, text=""):
         f = open(r'log.txt', 'a')
         if text == "":
             f.writelines(' '.join(

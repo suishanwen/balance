@@ -26,7 +26,7 @@ okcoinSpot = OkexSpot(okcoinRESTURL, apikey, secretkey)
 trade_wait_count = int(config.get("trade", "tradewaitcount"))
 
 
-class OkexClient:
+class OkexClient(object):
     BALANCE_OKB = "okb"
     BALANCE_USDT = "usdt"
 
@@ -50,7 +50,8 @@ class OkexClient:
     def get_coin_num(self, symbol):
         return fromDict(self.accountInfo, symbol, "available")
 
-    def make_order(self, my_order_info):
+    @classmethod
+    def make_order(cls, my_order_info):
         print(
             u'\n-------------------------------------------spot order------------------------------------------------')
         result = okcoinSpot.trade(my_order_info.symbol, my_order_info.orderType, my_order_info.price,
@@ -219,7 +220,8 @@ class OkexClient:
             print("getAccountInfo Fail,Try again!")
             self.get_account_info()
 
-    def write_log(self, my_order_info, text=""):
+    @classmethod
+    def write_log(cls, my_order_info, text=""):
         f = open(r'log.txt', 'a')
         if text == "":
             f.writelines(' '.join(

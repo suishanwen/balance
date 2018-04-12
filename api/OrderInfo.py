@@ -1,7 +1,7 @@
 import time
 
 
-class MyOrderInfo:
+class MyOrderInfo(object):
     def __init__(self, symbol, order_type, price=0, amount=0):
         self.orderId = ""
         self.symbol = symbol

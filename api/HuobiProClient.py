@@ -102,10 +102,10 @@ class HuobiProClient:
             self.check_order_status(my_order_info, wait_count)
 
     def trade(self, my_order_info):
-        if my_order_info.price == 0:
-            my_order_info.set_price(self.get_trade_price(my_order_info.symbol, my_order_info.orderType))
         if my_order_info.amount < self.MIN_AMOUNT:
             return 'filled'
+        if my_order_info.price == 0:
+            my_order_info.set_price(self.get_trade_price(my_order_info.symbol, my_order_info.orderType))
         order_id = self.make_order(my_order_info)
         if order_id != "-1":
             my_order_info.set_order_id(order_id)

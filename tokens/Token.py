@@ -157,7 +157,7 @@ def __main__(client, symbol):
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount)
             if order_info is not None:
                 order_process(client, order_info)
-                if order_info.amount < min_amount:
+                if order_info.totalAmount - order_info.totalDealAmount < min_amount:
                     current_base = round(order_info.avgPrice, 4)
                     config.read("config.ini")
                     config.set("trade", "currentBase", str(current_base))

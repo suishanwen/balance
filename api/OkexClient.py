@@ -228,6 +228,7 @@ class OkexClient:
                  str(my_order_info.price),
                  str(my_order_info.avgPrice),
                  str(my_order_info.dealAmount),
+                 str(my_order_info.totalDealAmount),
                  str(my_order_info.transaction),
                  str(fromTimeStamp(int(time.time())))]))
         else:

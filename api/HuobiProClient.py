@@ -198,19 +198,6 @@ class HuobiProClient:
         else:
             return self.priceInfo[symbol]["buy1"]
 
-    def write_log(self, my_order_info, text=""):
-        f = open(r'log.txt', 'a')
-        if text == "":
-            f.writelines(' '.join(
-                ["\n", my_order_info.orderId, my_order_info.symbol, my_order_info.orderType, str(my_order_info.price),
-                 str(my_order_info.avgPrice),
-                 str(my_order_info.dealAmount),
-                 str(my_order_info.transaction),
-                 str(fromTimeStamp(int(time.time())))]))
-        else:
-            f.writelines("\n" + text)
-        f.close()
-
     def get_account_info(self):
         print(
             u'---------------------------------------spot account info------------------------------------------------')
@@ -228,3 +215,18 @@ class HuobiProClient:
         else:
             print("getAccountInfo Fail,Try again!")
             self.get_account_info()
+
+    def write_log(self, my_order_info, text=""):
+        f = open(r'log.txt', 'a')
+        if text == "":
+            f.writelines(' '.join(
+                ["\n", my_order_info.orderId, my_order_info.symbol, my_order_info.orderType,
+                 str(my_order_info.price),
+                 str(my_order_info.avgPrice),
+                 str(my_order_info.dealAmount),
+                 str(my_order_info.totalDealAmount),
+                 str(my_order_info.transaction),
+                 str(fromTimeStamp(int(time.time())))]))
+        else:
+            f.writelines("\n" + text)
+        f.close()

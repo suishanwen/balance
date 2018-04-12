@@ -167,5 +167,5 @@ def __main__(client, symbol):
                         get_next_buy_sell_info(client)
         except Exception as err:
             print(err)
-        time.sleep(0.1)
+        # time.sleep(0.1)
         counter += 1

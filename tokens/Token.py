@@ -116,13 +116,13 @@ def add_statistics(client, my_order_info):
     transaction = float(config.get("statistics", "transaction"))
     abs_amount = float(config.get("statistics", "absamount"))
     abs_transaction = float(config.get("statistics", "abstransaction"))
-    config.set("statistics", "absamount", str(abs_amount + my_order_info.totalDealAmount))
-    config.set("statistics", "abstransaction", str(abs_transaction + abs(my_order_info.transaction)))
-    config.set("statistics", "transaction", str(transaction + my_order_info.transaction))
+    config.set("statistics", "absamount", str(round(abs_amount + my_order_info.totalDealAmount, 4)))
+    config.set("statistics", "abstransaction", str(round(abs_transaction + abs(my_order_info.transaction), 3)))
+    config.set("statistics", "transaction", str(round(transaction + my_order_info.transaction, 3)))
     if my_order_info.orderType == client.TRADE_BUY:
-        config.set("statistics", "amount", str(amount + my_order_info.totalDealAmount))
+        config.set("statistics", "amount", str(round(amount + my_order_info.totalDealAmount, 4)))
     else:
-        config.set("statistics", "amount", str(amount - my_order_info.totalDealAmount))
+        config.set("statistics", "amount", str(round(amount - my_order_info.totalDealAmount, 4)))
 
 
 def __main__(client, symbol):

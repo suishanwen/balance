@@ -92,7 +92,7 @@ def get_next_buy_sell_info(client):
         _ret = -_ret
     _next_buy = round(current_base * (100 - percentage * buy_rate - _ret) * 0.01, 4)
     _next_sell = round(current_base * (100 + percentage * sell_rate - _ret) * 0.01, 4)
-    _next_buy_amount = amount * buy_rate
+    _next_buy_amount = round(amount * buy_rate * (100 + percentage) / 100, 4)
     _next_sell_amount = amount * sell_rate
     return _next_buy, _next_buy_amount, _next_buy_amount, _next_sell, _next_sell_amount, _next_sell_amount
 

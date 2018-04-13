@@ -111,6 +111,20 @@ def modify_amount_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_amount, _ne
     return _next_buy_amount, _next_sell_amount
 
 
+def add_statistics(client, my_order_info):
+    amount = float(config.get("statistics", "amount"))
+    transaction = float(config.get("statistics", "transaction"))
+    abs_amount = float(config.get("statistics", "absamount"))
+    abs_transaction = float(config.get("statistics", "abstransaction"))
+    config.set("statistics", "absamount", str(abs_amount + my_order_info.totalDealAmount))
+    config.set("statistics", "abstransaction", str(abs_transaction + abs(my_order_info.transaction)))
+    config.set("statistics", "transaction", str(transaction + my_order_info.transaction))
+    if my_order_info.orderType == client.TRADE_BUY:
+        config.set("statistics", "amount", str(amount + my_order_info.totalDealAmount))
+    else:
+        config.set("statistics", "amount", str(amount - my_order_info.totalDealAmount))
+
+
 def __main__(client, symbol):
     global buy, avg_buy, buy_amount, sell, avg_sell, sell_amount
     current_base = float(config.get("trade", "currentbase"))
@@ -163,6 +177,7 @@ def __main__(client, symbol):
                     config.read("config.ini")
                     config.set("trade", "currentBase", str(current_base))
                     config.set("trade", "history", str(re_org_history(order_info)))
+                    add_statistics(client, order_info)
                     fp = open("config.ini", "w")
                     config.write(fp)
                     fp.close()

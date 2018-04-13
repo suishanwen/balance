@@ -1,5 +1,7 @@
 import time
 
+from util.MyUtil import fromTimeStamp
+
 
 class MyOrderInfo(object):
     def __init__(self, symbol, order_type, price=0, amount=0):
@@ -14,6 +16,16 @@ class MyOrderInfo(object):
         self.avgPrice = 0
         self.transaction = 0
         self.triggerSeconds = int(time.time())
+
+    def __repr__(self):
+        return ' '.join(
+            ["\n", str(self.orderId), self.symbol, self.orderType,
+             str(self.price),
+             str(self.avgPrice),
+             str(self.dealAmount),
+             str(self.totalDealAmount),
+             str(self.transaction),
+             str(fromTimeStamp(int(time.time())))])
 
     def set_order_id(self, order_id):
         self.orderId = order_id

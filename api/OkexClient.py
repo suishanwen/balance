@@ -224,14 +224,7 @@ class OkexClient(object):
     def write_log(cls, my_order_info, text=""):
         f = open(r'log.txt', 'a')
         if text == "":
-            f.writelines(' '.join(
-                ["\n", str(my_order_info.orderId), my_order_info.symbol, my_order_info.orderType,
-                 str(my_order_info.price),
-                 str(my_order_info.avgPrice),
-                 str(my_order_info.dealAmount),
-                 str(my_order_info.totalDealAmount),
-                 str(my_order_info.transaction),
-                 str(fromTimeStamp(int(time.time())))]))
+            f.writelines(str(my_order_info))
         else:
             f.writelines("\n" + text)
         f.close()

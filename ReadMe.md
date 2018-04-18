@@ -1,6 +1,6 @@
 running logs
 
-http://allinbitcoin.info/balance/huobi/log.txt
+http://bitcoinrobot.cn/balance/huobi/log.txt
 
-http://allinbitcoin.info/balance/ok/log.txt
+http://bitcoinrobot.cn/balance/ok/log.txt
 

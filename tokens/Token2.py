@@ -128,7 +128,7 @@ def add_statistics(client, my_order_info):
 
 
 def __main__(client, symbol):
-    global buy, avg_buy, buy_amount, sell, avg_sell, sell_amount
+    global buy, avg_buy, buy_amount, next_buy_amount, sell, avg_sell, sell_amount, next_sell_amount
     current_base = float(config.get("trade", "currentbase"))
     min_amount = float(config.get("trade", "minamount"))
     client.get_account_info()

@@ -51,8 +51,8 @@ class MyOrderInfo(object):
         else:
             self.transaction = round(self.transaction - self.dealAmount * self.avgPrice, 3)
 
-    def get_buy_amount(self, price, accuracy=4):
+    def get_buy_amount(self, price, accuracy=2):
         return round(self.transaction / price, accuracy)
 
-    def get_unhandled_amount(self, accuracy=4):
+    def get_unhandled_amount(self, accuracy=2):
         return round(self.totalAmount - self.totalDealAmount, accuracy)

@@ -83,6 +83,9 @@ class HuobiProClient(object):
                 print("order", order_id, "canceled")
             elif state == 'partial-canceled':
                 print("part dealed ", my_order_info.dealAmount, " and canceled")
+                if my_order_info.dealAmount == 0.0:
+                    print("data error!check order status again!")
+                    self.check_order_status(my_order_info, wait_count)
             elif state == ' partial-filled':
                 if wait_count == trade_wait_count:
                     print("part dealed ", my_order_info.dealAmount)

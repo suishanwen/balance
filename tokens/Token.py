@@ -1,6 +1,5 @@
 import time
 import configparser
-import random
 import json
 import math
 import api.OrderInfo as OrderInfo
@@ -86,12 +85,8 @@ def get_next_buy_sell_info(client):
     percentage = float(config.get("trade", "percentage"))
     current_base = float(config.get("trade", "currentbase"))
     buy_rate, sell_rate = get_next_buy_sell_rate(client)
-    _ret = round(random.uniform(0.001 * percentage, 0.010 * percentage), 3)
-    _num = random.randint(1, 10)
-    if _num > 5:
-        _ret = -_ret
-    _next_buy = round(current_base * (100 - percentage * buy_rate - _ret) * 0.01, 4)
-    _next_sell = round(current_base * (100 + percentage * sell_rate - _ret) * 0.01, 4)
+    _next_buy = round(current_base * (100 - percentage * buy_rate) * 0.01, 4)
+    _next_sell = round(current_base * (100 + percentage * sell_rate) * 0.01, 4)
     _next_buy_amount = round(amount * buy_rate * (100 + percentage) / 100, 4)
     _next_sell_amount = amount * sell_rate
     return _next_buy, _next_buy_amount, _next_buy_amount, _next_sell, _next_sell_amount, _next_sell_amount

@@ -19,7 +19,7 @@ class MyOrderInfo(object):
 
     def __repr__(self):
         return ' '.join(
-            ["\n", str(self.orderId), self.symbol, self.orderType,
+            [str(self.orderId), self.symbol, self.orderType,
              str(self.price),
              str(self.avgPrice),
              str(self.dealAmount),

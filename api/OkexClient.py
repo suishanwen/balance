@@ -222,9 +222,20 @@ class OkexClient(object):
 
     @classmethod
     def write_log(cls, my_order_info, text=""):
-        f = open(r'log.txt', 'a')
         if text == "":
-            f.writelines(str(my_order_info))
+            text = str(my_order_info)
+        s = open('log.txt').read()
+        mm = str(fromTimeStamp(int(time.time())))[0:7]
+        if s.find(mm) != -1:
+            f = open(r'log.txt', 'w')
+            f.write(text + "\n" + s)
+            f.close()
         else:
-            f.writelines("\n" + text)
-        f.close()
+            f = open(r'log.txt', 'a')
+            f.writelines("\n")
+            f.close()
+            old_f = open(str(fromTimeStamp(int(time.time()) - 86400))[0:7] + '.txt', 'w')
+            old_f.writelines(open('log.txt').readlines()[::-1])
+            old_f.close()
+            f = open(r'log.txt', 'w')
+            f.write(text)

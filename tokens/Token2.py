@@ -87,7 +87,7 @@ def get_next_buy_sell_info(client):
     percentage = float(config.get("trade", "percentage"))
     current_base = float(config.get("trade", "currentbase"))
     buy_rate, sell_rate = get_next_buy_sell_rate(client)
-    _ret = round(random.uniform(0.01 * percentage, 0.1 * percentage), 3)
+    _ret = round(random.uniform(0.001 * percentage, 0.010 * percentage), 3)
     _num = random.randint(1, 10)
     if _num > 5:
         _ret = -_ret

@@ -86,26 +86,28 @@ def get_next_buy_sell_info(client):
     percentage = float(config.get("trade", "percentage"))
     current_base = float(config.get("trade", "currentbase"))
     buy_rate, sell_rate = get_next_buy_sell_rate(client)
-    _next_buy = round(current_base * (100 - percentage * buy_rate) * 0.01, 4)
-    _next_sell = round(current_base * (100 + percentage * sell_rate) * 0.01, 4)
+    _next_buy = round(current_base / math.pow((100 + percentage) * 0.01, buy_rate), 4)
+    _next_sell = round(current_base * math.pow((100 + percentage) * 0.01, sell_rate), 4)
     _next_buy_trans = transaction * buy_rate
     _next_sell_trans = transaction * sell_rate
     return _next_buy, _next_buy_trans, _next_buy_trans, _next_sell, _next_sell_trans, _next_sell_trans
 
 
-def modify_transaction_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_transaction, _next_sell,
-                                _next_sell_transaction):
+def modify_trans_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_transaction, _next_sell, _next_sell_transaction):
     transaction = float(config.get("trade", "transaction"))
     current_base = float(config.get("trade", "currentbase"))
-    buy_rate = math.floor((current_base - _avg_sell) / (current_base - _next_buy))
+    percentage = float(config.get("trade", "percentage"))
+    buy_rate = math.floor(math.log(_avg_sell / current_base, (100 - percentage) * 0.01))
     buy_transaction_rate = _next_buy_transaction / transaction
     if buy_rate > 1 and buy_rate > buy_transaction_rate:
-        return round(buy_rate * transaction, 3), _next_sell_transaction
-    sell_rate = math.floor((_avg_buy - current_base) / (_next_sell - current_base))
+        return round(buy_rate * transaction, 3), round(current_base / math.pow((100 + percentage) * 0.01, buy_rate),
+                                                       4), _next_sell_transaction, _next_sell
+    sell_rate = math.floor(math.log(_avg_buy / current_base, (100 + percentage) * 0.01))
     sell_transaction_rate = _next_sell_transaction / transaction
     if sell_rate > 1 and sell_rate > sell_transaction_rate:
-        return _next_buy_transaction, round(sell_rate * transaction, 3)
-    return _next_buy_transaction, _next_sell_transaction
+        return _next_buy_transaction, _next_buy, round(sell_rate * transaction, 3), round(
+            current_base * math.pow((100 + percentage) * 0.01, sell_rate), 4)
+    return _next_buy_transaction, _next_buy, _next_sell_transaction, _next_sell
 
 
 def add_statistics(client, my_order_info):
@@ -131,7 +133,7 @@ def add_statistics(client, my_order_info):
 
 
 def __main__(client, symbol):
-    global buy, avg_buy, buy_amount, next_buy_amount, sell, avg_sell, sell_amount, next_sell_amount
+    global buy, avg_buy, buy_amount, next_buy_amount, sell, avg_sell, sell_amount, next_sell_amount, next_base
     current_base = float(config.get("trade", "currentbase"))
     min_amount = float(config.get("trade", "minamount"))
     client.get_account_info()
@@ -147,40 +149,45 @@ def __main__(client, symbol):
             client.get_coin_price(symbol)
             for i in range(3):
                 buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
-                next_buy_trans, next_sell_trans = modify_transaction_by_price(avg_buy, avg_sell, next_buy,
-                                                                              next_buy_trans_b,
-                                                                              next_sell, next_sell_trans_b)
+                next_buy_trans, next_buy_p, next_sell_trans, next_sell_p = modify_trans_by_price(avg_buy,
+                                                                                                 avg_sell,
+                                                                                                 next_buy,
+                                                                                                 next_buy_trans_b,
+                                                                                                 next_sell,
+                                                                                                 next_sell_trans_b)
                 next_buy_amount = round(next_buy_trans / avg_sell, 2)
                 next_sell_amount = round(next_sell_trans / avg_buy, 2)
-                if not ((next_buy >= avg_sell and sell_amount < next_buy_amount) or (
-                        next_sell <= avg_buy and buy_amount < next_sell_amount)):
+                if not ((next_buy_p >= avg_sell and sell_amount < next_buy_amount) or (
+                        next_sell_p <= avg_buy and buy_amount < next_sell_amount)):
                     break
             print(
                 "\nBase:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
                     current_base,
-                    next_sell,
+                    next_sell_p,
                     next_sell_amount,
                     buy,
                     buy_amount,
                     round(
-                        next_sell - buy,
+                        next_sell_p - buy,
                         4),
-                    next_buy,
+                    next_buy_p,
                     next_buy_amount,
                     sell,
                     sell_amount,
                     round(
-                        next_buy - sell,
+                        next_buy_p - sell,
                         4)))
             order_info = None
-            if next_buy >= avg_sell and sell_amount >= next_buy_amount:
-                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount)
-            elif next_sell <= avg_buy and buy_amount >= next_sell_amount:
-                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount)
+            if next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
+                next_base = next_buy_p
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount, next_base)
+            elif next_sell_p <= avg_buy and buy_amount >= next_sell_amount:
+                next_base = next_sell_p
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount, next_base)
             if order_info is not None:
                 order_process(client, order_info)
                 if order_info.totalAmount - order_info.totalDealAmount < min_amount:
-                    current_base = round(order_info.avgPrice, 4)
+                    current_base = round(next_base, 4)
                     config.read("config.ini")
                     config.set("trade", "currentBase", str(current_base))
                     config.set("trade", "history", str(re_org_history(order_info)))

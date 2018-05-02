@@ -4,12 +4,13 @@ from util.MyUtil import fromTimeStamp
 
 
 class MyOrderInfo(object):
-    def __init__(self, symbol, order_type, price=0, amount=0):
+    def __init__(self, symbol, order_type, price=0, amount=0, base=0):
         self.orderId = ""
         self.symbol = symbol
         self.orderType = order_type
         self.price = price
         self.totalAmount = amount
+        self.base = base
         self.totalDealAmount = 0
         self.amount = 0
         self.dealAmount = 0
@@ -20,6 +21,7 @@ class MyOrderInfo(object):
     def __repr__(self):
         return ' '.join(
             [str(self.orderId), self.symbol, self.orderType,
+             str(self.base),
              str(self.price),
              str(self.avgPrice),
              str(self.dealAmount),

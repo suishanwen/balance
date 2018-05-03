@@ -90,10 +90,10 @@ def get_next_buy_sell_info(client):
     _next_sell = round(current_base * math.pow(rate_p, sell_rate), 4)
     _next_buy_amount = round(amount * buy_rate + amount * (rate_p - 1) * (1 + buy_rate) * buy_rate / 2, 2)
     _next_sell_amount = amount * sell_rate
-    return _next_buy, _next_buy_amount, _next_buy_amount, _next_sell, _next_sell_amount, _next_sell_amount
+    return _next_buy, _next_buy_amount, _next_sell, _next_sell_amount
 
 
-def modify_amount_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_amount, _next_sell, _next_sell_amount):
+def modify_amt_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_amount, _next_sell, _next_sell_amount):
     amount = float(config.get("trade", "amount"))
     current_base = float(config.get("trade", "currentbase"))
     buy_rate = math.floor(math.log(current_base / _avg_sell, rate_p))
@@ -137,49 +137,48 @@ def __main__(client, symbol):
     min_amount = float(config.get("trade", "minamount"))
     client.get_account_info()
     counter = 0
-    next_buy, next_buy_amount, next_buy_amount_b, next_sell, next_sell_amount, next_sell_amount_b = \
-        get_next_buy_sell_info(client)
+    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
     while True:
         try:
             if counter > 300:
-                next_buy, next_buy_amount, next_buy_amount_b, next_sell, next_sell_amount, next_sell_amount_b = \
-                    get_next_buy_sell_info(client)
+                next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
                 counter = 0
             client.get_coin_price(symbol)
             for i in range(3):
                 buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
-                next_buy_amount, next_buy_p, next_sell_amount, next_sell_p = modify_amount_by_price(avg_buy, avg_sell,
-                                                                                                    next_buy,
-                                                                                                    next_buy_amount_b,
-                                                                                                    next_sell,
-                                                                                                    next_sell_amount_b)
-                if not ((next_buy_p >= avg_sell and sell_amount < next_buy_amount) or (
-                        next_sell_p <= avg_buy and buy_amount < next_sell_amount)):
+                next_buy_amount_p, next_buy_p, next_sell_amount_p, next_sell_p = modify_amt_by_price(avg_buy,
+                                                                                                     avg_sell,
+                                                                                                     next_buy,
+                                                                                                     next_buy_amount,
+                                                                                                     next_sell,
+                                                                                                     next_sell_amount)
+                if not ((next_buy_p >= avg_sell and sell_amount < next_buy_amount_p) or (
+                        next_sell_p <= avg_buy and buy_amount < next_sell_amount_p)):
                     break
             print(
                 "\nBase:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
                     current_base,
                     next_sell_p,
-                    next_sell_amount,
+                    next_sell_amount_p,
                     buy,
                     buy_amount,
                     round(
                         next_sell_p - buy,
                         4),
                     next_buy_p,
-                    next_buy_amount,
+                    next_buy_amount_p,
                     sell,
                     sell_amount,
                     round(
                         next_buy_p - sell,
                         4)))
             order_info = None
-            if next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
+            if next_buy_p >= avg_sell and sell_amount >= next_buy_amount_p:
                 next_base = next_buy_p
-                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount, next_base)
-            elif next_sell_p <= avg_buy and buy_amount >= next_sell_amount:
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount_p, next_base)
+            elif next_sell_p <= avg_buy and buy_amount >= next_sell_amount_p:
                 next_base = next_sell_p
-                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount, next_base)
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount_p, next_base)
             if order_info is not None:
                 order_process(client, order_info)
                 if order_info.totalAmount - order_info.totalDealAmount < min_amount:
@@ -191,8 +190,7 @@ def __main__(client, symbol):
                     fp = open("config.ini", "w")
                     config.write(fp)
                     fp.close()
-                    next_buy, next_buy_amount, next_buy_amount_b, next_sell, next_sell_amount, next_sell_amount_b = \
-                        get_next_buy_sell_info(client)
+                    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
         except Exception as err:
             print(err)
         # time.sleep(0.1)

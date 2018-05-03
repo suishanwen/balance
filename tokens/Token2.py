@@ -8,6 +8,8 @@ import api.OrderInfo as OrderInfo
 # read config
 config = configparser.ConfigParser()
 config.read("config.ini")
+percentage = float(config.get("trade", "percentage"))
+rate_p = (100 + percentage) * 0.01
 
 
 def order_process(client, my_order_info):
@@ -83,11 +85,10 @@ def get_next_buy_sell_rate(client):
 
 def get_next_buy_sell_info(client):
     transaction = float(config.get("trade", "transaction"))
-    percentage = float(config.get("trade", "percentage"))
     current_base = float(config.get("trade", "currentbase"))
     buy_rate, sell_rate = get_next_buy_sell_rate(client)
-    _next_buy = round(current_base / math.pow((100 + percentage) * 0.01, buy_rate), 4)
-    _next_sell = round(current_base * math.pow((100 + percentage) * 0.01, sell_rate), 4)
+    _next_buy = round(current_base / math.pow(rate_p, buy_rate), 4)
+    _next_sell = round(current_base * math.pow(rate_p, sell_rate), 4)
     _next_buy_trans = transaction * buy_rate
     _next_sell_trans = transaction * sell_rate
     return _next_buy, _next_buy_trans, _next_buy_trans, _next_sell, _next_sell_trans, _next_sell_trans
@@ -96,17 +97,16 @@ def get_next_buy_sell_info(client):
 def modify_trans_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_transaction, _next_sell, _next_sell_transaction):
     transaction = float(config.get("trade", "transaction"))
     current_base = float(config.get("trade", "currentbase"))
-    percentage = float(config.get("trade", "percentage"))
-    buy_rate = math.floor(math.log(_avg_sell / current_base, (100 - percentage) * 0.01))
+    buy_rate = math.floor(math.log(current_base / _avg_sell, rate_p))
     buy_transaction_rate = _next_buy_transaction / transaction
     if buy_rate > 1 and buy_rate > buy_transaction_rate:
-        return round(buy_rate * transaction, 3), round(current_base / math.pow((100 + percentage) * 0.01, buy_rate),
+        return round(buy_rate * transaction, 3), round(current_base / math.pow(rate_p, buy_rate),
                                                        4), _next_sell_transaction, _next_sell
-    sell_rate = math.floor(math.log(_avg_buy / current_base, (100 + percentage) * 0.01))
+    sell_rate = math.floor(math.log(_avg_buy / current_base, rate_p))
     sell_transaction_rate = _next_sell_transaction / transaction
     if sell_rate > 1 and sell_rate > sell_transaction_rate:
         return _next_buy_transaction, _next_buy, round(sell_rate * transaction, 3), round(
-            current_base * math.pow((100 + percentage) * 0.01, sell_rate), 4)
+            current_base * math.pow(rate_p, sell_rate), 4)
     return _next_buy_transaction, _next_buy, _next_sell_transaction, _next_sell
 
 

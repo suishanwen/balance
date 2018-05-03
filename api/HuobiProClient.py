@@ -3,12 +3,13 @@
 
 import time
 import sys
-import socket
-# import gzip
 
 from api.HuobiProAPI import *
 from util.MyUtil import fromDict, fromTimeStamp
-from websocket import create_connection
+
+# from websocket import create_connection
+# import gzip
+# import socket
 
 # read config
 config = configparser.ConfigParser()
@@ -42,17 +43,17 @@ class HuobiProClient(object):
 
     ws = None
 
-    @classmethod
-    def ws_connect(cls):
-        if cls.ws is None or not cls.ws.connected:
-            while True:
-                try:
-                    cls.ws = create_connection("wss://api.huobipro.com/ws", timeout=5)
-                    print('\nwebsocket connected!')
-                    break
-                except socket.timeout:
-                    print('\nconnect ws error,retry...')
-                    time.sleep(5)
+    # @classmethod
+    # def ws_connect(cls):
+    #     if cls.ws is None or not cls.ws.connected:
+    #         while True:
+    #             try:
+    #                 cls.ws = create_connection("wss://api.huobipro.com/ws", timeout=5)
+    #                 print('\nwebsocket connected!')
+    #                 break
+    #             except socket.timeout:
+    #                 print('\nconnect ws error,retry...')
+    #                 time.sleep(5)
 
     def get_coin_num(self, symbol):
         return fromDict(self.accountInfo, symbol, "available")

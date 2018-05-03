@@ -4,7 +4,7 @@
 import time
 import sys
 import socket
-import gzip
+# import gzip
 
 from api.HuobiProAPI import *
 from util.MyUtil import fromDict, fromTimeStamp
@@ -157,35 +157,54 @@ class HuobiProClient(object):
             return 'failed'
 
     def get_coin_price(self, symbol):
-        # data = get_depth(symbol)
-        self.ws_connect()
-        ws = self.ws
-        compress_data = ws.recv()
-        result = gzip.decompress(compress_data).decode('utf-8')
-        if result[:7] == '{"ping"':
-            ts = result[8:21]
-            pong = '{"pong":' + ts + '}'
-            ws.send(pong)
-            ws.send("""{"req": "market.$symbol$.depth.step0", "id": "id10"}""".replace("$symbol$", symbol))
-            self.get_coin_price(symbol)
-        else:
-            data = json.loads(result)
-            if data.get('status') == 'ok':
-                price_info = self.priceInfo[symbol]
-                asks = data["data"]["asks"]
-                bids = data["data"]["bids"]
-                price_info["sell1"] = asks[0][0]
-                price_info["sellAmount1"] = asks[0][1]
-                price_info["buy1"] = bids[0][0]
-                price_info["buyAmount1"] = bids[0][1]
-                price_info["sell2"] = asks[1][0]
-                price_info["sellAmount2"] = asks[1][1]
-                price_info["buy2"] = bids[1][0]
-                price_info["buyAmount2"] = bids[1][1]
-                price_info["sell3"] = asks[2][0]
-                price_info["sellAmount3"] = asks[2][1]
-                price_info["buy3"] = bids[2][0]
-                price_info["buyAmount3"] = bids[2][1]
+        data = get_depth(symbol)
+        if data.get('status') == 'ok':
+            price_info = self.priceInfo[symbol]
+            asks = data["tick"]["asks"]
+            bids = data["tick"]["bids"]
+            price_info["sell1"] = asks[0][0]
+            price_info["sellAmount1"] = asks[0][1]
+            price_info["buy1"] = bids[0][0]
+            price_info["buyAmount1"] = bids[0][1]
+            price_info["sell2"] = asks[1][0]
+            price_info["sellAmount2"] = asks[1][1]
+            price_info["buy2"] = bids[1][0]
+            price_info["buyAmount2"] = bids[1][1]
+            price_info["sell3"] = asks[2][0]
+            price_info["sellAmount3"] = asks[2][1]
+            price_info["buy3"] = bids[2][0]
+            price_info["buyAmount3"] = bids[2][1]
+
+    # def get_coin_price(self, symbol):
+    #     data = get_depth(symbol)
+    #     self.ws_connect()
+    #     ws = self.ws
+    #     compress_data = ws.recv()
+    #     result = gzip.decompress(compress_data).decode('utf-8')
+    #     if result[:7] == '{"ping"':
+    #         ts = result[8:21]
+    #         pong = '{"pong":' + ts + '}'
+    #         ws.send(pong)
+    #         ws.send("""{"req": "market.$symbol$.depth.step0", "id": "id10"}""".replace("$symbol$", symbol))
+    #         self.get_coin_price(symbol)
+    #     else:
+    #         data = json.loads(result)
+    #         if data.get('status') == 'ok':
+    #             price_info = self.priceInfo[symbol]
+    #             asks = data["data"]["asks"]
+    #             bids = data["data"]["bids"]
+    #             price_info["sell1"] = asks[0][0]
+    #             price_info["sellAmount1"] = asks[0][1]
+    #             price_info["buy1"] = bids[0][0]
+    #             price_info["buyAmount1"] = bids[0][1]
+    #             price_info["sell2"] = asks[1][0]
+    #             price_info["sellAmount2"] = asks[1][1]
+    #             price_info["buy2"] = bids[1][0]
+    #             price_info["buyAmount2"] = bids[1][1]
+    #             price_info["sell3"] = asks[2][0]
+    #             price_info["sellAmount3"] = asks[2][1]
+    #             price_info["buy3"] = bids[2][0]
+    #             price_info["buyAmount3"] = bids[2][1]
 
     def get_price_info(self, symbol, depth):
         if depth == 1:

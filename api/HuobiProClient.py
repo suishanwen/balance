@@ -37,9 +37,9 @@ class HuobiProClient(object):
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
                    BALANCE_HT: {"total": 0, "available": 0, "freezed": 0}}
 
-    priceInfo = {SYMBOL_HT: {"sell1": 0, 'sellAmount1': 0, "buy1": 0, 'buyAmount1': 0,
-                             "sell2": 0, 'sellAmount2': 0, "buy2": 0, 'buyAmount2': 0,
-                             "sell3": 0, 'sellAmount3': 0, "buy3": 0, 'buyAmount3': 0}}
+    priceInfo = {"version": 0, SYMBOL_HT: {"sell1": 0, 'sellAmount1': 0, "buy1": 0, 'buyAmount1': 0,
+                                           "sell2": 0, 'sellAmount2': 0, "buy2": 0, 'buyAmount2': 0,
+                                           "sell3": 0, 'sellAmount3': 0, "buy3": 0, 'buyAmount3': 0}}
 
     ws = None
 
@@ -160,9 +160,15 @@ class HuobiProClient(object):
     def get_coin_price(self, symbol):
         data = get_depth(symbol)
         if data.get('status') == 'ok':
-            price_info = self.priceInfo[symbol]
+            # check version
+            last_version = self.priceInfo["version"]
+            version = data["tick"]["version"]
+            if version == last_version:
+                self.get_coin_price(symbol)
+            self.priceInfo["version"] = version
             asks = data["tick"]["asks"]
             bids = data["tick"]["bids"]
+            price_info = self.priceInfo[symbol]
             price_info["sell1"] = asks[0][0]
             price_info["sellAmount1"] = asks[0][1]
             price_info["buy1"] = bids[0][0]

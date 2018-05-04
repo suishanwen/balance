@@ -37,9 +37,7 @@ class HuobiProClient(object):
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
                    BALANCE_HT: {"total": 0, "available": 0, "freezed": 0}}
 
-    priceInfo = {"version": 0, SYMBOL_HT: {"sell1": 0, 'sellAmount1': 0, "buy1": 0, 'buyAmount1': 0,
-                                           "sell2": 0, 'sellAmount2': 0, "buy2": 0, 'buyAmount2': 0,
-                                           "sell3": 0, 'sellAmount3': 0, "buy3": 0, 'buyAmount3': 0}}
+    priceInfo = {"version": 0, SYMBOL_HT: {"asks": [], "bids": []}}
 
     ws = None
 
@@ -166,21 +164,9 @@ class HuobiProClient(object):
             if version == last_version:
                 self.get_coin_price(symbol)
             self.priceInfo["version"] = version
-            asks = data["tick"]["asks"]
-            bids = data["tick"]["bids"]
             price_info = self.priceInfo[symbol]
-            price_info["sell1"] = asks[0][0]
-            price_info["sellAmount1"] = asks[0][1]
-            price_info["buy1"] = bids[0][0]
-            price_info["buyAmount1"] = bids[0][1]
-            price_info["sell2"] = asks[1][0]
-            price_info["sellAmount2"] = asks[1][1]
-            price_info["buy2"] = bids[1][0]
-            price_info["buyAmount2"] = bids[1][1]
-            price_info["sell3"] = asks[2][0]
-            price_info["sellAmount3"] = asks[2][1]
-            price_info["buy3"] = bids[2][0]
-            price_info["buyAmount3"] = bids[2][1]
+            price_info["asks"] = data["tick"]["asks"]
+            price_info["bids"] = data["tick"]["bids"]
 
     # def get_coin_price(self, symbol):
     #     data = get_depth(symbol)
@@ -198,62 +184,32 @@ class HuobiProClient(object):
     #         data = json.loads(result)
     #         if data.get('status') == 'ok':
     #             price_info = self.priceInfo[symbol]
-    #             asks = data["data"]["asks"]
-    #             bids = data["data"]["bids"]
-    #             price_info["sell1"] = asks[0][0]
-    #             price_info["sellAmount1"] = asks[0][1]
-    #             price_info["buy1"] = bids[0][0]
-    #             price_info["buyAmount1"] = bids[0][1]
-    #             price_info["sell2"] = asks[1][0]
-    #             price_info["sellAmount2"] = asks[1][1]
-    #             price_info["buy2"] = bids[1][0]
-    #             price_info["buyAmount2"] = bids[1][1]
-    #             price_info["sell3"] = asks[2][0]
-    #             price_info["sellAmount3"] = asks[2][1]
-    #             price_info["buy3"] = bids[2][0]
-    #             price_info["buyAmount3"] = bids[2][1]
+    #             price_info["asks"] = data["data"]["asks"]
+    #             price_info["bids"] = data["data"]["bids"]
 
     def get_price_info(self, symbol, depth):
-        if depth == 1:
-            return self.get_price_info1(symbol)
-        elif depth == 2:
-            return self.get_price_info2(symbol)
-        elif depth == 3:
-            return self.get_price_info3(symbol)
-
-    def get_price_info1(self, symbol):
         price_info = self.priceInfo[symbol]
-        return price_info["buy1"], price_info["buy1"], price_info["buyAmount1"], price_info["sell1"], price_info[
-            "sell1"], price_info["sellAmount1"]
-
-    def get_price_info2(self, symbol):
-        price_info = self.priceInfo[symbol]
-        add_up_buy_amount = price_info["buyAmount1"] + price_info["buyAmount2"]
-        avg_buy_price = round((price_info["buy1"] * price_info["buyAmount1"] + price_info["buy2"] * price_info[
-            "buyAmount2"]) / add_up_buy_amount, 4)
-        add_up_sell_amount = price_info["sellAmount1"] + price_info["sellAmount2"]
-        avg_sell_price = round((price_info["sell1"] * price_info["sellAmount1"] + price_info["sell2"] * price_info[
-            "sellAmount2"]) / add_up_sell_amount, 4)
-        return price_info["buy2"], avg_buy_price, add_up_buy_amount, price_info[
-            "sell2"], avg_sell_price, add_up_sell_amount
-
-    def get_price_info3(self, symbol):
-        price_info = self.priceInfo[symbol]
-        add_up_buy_amount = price_info["buyAmount1"] + price_info["buyAmount2"] + price_info["buyAmount3"]
-        avg_buy_price = round((price_info["buy1"] * price_info["buyAmount1"] + price_info["buy2"] * price_info[
-            "buyAmount2"] + price_info["buy3"] * price_info["buyAmount3"]) / add_up_buy_amount, 4)
-        add_up_sell_amount = price_info["sellAmount1"] + price_info["sellAmount2"] + price_info["sellAmount3"]
-        avg_sell_price = round((price_info["sell1"] * price_info["sellAmount1"] + price_info["sell2"] * price_info[
-            "sellAmount2"] + price_info["sell3"] * price_info["sellAmount3"]) / add_up_sell_amount, 4)
-        return price_info["buy3"], avg_buy_price, add_up_buy_amount, price_info[
-            "sell3"], avg_sell_price, add_up_sell_amount
+        asks = price_info['asks']
+        bids = price_info['bids']
+        amount_buy_sum = 0
+        trans_buy_sum = 0
+        amount_sell_sum = 0
+        trans_sell_sum = 0
+        for i in range(depth):
+            amount_buy_sum += bids[i][1]
+            trans_buy_sum += bids[i][0] * bids[i][1]
+            amount_sell_sum += asks[i][1]
+            trans_sell_sum += asks[i][0] * asks[i][1]
+        avg_buy = round(trans_buy_sum / amount_buy_sum, 4)
+        avg_sell = round(trans_sell_sum / amount_sell_sum, 4)
+        return bids[depth - 1][0], avg_buy, amount_buy_sum, asks[depth - 1][0], avg_sell, amount_sell_sum
 
     def get_trade_price(self, symbol, order_type):
         self.get_coin_price(symbol)
         if order_type == self.TRADE_BUY:
-            return self.priceInfo[symbol]["sell1"]
+            return self.priceInfo[symbol]["asks"][0][0]
         else:
-            return self.priceInfo[symbol]["buy1"]
+            return self.priceInfo[symbol]["bids"][0][0]
 
     def get_account_info(self):
         print(

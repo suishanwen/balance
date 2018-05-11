@@ -4,7 +4,6 @@ import math
 import time
 
 import api.OrderInfo as OrderInfo
-from util.MyUtil import sendEmail
 
 # read config
 config = configparser.ConfigParser()
@@ -133,16 +132,6 @@ def add_statistics(client, my_order_info):
     config.set("statistics", "avgprice", str(avg_price))
 
 
-def balance_temp_out(client, price, amount):
-    client.get_account_info()
-    available = client.accountInfo[client.BALANCE_HT]["available"]
-    if available >= 10000 and price >= 3.8 and amount >= 10000:
-        order_info = OrderInfo.MyOrderInfo(client.SYMBOL_HT, client.TRADE_SELL, 3.7, 10000, 3.8)
-        order_process(client, order_info)
-        sendEmail("HT unlocked！")
-        exit()
-
-
 def __main__(client, symbol):
     global buy, avg_buy, buy_amount, next_buy_amount, sell, avg_sell, sell_amount, next_sell_amount, next_base
     current_base = float(config.get("trade", "currentbase"))
@@ -205,8 +194,6 @@ def __main__(client, symbol):
                     config.write(fp)
                     fp.close()
                     next_buy, next_buy_trans, next_sell, next_sell_trans = get_next_buy_sell_info(client)
-            # temp wait ht unlock and sell
-            balance_temp_out(client, avg_buy, buy_amount)
         except Exception as err:
             print(err)
         # time.sleep(0.1)

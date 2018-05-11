@@ -133,10 +133,10 @@ def add_statistics(client, my_order_info):
     config.set("statistics", "avgprice", str(avg_price))
 
 
-def balance_temp_out(client):
+def balance_temp_out(client, price, amount):
     client.get_account_info()
     available = client.accountInfo[client.BALANCE_HT]["available"]
-    if available >= 10000 and client.priceInfo[client.SYMBOL_HT]["bids"][0][0] >= 3.8:
+    if available >= 10000 and price >= 3.8 and amount >= 10000:
         order_info = OrderInfo.MyOrderInfo(client.SYMBOL_HT, client.TRADE_SELL, 3.7, 10000, 3.8)
         order_process(client, order_info)
         sendEmail("HT unlocked！")
@@ -156,8 +156,6 @@ def __main__(client, symbol):
                 next_buy, next_buy_trans, next_sell, next_sell_trans = get_next_buy_sell_info(client)
                 counter = 0
             client.get_coin_price(symbol)
-            # temp wait ht unlock and sell
-            balance_temp_out(client)
             for i in range(3):
                 buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
                 next_buy_trans_p, next_buy_p, next_sell_trans_p, next_sell_p = modify_trans_by_price(avg_buy,
@@ -207,6 +205,8 @@ def __main__(client, symbol):
                     config.write(fp)
                     fp.close()
                     next_buy, next_buy_trans, next_sell, next_sell_trans = get_next_buy_sell_info(client)
+            # temp wait ht unlock and sell
+            balance_temp_out(client, avg_buy, buy_amount)
         except Exception as err:
             print(err)
         # time.sleep(0.1)

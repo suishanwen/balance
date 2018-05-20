@@ -207,3 +207,15 @@ class OkexClient(object):
             old_f.close()
             f = open(r'log.txt', 'w')
             f.write(text)
+
+    @classmethod
+    def get_line_close(cls, data):
+        return float(data[4])
+
+    @classmethod
+    def get_klines(cls, symbol, period, size):
+        result = okcoinSpot.klines(symbol, period, size)
+        if isinstance(result, list):
+            return list(map(cls.get_line_close, result))[::-1]
+        else:
+            cls.get_klines(symbol, period, size)

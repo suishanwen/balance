@@ -249,3 +249,15 @@ class HuobiProClient(object):
             f = open(r'log.txt', 'w')
             f.write(text)
             f.close()
+
+    @classmethod
+    def get_line_close(cls, data):
+        return data.get('close')
+
+    @classmethod
+    def get_klines(cls, symbol, period, size):
+        result = get_kline(symbol, period, size)
+        if result.get('status') == 'ok':
+            return list(map(cls.get_line_close, result.get('data')))
+        else:
+            cls.get_klines(symbol, period, size)

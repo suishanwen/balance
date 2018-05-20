@@ -9,6 +9,9 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 percentage = float(config.get("trade", "percentage"))
 rate_p = (100 + percentage) * 0.01
+period = config.get("klines", "period")
+size1 = int(config.get("klines", "size1"))
+size2 = int(config.get("klines", "size2"))
 
 
 def order_process(client, my_order_info):
@@ -131,8 +134,20 @@ def add_statistics(client, my_order_info):
     config.set("statistics", "avgprice", str(avg_price))
 
 
+def get_ma(client, symbol):
+    data2 = client.get_klines(symbol, period, size2)
+    data1 = data2[0:size1]
+    sum1 = sum2 = 0
+    for i in data1:
+        sum1 += i
+    for i in data2:
+        sum2 += i
+    return round(sum1 / len(data1) - sum2 / len(data2), 4)
+
+
 def __main__(client, symbol):
     global buy, avg_buy, buy_amount, sell, avg_sell, sell_amount, next_base
+    ma = get_ma(client, symbol)
     current_base = float(config.get("trade", "currentbase"))
     min_amount = float(config.get("trade", "minamount"))
     client.get_account_info()
@@ -142,6 +157,7 @@ def __main__(client, symbol):
         try:
             if counter > 300:
                 next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
+                ma = get_ma(client, symbol)
                 counter = 0
             client.get_coin_price(symbol)
             for i in range(3):
@@ -156,8 +172,9 @@ def __main__(client, symbol):
                         next_sell_p <= avg_buy and buy_amount < next_sell_amount_p)):
                     break
             print(
-                "\nBase:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
+                "\nBase:{} ,ma:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
                     current_base,
+                    ma,
                     next_sell_p,
                     next_sell_amount_p,
                     buy,
@@ -173,10 +190,10 @@ def __main__(client, symbol):
                         next_buy_p - sell,
                         4)))
             order_info = None
-            if next_buy_p >= avg_sell and sell_amount >= next_buy_amount_p:
+            if ma > 0 and next_buy_p >= avg_sell and sell_amount >= next_buy_amount_p:
                 next_base = next_buy_p
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount_p, next_base)
-            elif next_sell_p <= avg_buy and buy_amount >= next_sell_amount_p:
+            elif ma < 0 and next_sell_p <= avg_buy and buy_amount >= next_sell_amount_p:
                 next_base = next_sell_p
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount_p, next_base)
             if order_info is not None:

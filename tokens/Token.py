@@ -157,8 +157,9 @@ def __main__(client, symbol):
         try:
             if counter > 300:
                 next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
-                ma = get_ma(client, symbol)
                 counter = 0
+            elif counter % 30 == 0:
+                ma = get_ma(client, symbol)
             client.get_coin_price(symbol)
             for i in range(3):
                 buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)

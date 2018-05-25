@@ -76,7 +76,7 @@ class HuobiProClient(object):
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = cancel_order(my_order_info.orderId)
         if result.get('status') == 'ok':
-            self.write_log(my_order_info, "order " + result['data'] + " canceled")
+            self.write_log("order " + result['data'] + " canceled")
         else:
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         state = self.check_order_status(my_order_info)
@@ -230,9 +230,7 @@ class HuobiProClient(object):
             self.get_account_info()
 
     @classmethod
-    def write_log(cls, my_order_info, text=""):
-        if text == "":
-            text = str(my_order_info)
+    def write_log(cls, text=""):
         s = open('log.txt').read()
         mm = str(fromTimeStamp(int(time.time())))[0:7]
         if s.find(mm) != -1:

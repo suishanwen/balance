@@ -68,7 +68,7 @@ class OkexClient(object):
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = okcoinSpot.cancelOrder(my_order_info.symbol, my_order_info.orderId)
         if result.get('result'):
-            self.write_log(my_order_info, "order " + result['order_id'] + " canceled")
+            self.write_log( "order " + result['order_id'] + " canceled")
         else:
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         status = self.check_order_status(my_order_info)
@@ -189,9 +189,7 @@ class OkexClient(object):
             self.get_account_info()
 
     @classmethod
-    def write_log(cls, my_order_info, text=""):
-        if text == "":
-            text = str(my_order_info)
+    def write_log(cls, text=""):
         s = open('log.txt').read()
         mm = str(fromTimeStamp(int(time.time())))[0:7]
         if s.find(mm) != -1:

@@ -5,7 +5,7 @@ import time
 import sys
 
 from api.HuobiProAPI import *
-from util.MyUtil import fromDict, fromTimeStamp
+from util.MyUtil import from_dict, from_time_stamp, write_log
 
 # from websocket import create_connection
 # import gzip
@@ -54,7 +54,7 @@ class HuobiProClient(object):
     #                 time.sleep(5)
 
     def get_coin_num(self, symbol):
-        return fromDict(self.accountInfo, symbol, "available")
+        return from_dict(self.accountInfo, symbol, "available")
 
     @classmethod
     def make_order(cls, my_order_info):
@@ -64,7 +64,7 @@ class HuobiProClient(object):
                             my_order_info.price)
         if result.get('status') == 'ok':
             print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                  my_order_info.amount, "  ", fromTimeStamp(int(time.time())))
+                  my_order_info.amount, "  ", from_time_stamp(int(time.time())))
             return result['data']
         else:
             print("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,
@@ -76,7 +76,7 @@ class HuobiProClient(object):
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = cancel_order(my_order_info.orderId)
         if result.get('status') == 'ok':
-            self.write_log("order " + result['data'] + " canceled")
+            write_log("order " + result['data'] + " canceled")
         else:
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         state = self.check_order_status(my_order_info)
@@ -217,7 +217,7 @@ class HuobiProClient(object):
         my_account_info = get_balance(account_id)
         symbol = [self.BALANCE_USDT, self.BALANCE_HT]
         if my_account_info.get('status') == 'ok':
-            data = fromDict(my_account_info, "data", "list")
+            data = from_dict(my_account_info, "data", "list")
             for sy in symbol:
                 _sy = list(filter(lambda x: x["currency"] == sy, data))
                 self.accountInfo[sy]["available"] = float(_sy[0]["balance"])
@@ -228,25 +228,6 @@ class HuobiProClient(object):
         else:
             print("getAccountInfo Fail,Try again!")
             self.get_account_info()
-
-    @classmethod
-    def write_log(cls, text=""):
-        s = open('log.txt').read()
-        mm = str(fromTimeStamp(int(time.time())))[0:7]
-        if s.find(mm) != -1:
-            f = open(r'log.txt', 'w')
-            f.write(text + "\n" + s)
-            f.close()
-        else:
-            f = open(r'log.txt', 'a')
-            f.writelines("\n")
-            f.close()
-            old_f = open(str(fromTimeStamp(int(time.time()) - 86400))[0:7] + '.txt', 'w')
-            old_f.writelines(open('log.txt').readlines()[::-1])
-            old_f.close()
-            f = open(r'log.txt', 'w')
-            f.write(text)
-            f.close()
 
     @classmethod
     def get_line_close(cls, data):

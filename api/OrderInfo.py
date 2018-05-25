@@ -1,6 +1,6 @@
 import time
 
-from util.MyUtil import fromTimeStamp
+from util.MyUtil import from_time_stamp
 
 
 class MyOrderInfo(object):
@@ -27,7 +27,7 @@ class MyOrderInfo(object):
              str(self.dealAmount),
              str(self.totalDealAmount),
              str(self.transaction),
-             str(fromTimeStamp(int(time.time())))])
+             str(from_time_stamp(int(time.time())))])
 
     def set_order_id(self, order_id):
         self.orderId = order_id

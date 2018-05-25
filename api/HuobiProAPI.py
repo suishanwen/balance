@@ -125,6 +125,7 @@ def get_balance(acct_id=None):
 # 创建并执行订单
 def send_order(acct_id, amount, symbol, _type, price=0):
     """
+    :param acct_id:
     :param amount:
     :param symbol:
     :param _type: 可选值 {buy-market：市价买, sell-market：市价卖, buy-limit：限价买, sell-limit：限价卖}

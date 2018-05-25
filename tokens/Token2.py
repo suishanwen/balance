@@ -2,8 +2,8 @@ import configparser
 import json
 import math
 import time
-
 import api.OrderInfo as OrderInfo
+from util.MyUtil import write_log
 
 # read config
 config = configparser.ConfigParser()
@@ -20,10 +20,10 @@ def order_process(client, my_order_info):
     state = client.trade(my_order_info)
     if my_order_info.totalAmount - my_order_info.totalDealAmount < client.MIN_AMOUNT \
             and state == client.COMPLETE_STATUS:
-        client.write_log(str(my_order_info))
+        write_log(str(my_order_info))
     elif my_order_info.totalDealAmount > 0:
         if state == 'canceled' or state == 'partial-canceled' or state == -1:
-            client.write_log(str(my_order_info))
+            write_log(str(my_order_info))
         my_order_info.set_price(0)
         order_process(client, my_order_info)
 

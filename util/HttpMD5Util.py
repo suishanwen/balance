@@ -11,7 +11,7 @@ import ssl
 context = ssl._create_unverified_context()
 
 
-def buildMySign(params, secretKey):
+def build_my_sign(params, secretKey):
     sign = ''
     for key in sorted(params.keys()):
         sign += key + '=' + str(params[key]) + '&'
@@ -19,26 +19,26 @@ def buildMySign(params, secretKey):
     return hashlib.md5(data.encode("utf8")).hexdigest().upper()
 
 
-def httpGet(url, resource, params=''):
-    insideException = True
-    while insideException:
+def http_get(url, resource, params=''):
+    inside_exception = True
+    while inside_exception:
         try:
             conn = http.client.HTTPSConnection(url, timeout=10, context=context)
             conn.request("GET", resource + '?' + params)
             response = conn.getresponse()
             data = response.read().decode('utf-8')
-            insideException = False
+            inside_exception = False
         except Exception as err:
             print(err)
     return json.loads(data)
 
 
-def httpPost(url, resource, params):
+def http_post(url, resource, params):
     headers = {
         "Content-type": "application/x-www-form-urlencoded",
     }
-    insideException = True
-    while insideException:
+    inside_exception = True
+    while inside_exception:
         try:
             conn = http.client.HTTPSConnection(url, timeout=10, context=context)
             temp_params = urllib.parse.urlencode(params)
@@ -47,7 +47,7 @@ def httpPost(url, resource, params):
             data = response.read().decode('utf-8')
             params.clear()
             conn.close()
-            insideException = False
+            inside_exception = False
         except Exception as err:
             print(err)
     return json.loads(data)

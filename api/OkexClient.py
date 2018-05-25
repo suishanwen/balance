@@ -5,7 +5,7 @@ import time
 import sys
 
 from api.HuobiProAPI import *
-from util.MyUtil import fromDict, fromTimeStamp
+from util.MyUtil import from_dict, from_time_stamp, write_log
 from api.OkexSpotAPI import OkexSpot
 
 # read config
@@ -46,7 +46,7 @@ class OkexClient(object):
     priceInfo = {"version": 0, SYMBOL_OKB: {"asks": [], "bids": []}}
 
     def get_coin_num(self, symbol):
-        return fromDict(self.accountInfo, symbol, "available")
+        return from_dict(self.accountInfo, symbol, "available")
 
     @classmethod
     def make_order(cls, my_order_info):
@@ -56,7 +56,7 @@ class OkexClient(object):
                                   my_order_info.amount)
         if result.get('result'):
             print("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                  my_order_info.amount, "  ", fromTimeStamp(int(time.time())))
+                  my_order_info.amount, "  ", from_time_stamp(int(time.time())))
             return result['order_id']
         else:
             print("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,
@@ -66,9 +66,9 @@ class OkexClient(object):
     def cancel_my_order(self, my_order_info):
         print(
             u'\n---------------------------------------spot cancel order--------------------------------------------')
-        result = okcoinSpot.cancelOrder(my_order_info.symbol, my_order_info.orderId)
+        result = okcoinSpot.cancel_order(my_order_info.symbol, my_order_info.orderId)
         if result.get('result'):
-            self.write_log( "order " + result['order_id'] + " canceled")
+            write_log("order " + result['order_id'] + " canceled")
         else:
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         status = self.check_order_status(my_order_info)
@@ -180,31 +180,13 @@ class OkexClient(object):
             u'---------------------------------------spot account info------------------------------------------------')
         my_account_info = okcoinSpot.userinfo()
         if my_account_info.get('result'):
-            freezed = fromDict(my_account_info, "info", "funds", "freezed")
-            free = fromDict(my_account_info, "info", "funds", "free")
+            freezed = from_dict(my_account_info, "info", "funds", "freezed")
+            free = from_dict(my_account_info, "info", "funds", "free")
             print(u"USDT", free["usdt"], "freezed", freezed["usdt"])
             print(u"OKB", free["okb"], "freezed", freezed["okb"])
         else:
             print("getAccountInfo Fail,Try again!")
             self.get_account_info()
-
-    @classmethod
-    def write_log(cls, text=""):
-        s = open('log.txt').read()
-        mm = str(fromTimeStamp(int(time.time())))[0:7]
-        if s.find(mm) != -1:
-            f = open(r'log.txt', 'w')
-            f.write(text + "\n" + s)
-            f.close()
-        else:
-            f = open(r'log.txt', 'a')
-            f.writelines("\n")
-            f.close()
-            old_f = open(str(fromTimeStamp(int(time.time()) - 86400))[0:7] + '.txt', 'w')
-            old_f.writelines(open('log.txt').readlines()[::-1])
-            old_f.close()
-            f = open(r'log.txt', 'w')
-            f.write(text)
 
     @classmethod
     def get_line_close(cls, data):

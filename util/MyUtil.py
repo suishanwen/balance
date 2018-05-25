@@ -1,24 +1,25 @@
 import datetime
 import smtplib
+import time
 from email.mime.text import MIMEText
 from email.header import Header
 
 
-def hasattr(dict, args):
-    return args in dict.keys()
+def has_attr(_dict, args):
+    return args in _dict.keys()
 
 
-def fromDict(dict, *args):
+def from_dict(_dict, *args):
     for a in args:
-        dict = dict[a]
-    return dict
+        _dict = _dict[a]
+    return _dict
 
 
-def fromTimeStamp(timeStamp):
-    return datetime.datetime.fromtimestamp(float(timeStamp))
+def from_time_stamp(time_stamp):
+    return datetime.datetime.fromtimestamp(float(time_stamp))
 
 
-def sendEmail(content):
+def send_email(content):
     # 第三方 SMTP 服务
     mail_host = "smtp.sina.com"  # 设置服务器
     mail_user = "controlservice@sina.com"  # 用户名
@@ -32,11 +33,30 @@ def sendEmail(content):
     message['To'] = Header("my-email")
     message['Subject'] = Header('我的爬虫通知')
     try:
-        smtpObj = smtplib.SMTP()
-        smtpObj.connect(mail_host, 25)  # 25 为 SMTP 端口号
-        smtpObj.login(mail_user, mail_pass)
-        smtpObj.sendmail(sender, receivers, message.as_string())
+        smtp_obj = smtplib.SMTP()
+        smtp_obj.connect(mail_host, 25)  # 25 为 SMTP 端口号
+        smtp_obj.login(mail_user, mail_pass)
+        smtp_obj.sendmail(sender, receivers, message.as_string())
         print("邮件发送成功")
     except smtplib.SMTPException as err:
         print(err)
         print("Error: 邮件发送失败")
+
+
+def write_log(text=""):
+    s = open('log.txt').read()
+    mm = str(from_time_stamp(int(time.time())))[0:7]
+    if s.find(mm) != -1:
+        f = open(r'log.txt', 'w')
+        f.write(text + "\n" + s)
+        f.close()
+    else:
+        f = open(r'log.txt', 'a')
+        f.writelines("\n")
+        f.close()
+        old_f = open(str(from_time_stamp(int(time.time()) - 86400))[0:7] + '.txt', 'w')
+        old_f.writelines(open('log.txt').readlines()[::-1])
+        old_f.close()
+        f = open(r'log.txt', 'w')
+        f.write(text)
+        f.close()

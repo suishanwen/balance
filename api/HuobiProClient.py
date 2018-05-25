@@ -151,7 +151,7 @@ class HuobiProClient(object):
                 my_order_info.set_avg_price(round(
                     ((my_order_info.totalDealAmount - my_order_info.dealAmount) * avg_price_bak
                      + my_order_info.dealAmount * my_order_info.avgPrice) / my_order_info.totalDealAmount, 4))
-                return state
+            return state
         else:
             return 'failed'
 

@@ -102,7 +102,7 @@ class HuobiProClient(object):
                 if my_order_info.dealAmount == 0.0:
                     print("data error!check order status again!")
                     self.check_order_status(my_order_info, wait_count)
-            elif state == ' partial-filled':
+            elif state == 'partial-filled':
                 if wait_count == trade_wait_count:
                     print("part dealed ", my_order_info.dealAmount)
                 else:

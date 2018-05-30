@@ -15,8 +15,9 @@ config.read("config.ini")
 Token = Token1
 
 _type = config.get("trade", "type")
+symbol = config.get("trade", "symbol")
 if _type == 'transaction':
     Token = Token2
 
 if __name__ == '__main__':
-    Token.__main__(Client.HuobiProClient(), Client.HuobiProClient.SYMBOL_HT)
+    Token.__main__(Client.HuobiProClient(), symbol)

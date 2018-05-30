@@ -29,8 +29,10 @@ trade_wait_count = int(config.get("trade", "tradewaitcount"))
 class OkexClient(object):
     BALANCE_OKB = "okb"
     BALANCE_USDT = "usdt"
+    BALANCE_BTC = "btc"
 
     SYMBOL_OKB = "okb_usdt"
+    SYMBOL_BTC = "btc_usdt"
 
     TRADE_BUY = "buy"
     TRADE_SELL = "sell"
@@ -39,11 +41,14 @@ class OkexClient(object):
 
     MIN_AMOUNT = float(config.get("trade", "minamount"))
 
+    ACCURACY = 2
+
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
+                   BALANCE_BTC: {"total": 0, "available": 0, "freezed": 0},
                    BALANCE_OKB: {"total": 0, "available": 0, "freezed": 0}}
 
-    priceInfo = {"version": 0, SYMBOL_OKB: {"asks": [], "bids": []}}
+    priceInfo = {"version": 0, BALANCE_BTC: {"asks": [], "bids": []}, BALANCE_OKB: {"asks": [], "bids": []}}
 
     def get_coin_num(self, symbol):
         return from_dict(self.accountInfo, symbol, "available")

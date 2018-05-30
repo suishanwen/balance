@@ -16,7 +16,7 @@ rate_p = (100 + percentage) * 0.01
 
 
 def order_process(client, my_order_info):
-    my_order_info.set_amount(my_order_info.get_unhandled_amount())
+    my_order_info.set_amount(my_order_info.get_unhandled_amount(client.ACCURACY))
     state = client.trade(my_order_info)
     if my_order_info.totalAmount - my_order_info.totalDealAmount < client.MIN_AMOUNT \
             and state == client.COMPLETE_STATUS:
@@ -146,8 +146,14 @@ def get_ma(client, symbol):
     return round(sum1 / len(data1) - sum2 / len(data2), 4)
 
 
+def init_accuracy(client, symbol):
+    if symbol == client.SYMBOL_BTC:
+        client.ACCURACY = 4
+
+
 def __main__(client, symbol):
     global buy, avg_buy, buy_amount, next_buy_amount, sell, avg_sell, sell_amount, next_sell_amount, next_base
+    init_accuracy(client, symbol)
     ma = get_ma(client, symbol)
     current_base = float(config.get("trade", "currentbase"))
     min_amount = float(config.get("trade", "minamount"))
@@ -170,8 +176,8 @@ def __main__(client, symbol):
                                                                                                      next_buy_trans,
                                                                                                      next_sell,
                                                                                                      next_sell_trans)
-                next_buy_amount = round(next_buy_trans_p / avg_sell, 2)
-                next_sell_amount = round(next_sell_trans_p / avg_buy, 2)
+                next_buy_amount = round(next_buy_trans_p / avg_sell, client.ACCURACY)
+                next_sell_amount = round(next_sell_trans_p / avg_buy, client.ACCURACY)
                 if not ((next_buy_p >= avg_sell and sell_amount < next_buy_amount) or (
                         next_sell_p <= avg_buy and buy_amount < next_sell_amount)):
                     break

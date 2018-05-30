@@ -36,12 +36,14 @@ class HuobiProClient(object):
 
     MIN_AMOUNT = float(config.get("trade", "minamount"))
 
+    ACCURACY = 2
+
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
                    BALANCE_BTC: {"total": 0, "available": 0, "freezed": 0},
                    BALANCE_HT: {"total": 0, "available": 0, "freezed": 0}}
 
-    priceInfo = {"version": 0, SYMBOL_HT: {"asks": [], "bids": []}}
+    priceInfo = {"version": 0, SYMBOL_BTC: {"asks": [], "bids": []}, SYMBOL_HT: {"asks": [], "bids": []}}
 
     ws = None
 

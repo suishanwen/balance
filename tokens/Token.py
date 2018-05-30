@@ -16,7 +16,7 @@ size2 = int(config.get("klines", "size2"))
 
 
 def order_process(client, my_order_info):
-    my_order_info.set_amount(my_order_info.get_unhandled_amount())
+    my_order_info.set_amount(my_order_info.get_unhandled_amount(client.ACCURACY))
     state = client.trade(my_order_info)
     if my_order_info.totalAmount - my_order_info.totalDealAmount < client.MIN_AMOUNT \
             and state == client.COMPLETE_STATUS:
@@ -146,8 +146,14 @@ def get_ma(client, symbol):
     return round(sum1 / len(data1) - sum2 / len(data2), 4)
 
 
+def init_accuracy(client, symbol):
+    if symbol == client.SYMBOL_BTC:
+        client.ACCURACY = 4
+
+
 def __main__(client, symbol):
     global buy, avg_buy, buy_amount, sell, avg_sell, sell_amount, next_base
+    init_accuracy(client, symbol)
     ma = get_ma(client, symbol)
     current_base = float(config.get("trade", "currentbase"))
     min_amount = float(config.get("trade", "minamount"))

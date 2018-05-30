@@ -29,8 +29,6 @@ SECRET_KEY = configBase.get("huobipro", "secret_key")
 MARKET_URL = "https://api.huobipro.com"
 TRADE_URL = "https://api.huobipro.com"
 
-# 首次运行可通过get_accounts()获取acct_id,然后直接赋值,减少重复获取。
-ACCOUNT_ID = None
 
 
 # 'Timestamp': '2017-06-02T06:13:49'

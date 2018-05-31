@@ -14,8 +14,8 @@ config.read("config.ini")
 
 Token = Token1
 
-_type = config.get("trade", "type")
 symbol = config.get("trade", "symbol")
+_type = config.get(symbol, "type")
 if _type == 'transaction':
     Token = Token2
 

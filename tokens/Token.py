@@ -8,8 +8,6 @@ from util.MyUtil import write_log
 # read config
 config = configparser.ConfigParser()
 config.read("config.ini")
-percentage = float(config.get("trade", "percentage"))
-rate_p = (100 + percentage) * 0.01
 period = config.get("klines", "period")
 size1 = int(config.get("klines", "size1"))
 size2 = int(config.get("klines", "size2"))
@@ -28,11 +26,11 @@ def order_process(client, my_order_info):
         order_process(client, my_order_info)
 
 
-def load_history():
+def load_history(symbol):
     history_list = []
     history = ""
     try:
-        history = config.get("trade", "history")
+        history = config.get(symbol, "history")
     except Exception as _err:
         print(_err)
     if history != "":
@@ -40,17 +38,17 @@ def load_history():
     return history_list
 
 
-def re_org_history(my_order_info):
-    history_list = load_history()
+def re_org_history(my_order_info, symbol):
+    history_list = load_history(symbol)
     history_list.insert(0, my_order_info.__dict__)
     if len(history_list) > 5:
         history_list.pop()
     return json.dumps(history_list)
 
 
-def get_next_buy_sell_rate(client):
+def get_next_buy_sell_rate(client, symbol):
     seconds_now = int(time.time())
-    history_list = load_history()
+    history_list = load_history(symbol)
     trend_count = 0
     buy_sell_rate = 1, 1
     for history in history_list:
@@ -86,38 +84,36 @@ def get_next_buy_sell_rate(client):
     return buy_sell_rate
 
 
-def get_next_buy_sell_info(client):
-    amount = float(config.get("trade", "amount"))
-    current_base = float(config.get("trade", "currentbase"))
-    buy_rate, sell_rate = get_next_buy_sell_rate(client)
-    _next_buy = round(current_base / math.pow(rate_p, buy_rate), 4)
-    _next_sell = round(current_base * math.pow(rate_p, sell_rate), 4)
-    _next_buy_amount = round(amount * buy_rate + amount * (rate_p - 1) * (1 + buy_rate) * buy_rate / 2, 2)
-    _next_sell_amount = amount * sell_rate
+def get_next_buy_sell_info(client, symbol):
+    buy_rate, sell_rate = get_next_buy_sell_rate(client, symbol)
+    _next_buy = round(client.currentBase / math.pow(client.rateP, buy_rate), 4)
+    _next_sell = round(client.currentBase * math.pow(client.rateP, sell_rate), 4)
+    _next_buy_amount = round(
+        client.amount * buy_rate + client.amount * (client.rateP - 1) * (1 + buy_rate) * buy_rate / 2, 2)
+    _next_sell_amount = client.amount * sell_rate
     return _next_buy, _next_buy_amount, _next_sell, _next_sell_amount
 
 
-def modify_amt_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_amount, _next_sell, _next_sell_amount):
-    amount = float(config.get("trade", "amount"))
-    current_base = float(config.get("trade", "currentbase"))
-    buy_rate = math.floor(math.log(current_base / _avg_sell, rate_p))
-    buy_amount_rate = _next_buy_amount / amount
+def modify_amt_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_amount, _next_sell, _next_sell_amount, client):
+    buy_rate = math.floor(math.log(client.currentBase / _avg_sell, client.rateP))
+    buy_amount_rate = _next_buy_amount / client.amount
     if buy_rate > 1 and buy_rate > buy_amount_rate:
-        return buy_rate * amount, round(current_base / math.pow(rate_p, buy_rate),
-                                        4), _next_sell_amount, _next_sell
-    sell_rate = math.floor(math.log(_avg_buy / current_base, rate_p))
-    sell_amount_rate = _next_sell_amount / amount
+        return buy_rate * client.amount, round(client.currentBase / math.pow(client.rateP, buy_rate),
+                                               4), _next_sell_amount, _next_sell
+    sell_rate = math.floor(math.log(_avg_buy / client.currentBase, client.rateP))
+    sell_amount_rate = _next_sell_amount / client.amount
     if sell_rate > 1 and sell_rate > sell_amount_rate:
-        return _next_buy_amount, _next_buy, sell_rate * amount, round(
-            current_base * math.pow(rate_p, sell_rate), 4)
+        return _next_buy_amount, _next_buy, sell_rate * client.amount, round(
+            client.currentBase * math.pow(client.rateP, sell_rate), 4)
     return _next_buy_amount, _next_buy, _next_sell_amount, _next_sell
 
 
 def add_statistics(client, my_order_info):
-    amount = float(config.get("statistics", "amount"))
-    transaction = float(config.get("statistics", "transaction"))
-    abs_amount = float(config.get("statistics", "absamount"))
-    abs_transaction = float(config.get("statistics", "abstransaction"))
+    cfg_field = my_order_info.symbol + "-stat"
+    amount = float(config.get(cfg_field, "amount"))
+    transaction = float(config.get(cfg_field, "transaction"))
+    abs_amount = float(config.get(cfg_field, "absamount"))
+    abs_transaction = float(config.get(cfg_field, "abstransaction"))
     new_abs_amount = round(abs_amount + my_order_info.totalDealAmount, 4)
     new_abs_transaction = round(abs_transaction + abs(my_order_info.transaction), 3)
     new_transaction = round(transaction + my_order_info.transaction, 3)
@@ -127,12 +123,12 @@ def add_statistics(client, my_order_info):
         new_amount = round(amount - my_order_info.totalDealAmount, 4)
     abs_avg_price = round(new_abs_transaction / abs(new_abs_amount), 4)
     avg_price = round(new_transaction / abs(new_amount), 4)
-    config.set("statistics", "absamount", str(new_abs_amount))
-    config.set("statistics", "abstransaction", str(new_abs_transaction))
-    config.set("statistics", "absavgprice", str(abs_avg_price))
-    config.set("statistics", "transaction", str(new_transaction))
-    config.set("statistics", "amount", str(new_amount))
-    config.set("statistics", "avgprice", str(avg_price))
+    config.set(cfg_field, "absamount", str(new_abs_amount))
+    config.set(cfg_field, "abstransaction", str(new_abs_transaction))
+    config.set(cfg_field, "absavgprice", str(abs_avg_price))
+    config.set(cfg_field, "transaction", str(new_transaction))
+    config.set(cfg_field, "amount", str(new_amount))
+    config.set(cfg_field, "avgprice", str(avg_price))
 
 
 def get_ma(client, symbol):
@@ -147,23 +143,26 @@ def get_ma(client, symbol):
 
 
 def init_config(client, symbol):
+    client.amount = float(config.get(symbol, "amount"))
+    client.currentBase = float(config.get(symbol, "currentbase"))
+    client.percentage = float(config.get(symbol, "percentage"))
+    client.rateP = (100 + client.percentage) * 0.01
     if symbol == client.SYMBOL_BTC:
         client.ACCURACY = 4
         client.MIN_AMOUNT = 0.0001
 
 
 def __main__(client, symbol):
-    global buy, avg_buy, buy_amount, sell, avg_sell, sell_amount, next_base
     init_config(client, symbol)
     ma = get_ma(client, symbol)
-    current_base = float(config.get("trade", "currentbase"))
     client.get_account_info()
     counter = 0
-    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
+    avg_sell = avg_buy = next_base = 0
+    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client, symbol)
     while True:
         try:
             if counter > 300:
-                next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
+                next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client, symbol)
                 counter = 0
             elif counter % 30 == 0:
                 ma = get_ma(client, symbol)
@@ -175,13 +174,14 @@ def __main__(client, symbol):
                                                                                                      next_buy,
                                                                                                      next_buy_amount,
                                                                                                      next_sell,
-                                                                                                     next_sell_amount)
+                                                                                                     next_sell_amount,
+                                                                                                     client)
                 if not ((next_buy_p >= avg_sell and sell_amount < next_buy_amount_p) or (
                         next_sell_p <= avg_buy and buy_amount < next_sell_amount_p)):
                     break
             print(
                 "\nBase:{} ,ma:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
-                    current_base,
+                    client.currentBase,
                     ma,
                     next_sell_p,
                     next_sell_amount_p,
@@ -207,15 +207,15 @@ def __main__(client, symbol):
             if order_info is not None:
                 order_process(client, order_info)
                 if order_info.totalAmount - order_info.totalDealAmount < client.MIN_AMOUNT:
-                    current_base = round(next_base, 4)
+                    client.currentBase = round(next_base, 4)
                     config.read("config.ini")
-                    config.set("trade", "currentBase", str(current_base))
-                    config.set("trade", "history", str(re_org_history(order_info)))
+                    config.set(symbol, "currentBase", str(client.currentBase))
+                    config.set(symbol, "history", str(re_org_history(order_info, symbol)))
                     add_statistics(client, order_info)
                     fp = open("config.ini", "w")
                     config.write(fp)
                     fp.close()
-                    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
+                    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client, symbol)
         except Exception as err:
             print(err)
         # time.sleep(0.1)

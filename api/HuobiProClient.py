@@ -7,6 +7,7 @@ import sys
 from api.HuobiProAPI import *
 from util.MyUtil import from_dict, from_time_stamp, write_log
 
+
 # from websocket import create_connection
 # import gzip
 # import socket
@@ -30,6 +31,13 @@ class HuobiProClient(object):
     MIN_AMOUNT = 0.1
     ACCURACY = 2
     TRADE_WAIT_COUNT = 1
+
+    # trade params
+    amount = 0
+    transaction = 0
+    currentBase = 0
+    percentage = 0
+    rateP = 0
 
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},

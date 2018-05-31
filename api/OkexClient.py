@@ -40,6 +40,13 @@ class OkexClient(object):
     ACCURACY = 4
     TRADE_WAIT_COUNT = 1
 
+    # trade params
+    amount = 0
+    transaction = 0
+    currentBase = 0
+    percentage = 0
+    rateP = 0
+
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
                    BALANCE_BTC: {"total": 0, "available": 0, "freezed": 0},

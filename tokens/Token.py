@@ -146,17 +146,17 @@ def get_ma(client, symbol):
     return round(sum1 / len(data1) - sum2 / len(data2), 4)
 
 
-def init_accuracy(client, symbol):
+def init_config(client, symbol):
     if symbol == client.SYMBOL_BTC:
         client.ACCURACY = 4
+        client.MIN_AMOUNT = 0.0001
 
 
 def __main__(client, symbol):
     global buy, avg_buy, buy_amount, sell, avg_sell, sell_amount, next_base
-    init_accuracy(client, symbol)
+    init_config(client, symbol)
     ma = get_ma(client, symbol)
     current_base = float(config.get("trade", "currentbase"))
-    min_amount = float(config.get("trade", "minamount"))
     client.get_account_info()
     counter = 0
     next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
@@ -206,7 +206,7 @@ def __main__(client, symbol):
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount_p, next_base)
             if order_info is not None:
                 order_process(client, order_info)
-                if order_info.totalAmount - order_info.totalDealAmount < min_amount:
+                if order_info.totalAmount - order_info.totalDealAmount < client.MIN_AMOUNT:
                     current_base = round(next_base, 4)
                     config.read("config.ini")
                     config.set("trade", "currentBase", str(current_base))

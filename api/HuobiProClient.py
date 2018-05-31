@@ -11,13 +11,6 @@ from util.MyUtil import from_dict, from_time_stamp, write_log
 # import gzip
 # import socket
 
-# read config
-config = configparser.ConfigParser()
-config.read("config.ini")
-
-# getConfig
-trade_wait_count = int(config.get("trade", "tradewaitcount"))
-
 
 class HuobiProClient(object):
     ACCOUNT_ID = ""
@@ -34,9 +27,9 @@ class HuobiProClient(object):
 
     COMPLETE_STATUS = 'filled'
 
-    MIN_AMOUNT = float(config.get("trade", "minamount"))
-
+    MIN_AMOUNT = 0.1
     ACCURACY = 2
+    TRADE_WAIT_COUNT = 1
 
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
@@ -108,7 +101,7 @@ class HuobiProClient(object):
                     print("data error!check order status again!")
                     self.check_order_status(my_order_info, wait_count)
             elif state == 'partial-filled':
-                if wait_count == trade_wait_count:
+                if wait_count == self.TRADE_WAIT_COUNT:
                     print("part dealed ", my_order_info.dealAmount)
                 else:
                     print("part dealed ", my_order_info.dealAmount, end=" ")
@@ -116,7 +109,7 @@ class HuobiProClient(object):
             elif state == 'filled':
                 print("order", order_id, "complete deal")
             else:
-                if wait_count == trade_wait_count:
+                if wait_count == self.TRADE_WAIT_COUNT:
                     print("timeout no deal")
                 else:
                     print("no deal", end=" ")
@@ -137,11 +130,11 @@ class HuobiProClient(object):
             wait_count = 0
             state = ''
             avg_price_bak = my_order_info.avgPrice
-            while wait_count < trade_wait_count and state != 'filled':
+            while wait_count < self.TRADE_WAIT_COUNT and state != 'filled':
                 state = self.check_order_status(my_order_info, wait_count)
                 # time.sleep(0.1)
                 wait_count += 1
-                if wait_count == trade_wait_count and state != 'filled':
+                if wait_count == self.TRADE_WAIT_COUNT and state != 'filled':
                     trade_price = self.get_trade_price(my_order_info.symbol, my_order_info.orderType)
                     if trade_price == my_order_info.price:
                         wait_count -= 1

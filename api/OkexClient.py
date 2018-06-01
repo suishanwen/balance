@@ -41,6 +41,7 @@ class OkexClient(object):
     TRADE_WAIT_COUNT = 1
 
     # trade params
+    mode = ""
     amount = 0
     transaction = 0
     currentBase = 0

@@ -1,4 +1,4 @@
-import time
+# import time
 import configparser
 import json
 import math
@@ -46,46 +46,47 @@ def re_org_history(my_order_info, symbol):
     return json.dumps(history_list)
 
 
-def get_next_buy_sell_rate(client, symbol):
-    seconds_now = int(time.time())
-    history_list = load_history(symbol)
-    trend_count = 0
-    buy_sell_rate = 1, 1
-    for history in history_list:
-        if history["orderType"] == client.TRADE_BUY:
-            trend_count += 1
-        else:
-            trend_count -= 1
-        seconds_now_diff = seconds_now - history["triggerSeconds"]
-        # <25min buy twice
-        if trend_count == 2 and seconds_now_diff < 1500:
-            buy_sell_rate = 2, 1
-        # <1.5h buy three times
-        elif trend_count == 3 and seconds_now_diff < 5400:
-            buy_sell_rate = 3, 1
-        # <2.5h buy four times
-        elif trend_count == 4 and seconds_now_diff < 9000:
-            buy_sell_rate = 4, 1
-        # <4h buy five times
-        elif trend_count == 5 and seconds_now_diff < 14400:
-            buy_sell_rate = 5, 1
-        # <25min sell twice
-        elif trend_count == -2 and seconds_now_diff < 1500:
-            buy_sell_rate = 1, 2
-        # <1.5h sell three times
-        elif trend_count == -3 and seconds_now_diff < 5400:
-            buy_sell_rate = 1, 3
-        # <2.5h sell four times
-        elif trend_count == -4 and seconds_now_diff < 9000:
-            buy_sell_rate = 1, 4
-        # <4h sell five times
-        elif trend_count == -5 and seconds_now_diff < 14400:
-            buy_sell_rate = 1, 5
-    return buy_sell_rate
+# def get_next_buy_sell_rate(client, symbol):
+#     seconds_now = int(time.time())
+#     history_list = load_history(symbol)
+#     trend_count = 0
+#     buy_sell_rate = 1, 1
+#     for history in history_list:
+#         if history["orderType"] == client.TRADE_BUY:
+#             trend_count += 1
+#         else:
+#             trend_count -= 1
+#         seconds_now_diff = seconds_now - history["triggerSeconds"]
+#         # <25min buy twice
+#         if trend_count == 2 and seconds_now_diff < 1500:
+#             buy_sell_rate = 2, 1
+#         # <1.5h buy three times
+#         elif trend_count == 3 and seconds_now_diff < 5400:
+#             buy_sell_rate = 3, 1
+#         # <2.5h buy four times
+#         elif trend_count == 4 and seconds_now_diff < 9000:
+#             buy_sell_rate = 4, 1
+#         # <4h buy five times
+#         elif trend_count == 5 and seconds_now_diff < 14400:
+#             buy_sell_rate = 5, 1
+#         # <25min sell twice
+#         elif trend_count == -2 and seconds_now_diff < 1500:
+#             buy_sell_rate = 1, 2
+#         # <1.5h sell three times
+#         elif trend_count == -3 and seconds_now_diff < 5400:
+#             buy_sell_rate = 1, 3
+#         # <2.5h sell four times
+#         elif trend_count == -4 and seconds_now_diff < 9000:
+#             buy_sell_rate = 1, 4
+#         # <4h sell five times
+#         elif trend_count == -5 and seconds_now_diff < 14400:
+#             buy_sell_rate = 1, 5
+#     return buy_sell_rate
 
 
-def get_next_buy_sell_info(client, symbol):
-    buy_rate, sell_rate = get_next_buy_sell_rate(client, symbol)
+def get_next_buy_sell_info(client):
+    # buy_rate, sell_rate = get_next_buy_sell_rate(client, symbol)
+    buy_rate, sell_rate = 1, 1
     _next_buy = round(client.currentBase / math.pow(client.rateP, buy_rate), 4)
     _next_sell = round(client.currentBase * math.pow(client.rateP, sell_rate), 4)
     _next_buy_amount = round(
@@ -158,11 +159,11 @@ def __main__(client, symbol):
     client.get_account_info()
     counter = 0
     avg_sell = avg_buy = next_base = 0
-    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client, symbol)
+    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
     while True:
         try:
             if counter > 300:
-                next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client, symbol)
+                next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
                 counter = 0
             elif counter % 30 == 0:
                 ma = get_ma(client, symbol)
@@ -215,7 +216,7 @@ def __main__(client, symbol):
                     fp = open("config.ini", "w")
                     config.write(fp)
                     fp.close()
-                    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client, symbol)
+                    next_buy, next_buy_amount, next_sell, next_sell_amount = get_next_buy_sell_info(client)
         except Exception as err:
             print(err)
         # time.sleep(0.1)

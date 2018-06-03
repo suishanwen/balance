@@ -137,7 +137,7 @@ def modify_val_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_val, _next_sel
                                                                                              client)
         next_buy_amount = round(next_buy_trans_p / _avg_sell, client.ACCURACY)
         next_sell_amount = round(next_sell_trans_p / _avg_buy, client.ACCURACY)
-        return next_buy_amount, _next_buy, next_sell_amount, _next_sell
+        return next_buy_amount, next_buy_p, next_sell_amount, next_sell_p
     else:
         return modify_amt_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_val, _next_sell, _next_sell_val, client)
 

@@ -24,12 +24,10 @@ okcoinSpot = OkexSpot(okcoinRESTURL, apikey, secretkey)
 
 
 class OkexClient(object):
-    BALANCE_OKB = "okb"
     BALANCE_USDT = "usdt"
-    BALANCE_BTC = "btc"
+    BALANCE_T = ""
 
-    SYMBOL_OKB = "okb_usdt"
-    SYMBOL_BTC = "btc_usdt"
+    SYMBOL_T = ""
 
     TRADE_BUY = "buy"
     TRADE_SELL = "sell"
@@ -49,11 +47,9 @@ class OkexClient(object):
     rateP = 0
 
     # global variable
-    accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
-                   BALANCE_BTC: {"total": 0, "available": 0, "freezed": 0},
-                   BALANCE_OKB: {"total": 0, "available": 0, "freezed": 0}}
+    accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}
 
-    priceInfo = {"version": 0, BALANCE_BTC: {"asks": [], "bids": []}, BALANCE_OKB: {"asks": [], "bids": []}}
+    priceInfo = {"version": 0, SYMBOL_T: {"asks": [], "bids": []}}
 
     def get_coin_num(self, symbol):
         return from_dict(self.accountInfo, symbol, "available")
@@ -188,14 +184,18 @@ class OkexClient(object):
     def get_account_info(self):
         print(
             u'---------------------------------------spot account info------------------------------------------------')
-        my_account_info = okcoinSpot.userinfo()
-        if my_account_info.get('result'):
-            freezed = from_dict(my_account_info, "info", "funds", "freezed")
-            free = from_dict(my_account_info, "info", "funds", "free")
-            print(u"USDT", free["usdt"], "freezed", freezed["usdt"])
-            print(u"OKB", free["okb"], "freezed", freezed["okb"])
-        else:
-            print("getAccountInfo Fail,Try again!")
+        try:
+            my_account_info = okcoinSpot.userinfo()
+            if my_account_info.get('result'):
+                freezed = from_dict(my_account_info, "info", "funds", "freezed")
+                free = from_dict(my_account_info, "info", "funds", "free")
+                print(u"USDT", free["usdt"], "freezed", freezed["usdt"])
+                print(self.BALANCE_T.upper(), free[self.BALANCE_T], "freezed", freezed[self.BALANCE_T])
+            else:
+                print("getAccountInfo Fail,Try again!")
+                self.get_account_info()
+        except Exception as err:
+            print(err)
             self.get_account_info()
 
     @classmethod

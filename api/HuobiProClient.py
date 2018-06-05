@@ -16,12 +16,10 @@ from util.MyUtil import from_dict, from_time_stamp, write_log
 class HuobiProClient(object):
     ACCOUNT_ID = ""
 
-    BALANCE_BTC = "btc"
-    BALANCE_HT = "ht"
     BALANCE_USDT = "usdt"
+    BALANCE_T = ""
 
-    SYMBOL_HT = "htusdt"
-    SYMBOL_BTC = "btcusdt"
+    SYMBOL_T = ""
 
     TRADE_BUY = "buy-limit"
     TRADE_SELL = "sell-limit"
@@ -41,11 +39,9 @@ class HuobiProClient(object):
     rateP = 0
 
     # global variable
-    accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0},
-                   BALANCE_BTC: {"total": 0, "available": 0, "freezed": 0},
-                   BALANCE_HT: {"total": 0, "available": 0, "freezed": 0}}
+    accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}
 
-    priceInfo = {"version": 0, SYMBOL_BTC: {"asks": [], "bids": []}, SYMBOL_HT: {"asks": [], "bids": []}}
+    priceInfo = {"version": 0, SYMBOL_T: {"asks": [], "bids": []}}
 
     ws = None
 
@@ -221,28 +217,32 @@ class HuobiProClient(object):
     def get_account_info(self):
         print(
             u'---------------------------------------spot account info------------------------------------------------')
-        accounts = get_accounts()
-        if accounts.get('status') == 'ok':
-            spot_account = list(filter(lambda x: x["type"] == 'spot', accounts.get("data")))
-            self.ACCOUNT_ID = spot_account[0].get('id')
-            my_account_info = get_balance(self.ACCOUNT_ID)
-            symbols = [self.BALANCE_USDT, self.BALANCE_BTC, self.BALANCE_HT]
-            if my_account_info.get('status') == 'ok':
-                data = from_dict(my_account_info, "data", "list")
-                for symbol in symbols:
-                    symbol_infos = list(filter(lambda x: x["currency"] == symbol, data))
-                    symbol_info = self.accountInfo[symbol]
-                    symbol_info["available"] = float(symbol_infos[0]["balance"])
-                    symbol_info["freezed"] = float(symbol_infos[1]["balance"])
-                    symbol_info["total"] = symbol_info["available"] + symbol_info["freezed"]
-                    print(symbol.upper(), symbol_info["total"], "available", symbol_info["available"],
-                          "freezed", symbol_info["freezed"])
+        try:
+            accounts = get_accounts()
+            if accounts.get('status') == 'ok':
+                spot_account = list(filter(lambda x: x["type"] == 'spot', accounts.get("data")))
+                self.ACCOUNT_ID = spot_account[0].get('id')
+                my_account_info = get_balance(self.ACCOUNT_ID)
+                symbols = [self.BALANCE_USDT, self.BALANCE_T]
+                if my_account_info.get('status') == 'ok':
+                    data = from_dict(my_account_info, "data", "list")
+                    for symbol in symbols:
+                        symbol_infos = list(filter(lambda x: x["currency"] == symbol, data))
+                        symbol_info = self.accountInfo[symbol]
+                        symbol_info["available"] = float(symbol_infos[0]["balance"])
+                        symbol_info["freezed"] = float(symbol_infos[1]["balance"])
+                        symbol_info["total"] = symbol_info["available"] + symbol_info["freezed"]
+                        print(symbol.upper(), symbol_info["total"], "available", symbol_info["available"],
+                              "freezed", symbol_info["freezed"])
+                else:
+                    print("getAccountInfo Failed!retry...")
+                    self.get_account_info()
             else:
-                print("getAccountInfo Failed!")
-                exit()
-        else:
-            print("getAccounts Failed!")
-            exit()
+                print("getAccounts Failed!retry...")
+                self.get_account_info()
+        except Exception as err:
+            print(err)
+            self.get_account_info()
 
     @classmethod
     def get_line_close(cls, data):

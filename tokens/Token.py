@@ -144,10 +144,15 @@ def modify_val_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_val, _next_sel
 
 def add_statistics(client, my_order_info):
     cfg_field = my_order_info.symbol + "-stat"
-    amount = float(config.get(cfg_field, "amount"))
-    transaction = float(config.get(cfg_field, "transaction"))
-    abs_amount = float(config.get(cfg_field, "absamount"))
-    abs_transaction = float(config.get(cfg_field, "abstransaction"))
+    amount = transaction = abs_amount = abs_transaction = 0
+    try:
+        amount = float(config.get(cfg_field, "amount"))
+        transaction = float(config.get(cfg_field, "transaction"))
+        abs_amount = float(config.get(cfg_field, "absamount"))
+        abs_transaction = float(config.get(cfg_field, "abstransaction"))
+    except Exception as err:
+        print(err)
+        config.add_section(cfg_field)
     new_abs_amount = round(abs_amount + my_order_info.totalDealAmount, 4)
     new_abs_transaction = round(abs_transaction + abs(my_order_info.transaction), 3)
     new_transaction = round(transaction + my_order_info.transaction, 3)
@@ -183,17 +188,20 @@ def init_config(client, symbol):
     client.currentBase = float(config.get(symbol, "currentbase"))
     client.percentage = float(config.get(symbol, "percentage"))
     client.rateP = (100 + client.percentage) * 0.01
-    if symbol == client.SYMBOL_BTC:
+    client.SYMBOL_T = symbol
+    client.BALANCE_T = str(symbol).replace("_", "").replace("usdt", "")
+    client.accountInfo[client.BALANCE_T] = {"total": 0, "available": 0, "freezed": 0}
+    client.priceInfo[client.SYMBOL_T] = {"asks": [], "bids": []}
+    if client.BALANCE_T == "btc":
         client.ACCURACY = 4
         client.MIN_AMOUNT = 0.0001
 
 
 def __main__(client, symbol):
     init_config(client, symbol)
-    ma = get_ma(client, symbol)
     client.get_account_info()
     counter = 0
-    avg_sell = avg_buy = next_base = 0
+    ma = avg_sell = avg_buy = next_base = 0
     next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
     while True:
         try:

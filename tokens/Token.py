@@ -16,7 +16,7 @@ size2 = int(config.get("klines", "size2"))
 def order_process(client, my_order_info):
     my_order_info.set_amount(my_order_info.get_unhandled_amount(client.ACCURACY))
     state = client.trade(my_order_info)
-    if my_order_info.totalAmount - my_order_info.totalDealAmount < client.MIN_AMOUNT \
+    if my_order_info.get_unhandled_amount(client.ACCURACY) < client.MIN_AMOUNT \
             and state == client.COMPLETE_STATUS:
         write_log(str(my_order_info))
     elif my_order_info.totalDealAmount > 0:
@@ -200,7 +200,7 @@ def __main__(client, symbol):
             if counter > 300:
                 next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
                 counter = 0
-            elif counter % 30 == 0:
+            elif counter % 15 == 0:
                 ma = get_ma(client, symbol)
             client.get_coin_price(symbol)
             for i in range(3):

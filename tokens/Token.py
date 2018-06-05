@@ -254,7 +254,7 @@ def __main__(client, symbol):
                     client.currentBase = round(next_base, 4)
                     config.read("config.ini")
                     config.set(symbol, "currentBase", str(client.currentBase))
-                    config.set(symbol, "history", str(re_org_history(order_info)))
+                    # config.set(symbol, "history", str(re_org_history(order_info)))
                     add_statistics(client, order_info)
                     fp = open("config.ini", "w")
                     config.write(fp)

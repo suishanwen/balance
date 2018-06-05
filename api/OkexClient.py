@@ -73,12 +73,13 @@ class OkexClient(object):
         print(
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = okcoinSpot.cancel_order(my_order_info.symbol, my_order_info.orderId)
-        if result.get('result'):
-            write_log("order " + result['order_id'] + " canceled")
-        else:
+        if not result.get('result'):
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         status = self.check_order_status(my_order_info)
-        if status != -1 and status != 2:  # not canceled or cancel failed(part dealed) continue cancel
+        if status == -1:
+            write_log("order " + my_order_info.orderId + " canceled")
+        elif status != self.COMPLETE_STATUS:
+            # not canceled or cancel failed(part dealed) and not complete continue cancelling
             self.cancel_my_order(my_order_info)
         return status
 

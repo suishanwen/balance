@@ -78,13 +78,13 @@ class HuobiProClient(object):
         print(
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = cancel_order(my_order_info.orderId)
-        if result.get('status') == 'ok':
-            write_log("order " + result['data'] + " canceled")
-        else:
+        if result.get('status') != 'ok':
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         state = self.check_order_status(my_order_info)
-        # not canceled or cancel failed(part dealed) continue cancel
-        if state != 'canceled' and state != 'partial-canceled' and state != 'filled':
+        if state == 'canceled' or state == 'partial-canceled':
+            write_log("order " + my_order_info.orderId + " canceled")
+        elif state != self.COMPLETE_STATUS:
+            # not canceled or cancel failed(part dealed) and not complete continue cancelling
             self.cancel_my_order(my_order_info)
         return state
 

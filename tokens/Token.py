@@ -18,6 +18,11 @@ def order_process(client, my_order_info):
     state = client.trade(my_order_info)
     if my_order_info.get_unhandled_amount(client.ACCURACY) < client.MIN_AMOUNT \
             and state == client.COMPLETE_STATUS:
+        if client.mode == "transaction":
+            count = round(abs(my_order_info.transaction) / client.transaction)
+        else:
+            count = round(my_order_info.totalDealAmount / client.amount)
+        my_order_info.count = int((1 + count) * count / 2)
         write_log(str(my_order_info))
     elif my_order_info.totalDealAmount > 0:
         if state == 'canceled' or state == 'partial-canceled' or state == -1:
@@ -144,15 +149,17 @@ def modify_val_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_val, _next_sel
 
 def add_statistics(client, my_order_info):
     cfg_field = my_order_info.symbol + "-stat"
-    amount = transaction = abs_amount = abs_transaction = 0
+    amount = transaction = abs_amount = abs_transaction = count = 0
     try:
         amount = float(config.get(cfg_field, "amount"))
         transaction = float(config.get(cfg_field, "transaction"))
         abs_amount = float(config.get(cfg_field, "absamount"))
         abs_transaction = float(config.get(cfg_field, "abstransaction"))
+        count = int(config.get(cfg_field, "count"))
     except Exception as err:
         print(err)
         config.add_section(cfg_field)
+    new_count = count + my_order_info.count
     new_abs_amount = round(abs_amount + my_order_info.totalDealAmount, 4)
     new_abs_transaction = round(abs_transaction + abs(my_order_info.transaction), 3)
     new_transaction = round(transaction + my_order_info.transaction, 3)
@@ -168,6 +175,7 @@ def add_statistics(client, my_order_info):
     config.set(cfg_field, "transaction", str(new_transaction))
     config.set(cfg_field, "amount", str(new_amount))
     config.set(cfg_field, "avgprice", str(avg_price))
+    config.set(cfg_field, "count", str(new_count))
 
 
 def get_ma(client, symbol):
@@ -242,7 +250,7 @@ def __main__(client, symbol):
                         next_buy_p - sell,
                         4)))
             order_info = None
-            if ma > 0 and next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
+            if  next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
                 next_base = next_buy_p
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount, next_base)
             elif ma < 0 and next_sell_p <= avg_buy and buy_amount >= next_sell_amount:

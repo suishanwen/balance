@@ -16,6 +16,7 @@ class MyOrderInfo(object):
         self.dealAmount = 0
         self.avgPrice = 0
         self.transaction = 0
+        self.count = 0
         self.triggerSeconds = int(time.time())
 
     def __repr__(self):
@@ -27,6 +28,7 @@ class MyOrderInfo(object):
              str(self.dealAmount),
              str(self.totalDealAmount),
              str(self.transaction),
+             "[" + str(self.count) + "]",
              str(from_time_stamp(int(time.time())))])
 
     def set_order_id(self, order_id):

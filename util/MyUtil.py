@@ -1,6 +1,8 @@
 import datetime
 import smtplib
 import time
+import configparser
+import json
 from email.mime.text import MIMEText
 from email.header import Header
 
@@ -54,8 +56,21 @@ def write_log(text=""):
         f = open(r'log.txt', 'a')
         f.writelines("\n")
         f.close()
+        # write old logs
         old_f = open(str(from_time_stamp(int(time.time()) - 86400))[0:7] + '.txt', 'w')
         old_f.writelines(open('log.txt').readlines()[::-1])
+        # write count
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+        symbols = json.loads(config.get("trade", "symbol"))
+        for symbol in symbols:
+            cfg_field = symbol + "-stat"
+            sum_count = 0
+            try:
+                sum_count = sum(json.loads(config.get(cfg_field, "count")))
+            except Exception as err:
+                print(err)
+            old_f.writelines(symbol + " [" + str(sum_count) + "]")
         old_f.close()
         f = open(r'log.txt', 'w')
         f.write(text)

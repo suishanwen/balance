@@ -43,8 +43,6 @@ class HuobiProClient(object):
 
     priceInfo = {"version": 0, SYMBOL_T: {"asks": [], "bids": []}}
 
-    today = datetime.date.today().day
-
     ws = None
 
     # @classmethod
@@ -253,7 +251,7 @@ class HuobiProClient(object):
     @classmethod
     def get_klines(cls, symbol, period, size):
         result = get_kline(symbol, period, size)
-        if result.get('status') == 'ok':
+        if result is not None and result.get('status') == 'ok':
             return list(map(cls.get_line_close, result.get('data')))
         else:
             cls.get_klines(symbol, period, size)

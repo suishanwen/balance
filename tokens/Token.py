@@ -1,6 +1,7 @@
 import configparser
 import json
 import math
+import datetime
 # import time
 import api.OrderInfo as OrderInfo
 from util.MyUtil import write_log
@@ -145,17 +146,27 @@ def modify_val_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_val, _next_sel
 
 def add_statistics(client, my_order_info):
     cfg_field = my_order_info.symbol + "-stat"
-    amount = transaction = abs_amount = abs_transaction = count = 0
+    amount = transaction = abs_amount = abs_transaction = 0
+    count = []
     try:
         amount = float(config.get(cfg_field, "amount"))
         transaction = float(config.get(cfg_field, "transaction"))
         abs_amount = float(config.get(cfg_field, "absamount"))
         abs_transaction = float(config.get(cfg_field, "abstransaction"))
-        count = int(config.get(cfg_field, "count"))
+        count = json.loads(config.get(cfg_field, "count"))
     except Exception as err:
         print(err)
-        config.add_section(cfg_field)
-    new_count = count + my_order_info.count
+        if str(err).find("No Section") > -1:
+            config.add_section(cfg_field)
+    day = datetime.date.today().day
+    if day == len(count):
+        count[day - 1] = count[day - 1] + my_order_info.count
+    elif day > len(count):
+        for i in range(day - len(count) - 1):
+            count.append(0)
+        count.append(my_order_info.count)
+    elif day < len(count):
+        count = [my_order_info.count]
     new_abs_amount = round(abs_amount + my_order_info.totalDealAmount, 4)
     new_abs_transaction = round(abs_transaction + abs(my_order_info.transaction), 3)
     new_transaction = round(transaction + my_order_info.transaction, 3)
@@ -171,7 +182,7 @@ def add_statistics(client, my_order_info):
     config.set(cfg_field, "transaction", str(new_transaction))
     config.set(cfg_field, "amount", str(new_amount))
     config.set(cfg_field, "avgprice", str(avg_price))
-    config.set(cfg_field, "count", str(new_count))
+    config.set(cfg_field, "count", str(json.dumps(count)))
 
 
 def get_ma(client, symbol):
@@ -246,7 +257,7 @@ def __main__(client, symbol):
                         next_buy_p - sell,
                         4)))
             order_info = None
-            if next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
+            if ma > 0 and next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
                 next_base = next_buy_p
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount, next_base)
             elif ma < 0 and next_sell_p <= avg_buy and buy_amount >= next_sell_amount:

@@ -51,8 +51,6 @@ class OkexClient(object):
 
     priceInfo = {"version": 0, SYMBOL_T: {"asks": [], "bids": []}}
 
-    today = datetime.date.today().day
-
     def get_coin_num(self, symbol):
         return from_dict(self.accountInfo, symbol, "available")
 

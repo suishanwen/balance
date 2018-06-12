@@ -60,3 +60,12 @@ class MyOrderInfo(object):
 
     def get_unhandled_amount(self, accuracy=2):
         return round(self.totalAmount - self.totalDealAmount, accuracy)
+
+    def set_count(self, client):
+        if client.mode == "transaction":
+            count = round(abs(self.transaction) / client.transaction)
+        else:
+            count = round(self.totalDealAmount / client.amount)
+        if self.orderType == client.TRADE_BUY:
+            count -= 1
+        self.count = int((1 + count) * count / 2)

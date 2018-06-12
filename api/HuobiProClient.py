@@ -43,6 +43,8 @@ class HuobiProClient(object):
 
     priceInfo = {"version": 0, SYMBOL_T: {"asks": [], "bids": []}}
 
+    today = datetime.date.today().day
+
     ws = None
 
     # @classmethod

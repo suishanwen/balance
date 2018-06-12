@@ -18,11 +18,7 @@ def order_process(client, my_order_info):
     state = client.trade(my_order_info)
     if my_order_info.get_unhandled_amount(client.ACCURACY) < client.MIN_AMOUNT \
             and state == client.COMPLETE_STATUS:
-        if client.mode == "transaction":
-            count = round(abs(my_order_info.transaction) / client.transaction)
-        else:
-            count = round(my_order_info.totalDealAmount / client.amount)
-        my_order_info.count = int((1 + count) * count / 2)
+        my_order_info.set_count(client)
         write_log(str(my_order_info))
     elif my_order_info.totalDealAmount > 0:
         if state == 'canceled' or state == 'partial-canceled' or state == -1:
@@ -250,7 +246,7 @@ def __main__(client, symbol):
                         next_buy_p - sell,
                         4)))
             order_info = None
-            if  next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
+            if next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
                 next_base = next_buy_p
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount, next_base)
             elif ma < 0 and next_sell_p <= avg_buy and buy_amount >= next_sell_amount:

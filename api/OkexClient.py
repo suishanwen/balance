@@ -58,8 +58,12 @@ class OkexClient(object):
     def make_order(cls, my_order_info):
         print(
             u'\n-------------------------------------------spot order------------------------------------------------')
-        result = okcoinSpot.trade(my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                                  my_order_info.amount)
+        result = {}
+        try:
+            result = okcoinSpot.trade(my_order_info.symbol, my_order_info.orderType, my_order_info.price,
+                                      my_order_info.amount)
+        except Exception as e:
+            print(e)
         if result.get('result'):
             print("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                   my_order_info.amount, "  ", from_time_stamp(int(time.time())))
@@ -72,7 +76,11 @@ class OkexClient(object):
     def cancel_my_order(self, my_order_info):
         print(
             u'\n---------------------------------------spot cancel order--------------------------------------------')
-        result = okcoinSpot.cancel_order(my_order_info.symbol, my_order_info.orderId)
+        result = {}
+        try:
+            result = okcoinSpot.cancel_order(my_order_info.symbol, my_order_info.orderId)
+        except Exception as e:
+            print(e)
         if not result.get('result'):
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         status = self.check_order_status(my_order_info)
@@ -85,7 +93,11 @@ class OkexClient(object):
 
     def check_order_status(self, my_order_info, wait_count=0):
         order_id = my_order_info.orderId
-        order_result = okcoinSpot.orderinfo(my_order_info.symbol, my_order_info.orderId)
+        order_result = {}
+        try:
+            order_result = okcoinSpot.orderinfo(my_order_info.symbol, my_order_info.orderId)
+        except Exception as e:
+            print(e)
         if order_result.get('result'):
             orders = order_result["orders"]
             if len(orders) > 0:
@@ -152,7 +164,11 @@ class OkexClient(object):
             return -2
 
     def get_coin_price(self, symbol):
-        data = okcoinSpot.depth(symbol)
+        data = {}
+        try:
+            data = okcoinSpot.depth(symbol)
+        except Exception as e:
+            print(e)
         price_info = self.priceInfo[symbol]
         if data.get("asks") is not None:
             price_info["asks"] = data["asks"][::-1]
@@ -205,7 +221,11 @@ class OkexClient(object):
 
     @classmethod
     def get_klines(cls, symbol, period, size):
-        result = okcoinSpot.klines(symbol, period, size)
+        result = {}
+        try:
+            result = okcoinSpot.klines(symbol, period, size)
+        except Exception as e:
+            print(e)
         if isinstance(result, list):
             return list(map(cls.get_line_close, result))[::-1]
         else:

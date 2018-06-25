@@ -98,7 +98,11 @@ class HuobiProClient(object):
     def cancel_my_order(self, my_order_info):
         print(
             u'\n---------------------------------------spot cancel order--------------------------------------------')
-        result = cancel_order(my_order_info.orderId)
+        result = {}
+        try:
+            result = cancel_order(my_order_info.orderId)
+        except Exception as e:
+            print(e)
         if result.get('status') != 'ok':
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         state = self.check_order_status(my_order_info)
@@ -111,7 +115,11 @@ class HuobiProClient(object):
 
     def check_order_status(self, my_order_info, wait_count=0):
         order_id = my_order_info.orderId
-        order_result = order_info(order_id)
+        order_result = {}
+        try:
+            order_result = order_info(order_id)
+        except Exception as e:
+            print(e)
         if order_result.get('status') == 'ok':
             order = order_result["data"]
             order_id = order["id"]
@@ -180,7 +188,11 @@ class HuobiProClient(object):
             return 'failed'
 
     def get_coin_price(self, symbol):
-        data = get_depth(symbol)
+        data = {}
+        try:
+            data = get_depth(symbol)
+        except Exception as e:
+            print(e)
         if data.get('status') == 'ok':
             # check version
             last_version = self.priceInfo["version"]
@@ -271,8 +283,12 @@ class HuobiProClient(object):
 
     @classmethod
     def get_klines(cls, symbol, period, size):
-        result = get_kline(symbol, period, size)
-        if result is not None and result.get('status') == 'ok':
+        result = {}
+        try:
+            result = get_kline(symbol, period, size)
+        except Exception as e:
+            print(e)
+        if result.get('status') == 'ok':
             return list(map(cls.get_line_close, result.get('data')))
         else:
             cls.get_klines(symbol, period, size)

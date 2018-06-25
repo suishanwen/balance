@@ -174,6 +174,8 @@ class OkexClient(object):
         if data.get("asks") is not None:
             price_info["asks"] = data["asks"][::-1]
             price_info["bids"] = data["bids"]
+        else:
+            self.get_coin_price(symbol)
 
     def get_price_info(self, symbol, depth):
         price_info = self.priceInfo[symbol]

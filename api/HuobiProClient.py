@@ -204,6 +204,8 @@ class HuobiProClient(object):
             price_info = self.priceInfo[symbol]
             price_info["asks"] = data["tick"]["asks"]
             price_info["bids"] = data["tick"]["bids"]
+        else:
+            self.get_coin_price(symbol)
 
     # def get_coin_price(self, symbol):
     #     data = get_depth(symbol)

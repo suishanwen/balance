@@ -187,7 +187,7 @@ def order_matchresults(order_id):
 
 
 # 查询当前委托、历史委托
-def orders_list(symbol, states, types=None, start_date=None, end_date=None, _from=None, direct=None, size=None):
+def orders_list(symbol, states, types=None, size=None, start_date=None, end_date=None, _from=None, direct=None):
     """
 
     :param symbol:
@@ -221,7 +221,7 @@ def orders_list(symbol, states, types=None, start_date=None, end_date=None, _fro
 
 
 # 查询当前成交、历史成交
-def orders_matchresults(symbol, types=None, start_date=None, end_date=None, _from=None, direct=None, size=None):
+def orders_matchresults(symbol, types=None, size=None, start_date=None, end_date=None, _from=None, direct=None):
     """
 
     :param symbol:

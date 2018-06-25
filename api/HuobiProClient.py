@@ -60,11 +60,32 @@ class HuobiProClient(object):
     def get_coin_num(self, symbol):
         return from_dict(self.accountInfo, symbol, "available")
 
+    def check_order_list(self, my_order_info):
+        result = {}
+        try:
+            result = orders_list(my_order_info.symbol, 'pre-submitted,submitting,submitted,partial-filled,filled',
+                                 my_order_info.orderType, 1)
+        except Exception as e:
+            print(e)
+        if result.get('status') == 'ok':
+            order = result.get("data")[0]
+            if float(order.get("price")) == my_order_info.price:
+                return {'status': 'ok', 'data': order['id']}
+            else:
+                return {}
+        else:
+            print(my_order_info.symbol, "check_order_list failed,try again.")
+            self.check_order_list(my_order_info)
+
     def make_order(self, my_order_info):
         print(
             u'\n-------------------------------------------spot order------------------------------------------------')
-        result = send_order(self.ACCOUNT_ID, my_order_info.amount, my_order_info.symbol, my_order_info.orderType,
-                            my_order_info.price)
+        try:
+            result = send_order(self.ACCOUNT_ID, my_order_info.amount, my_order_info.symbol, my_order_info.orderType,
+                                my_order_info.price)
+        except Exception as e:
+            print(e)
+            result = self.check_order_list(my_order_info)
         if result.get('status') == 'ok':
             print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                   my_order_info.amount, "  ", from_time_stamp(int(time.time())))

@@ -3,7 +3,6 @@
 
 import time
 import sys
-import traceback
 
 from api.HuobiProAPI import *
 from util.MyUtil import from_dict, from_time_stamp, write_log
@@ -67,7 +66,7 @@ class HuobiProClient(object):
             result = orders_list(my_order_info.symbol, 'pre-submitted,submitting,submitted,partial-filled,filled',
                                  my_order_info.orderType, 1)
         except Exception as e:
-            print(e, ":", traceback.format_exc())
+            print("orders_list:%s" % e)
         if result.get('status') == 'ok':
             order = result.get("data")[0]
             if float(order.get("price")) == my_order_info.price:
@@ -85,7 +84,7 @@ class HuobiProClient(object):
             result = send_order(self.ACCOUNT_ID, my_order_info.amount, my_order_info.symbol, my_order_info.orderType,
                                 my_order_info.price)
         except Exception as e:
-            print(e, ":", traceback.format_exc())
+            print("send_order:%s" % e)
             result = self.check_order_list(my_order_info)
         if result.get('status') == 'ok':
             print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
@@ -103,7 +102,7 @@ class HuobiProClient(object):
         try:
             result = cancel_order(my_order_info.orderId)
         except Exception as e:
-            print(e, ":", traceback.format_exc())
+            print("cancel_order:%s" % e)
         if result.get('status') != 'ok':
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         state = self.check_order_status(my_order_info)
@@ -120,7 +119,7 @@ class HuobiProClient(object):
         try:
             order_result = order_info(order_id)
         except Exception as e:
-            print(e, ":", traceback.format_exc())
+            print("order_info:%s" % e)
         if order_result.get('status') == 'ok':
             order = order_result["data"]
             order_id = order["id"]
@@ -193,7 +192,7 @@ class HuobiProClient(object):
         try:
             data = get_depth(symbol)
         except Exception as e:
-            print(e, ":", traceback.format_exc())
+            print("get_depth:%s" % e)
         if data.get('status') == 'ok':
             # check version
             last_version = self.priceInfo["version"]
@@ -290,7 +289,7 @@ class HuobiProClient(object):
         try:
             result = get_kline(symbol, period, size)
         except Exception as e:
-            print(e, ":", traceback.format_exc())
+            print("get_kline:%s" % e)
         if result.get('status') == 'ok':
             return list(map(cls.get_line_close, result.get('data')))
         else:

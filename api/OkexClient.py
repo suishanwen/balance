@@ -63,7 +63,7 @@ class OkexClient(object):
             result = okcoinSpot.trade(my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                                       my_order_info.amount)
         except Exception as e:
-            print("trade:%s" % e)
+            print("***trade:%s" % e)
         if result.get('result'):
             print("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                   my_order_info.amount, "  ", from_time_stamp(int(time.time())))
@@ -80,7 +80,7 @@ class OkexClient(object):
         try:
             result = okcoinSpot.cancel_order(my_order_info.symbol, my_order_info.orderId)
         except Exception as e:
-            print("cancel_order:%s" % e)
+            print("***cancel_order:%s" % e)
         if not result.get('result'):
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         status = self.check_order_status(my_order_info)
@@ -97,7 +97,7 @@ class OkexClient(object):
         try:
             order_result = okcoinSpot.orderinfo(my_order_info.symbol, my_order_info.orderId)
         except Exception as e:
-            print("orderinfo:%s" % e)
+            print("***orderinfo:%s" % e)
         if order_result.get('result'):
             orders = order_result["orders"]
             if len(orders) > 0:
@@ -168,7 +168,7 @@ class OkexClient(object):
         try:
             data = okcoinSpot.depth(symbol)
         except Exception as e:
-            print("depth:%s" % e)
+            print("***depth:%s" % e)
         price_info = self.priceInfo[symbol]
         if data.get("asks") is not None:
             price_info["asks"] = data["asks"][::-1]
@@ -227,7 +227,7 @@ class OkexClient(object):
         try:
             result = okcoinSpot.klines(symbol, period, size)
         except Exception as e:
-            print("klines:%s" % e)
+            print("***klines:%s" % e)
         if isinstance(result, list):
             return list(map(cls.get_line_close, result))[::-1]
         else:

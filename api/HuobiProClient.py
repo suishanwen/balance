@@ -67,7 +67,7 @@ class HuobiProClient(object):
                                  my_order_info.orderType, 1)
         except Exception as e:
             print("***orders_list:%s" % e)
-        if result.get('status') == 'ok':
+        if result is not None and result.get('status') == 'ok':
             order = result.get("data")[0]
             if float(order.get("price")) == my_order_info.price:
                 return {'status': 'ok', 'data': order['id']}
@@ -86,7 +86,7 @@ class HuobiProClient(object):
         except Exception as e:
             print("***send_order:%s" % e)
             result = self.check_order_list(my_order_info)
-        if result.get('status') == 'ok':
+        if result is not None and result.get('status') == 'ok':
             print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                   my_order_info.amount, "  ", from_time_stamp(int(time.time())))
             return result['data']
@@ -103,7 +103,7 @@ class HuobiProClient(object):
             result = cancel_order(my_order_info.orderId)
         except Exception as e:
             print("***cancel_order:%s" % e)
-        if result.get('status') != 'ok':
+        if result is not None and result.get('status') != 'ok':
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         state = self.check_order_status(my_order_info)
         if state == 'canceled' or state == 'partial-canceled':
@@ -120,7 +120,7 @@ class HuobiProClient(object):
             order_result = order_info(order_id)
         except Exception as e:
             print("***order_info:%s" % e)
-        if order_result.get('status') == 'ok':
+        if order_result is not None and order_result.get('status') == 'ok':
             order = order_result["data"]
             order_id = order["id"]
             state = order["state"]
@@ -193,7 +193,7 @@ class HuobiProClient(object):
             data = get_depth(symbol)
         except Exception as e:
             print("***get_depth:%s" % e)
-        if data.get('status') == 'ok':
+        if data is not None and data.get('status') == 'ok':
             # check version
             last_version = self.priceInfo["version"]
             version = data["tick"]["version"]
@@ -290,7 +290,7 @@ class HuobiProClient(object):
             result = get_kline(symbol, period, size)
         except Exception as e:
             print("***get_kline:%s" % e)
-        if result.get('status') == 'ok':
+        if result is not None and result.get('status') == 'ok':
             return list(map(cls.get_line_close, result.get('data')))
         else:
             return cls.get_klines(symbol, period, size)

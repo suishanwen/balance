@@ -75,7 +75,7 @@ class HuobiProClient(object):
                 return {}
         else:
             print(my_order_info.symbol, "check_order_list failed,try again.")
-            self.check_order_list(my_order_info)
+            return self.check_order_list(my_order_info)
 
     def make_order(self, my_order_info):
         print(
@@ -293,4 +293,4 @@ class HuobiProClient(object):
         if result.get('status') == 'ok':
             return list(map(cls.get_line_close, result.get('data')))
         else:
-            cls.get_klines(symbol, period, size)
+            return cls.get_klines(symbol, period, size)

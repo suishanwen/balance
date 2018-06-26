@@ -2,9 +2,10 @@ import configparser
 import json
 import math
 import datetime
+import traceback
 # import time
 import api.OrderInfo as OrderInfo
-from util.MyUtil import write_log
+from util.MyUtil import write_log, send_email
 
 # read config
 config = configparser.ConfigParser()
@@ -219,59 +220,64 @@ def __main__(client, symbol):
     ma = avg_sell = avg_buy = next_base = 0
     next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
     while True:
-        if counter > 300:
-            next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
-            counter = 0
-        elif counter % 15 == 0:
-            ma = get_ma(client, symbol)
-        client.get_coin_price(symbol)
-        for i in range(3):
-            buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
-            next_buy_amount, next_buy_p, next_sell_amount, next_sell_p = modify_val_by_price(avg_buy,
-                                                                                             avg_sell,
-                                                                                             next_buy,
-                                                                                             next_buy_val,
-                                                                                             next_sell,
-                                                                                             next_sell_val,
-                                                                                             client)
-            if not ((next_buy_p >= avg_sell and sell_amount < next_buy_amount) or (
-                    next_sell_p <= avg_buy and buy_amount < next_sell_amount)):
-                break
-        print(
-            "\nBase:{} ,ma:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
-                client.currentBase,
-                ma,
-                next_sell_p,
-                next_sell_amount,
-                buy,
-                buy_amount,
-                round(
-                    next_sell_p - buy,
-                    4),
-                next_buy_p,
-                next_buy_amount,
-                sell,
-                sell_amount,
-                round(
-                    next_buy_p - sell,
-                    4)))
-        order_info = None
-        if ma > 0 and next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
-            next_base = next_buy_p
-            order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount, next_base)
-        elif ma < 0 and next_sell_p <= avg_buy and buy_amount >= next_sell_amount:
-            next_base = next_sell_p
-            order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount, next_base)
-        if order_info is not None:
-            order_process(client, order_info)
-            if order_info.totalAmount - order_info.totalDealAmount < client.MIN_AMOUNT:
-                client.currentBase = round(next_base, 4)
-                config.read("config.ini")
-                config.set(symbol, "currentBase", str(client.currentBase))
-                # config.set(symbol, "history", str(re_org_history(order_info)))
-                add_statistics(client, order_info)
-                fp = open("config.ini", "w")
-                config.write(fp)
-                fp.close()
+        try:
+            if counter > 300:
                 next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
-        counter += 1
+                counter = 0
+            elif counter % 15 == 0:
+                ma = get_ma(client, symbol)
+            client.get_coin_price(symbol)
+            for i in range(3):
+                buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
+                next_buy_amount, next_buy_p, next_sell_amount, next_sell_p = modify_val_by_price(avg_buy,
+                                                                                                 avg_sell,
+                                                                                                 next_buy,
+                                                                                                 next_buy_val,
+                                                                                                 next_sell,
+                                                                                                 next_sell_val,
+                                                                                                 client)
+                if not ((next_buy_p >= avg_sell and sell_amount < next_buy_amount) or (
+                        next_sell_p <= avg_buy and buy_amount < next_sell_amount)):
+                    break
+            print(
+                "\nBase:{} ,ma:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
+                    client.currentBase,
+                    ma,
+                    next_sell_p,
+                    next_sell_amount,
+                    buy,
+                    buy_amount,
+                    round(
+                        next_sell_p - buy,
+                        4),
+                    next_buy_p,
+                    next_buy_amount,
+                    sell,
+                    sell_amount,
+                    round(
+                        next_buy_p - sell,
+                        4)))
+            order_info = None
+            if ma > 0 and next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
+                next_base = next_buy_p
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount, next_base)
+            elif ma < 0 and next_sell_p <= avg_buy and buy_amount >= next_sell_amount:
+                next_base = next_sell_p
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount, next_base)
+            if order_info is not None:
+                order_process(client, order_info)
+                if order_info.totalAmount - order_info.totalDealAmount < client.MIN_AMOUNT:
+                    client.currentBase = round(next_base, 4)
+                    config.read("config.ini")
+                    config.set(symbol, "currentBase", str(client.currentBase))
+                    # config.set(symbol, "history", str(re_org_history(order_info)))
+                    add_statistics(client, order_info)
+                    fp = open("config.ini", "w")
+                    config.write(fp)
+                    fp.close()
+                    next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
+            counter += 1
+        except Exception as e:
+            print(e, traceback.format_exc())
+            send_email("unhandled exception:%s" % e)
+            exit()

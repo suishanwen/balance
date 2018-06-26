@@ -88,7 +88,7 @@ class OkexClient(object):
             write_log("order " + my_order_info.orderId + " canceled")
         elif status != self.COMPLETE_STATUS:
             # not canceled or cancel failed(part dealed) and not complete continue cancelling
-            self.cancel_my_order(my_order_info)
+            return self.cancel_my_order(my_order_info)
         return status
 
     def check_order_status(self, my_order_info, wait_count=0):
@@ -127,7 +127,7 @@ class OkexClient(object):
                 return status
         else:
             print(order_id, "checkOrderStatus failed,try again.")
-            self.check_order_status(my_order_info, wait_count)
+            return self.check_order_status(my_order_info, wait_count)
 
     def trade(self, my_order_info):
         if my_order_info.amount < self.MIN_AMOUNT:
@@ -231,4 +231,4 @@ class OkexClient(object):
         if isinstance(result, list):
             return list(map(cls.get_line_close, result))[::-1]
         else:
-            cls.get_klines(symbol, period, size)
+            return cls.get_klines(symbol, period, size)

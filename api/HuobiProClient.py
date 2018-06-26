@@ -110,7 +110,7 @@ class HuobiProClient(object):
             write_log("order " + my_order_info.orderId + " canceled")
         elif state != self.COMPLETE_STATUS:
             # not canceled or cancel failed(part dealed) and not complete continue cancelling
-            self.cancel_my_order(my_order_info)
+            return self.cancel_my_order(my_order_info)
         return state
 
     def check_order_status(self, my_order_info, wait_count=0):
@@ -133,7 +133,7 @@ class HuobiProClient(object):
                 print("part dealed ", my_order_info.dealAmount, " and canceled")
                 if my_order_info.dealAmount == 0.0:
                     print("data error!check order status again!")
-                    self.check_order_status(my_order_info, wait_count)
+                    return self.check_order_status(my_order_info, wait_count)
             elif state == 'partial-filled':
                 if wait_count == self.TRADE_WAIT_COUNT:
                     print("part dealed ", my_order_info.dealAmount)
@@ -151,7 +151,7 @@ class HuobiProClient(object):
             return state
         else:
             print(order_id, "checkOrderStatus failed,try again.")
-            self.check_order_status(my_order_info, wait_count)
+            return self.check_order_status(my_order_info, wait_count)
 
     def trade(self, my_order_info):
         if my_order_info.amount < self.MIN_AMOUNT:

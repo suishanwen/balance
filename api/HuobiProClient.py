@@ -103,7 +103,7 @@ class HuobiProClient(object):
             result = cancel_order(my_order_info.orderId)
         except Exception as e:
             print("***cancel_order:%s" % e)
-        if result is not None and result.get('status') != 'ok':
+        if result is None or result.get('status') != 'ok':
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         state = self.check_order_status(my_order_info)
         if state == 'canceled' or state == 'partial-canceled':

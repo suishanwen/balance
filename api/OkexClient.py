@@ -64,7 +64,7 @@ class OkexClient(object):
                                       my_order_info.amount)
         except Exception as e:
             print("***trade:%s" % e)
-        if result.get('result'):
+        if result is not None and result.get('result'):
             print("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                   my_order_info.amount, "  ", from_time_stamp(int(time.time())))
             return result['order_id']
@@ -81,7 +81,7 @@ class OkexClient(object):
             result = okcoinSpot.cancel_order(my_order_info.symbol, my_order_info.orderId)
         except Exception as e:
             print("***cancel_order:%s" % e)
-        if not result.get('result'):
+        if result is None or not result.get('result'):
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         status = self.check_order_status(my_order_info)
         if status == -1:
@@ -98,7 +98,7 @@ class OkexClient(object):
             order_result = okcoinSpot.orderinfo(my_order_info.symbol, my_order_info.orderId)
         except Exception as e:
             print("***orderinfo:%s" % e)
-        if order_result.get('result'):
+        if order_result is not None and order_result.get('result'):
             orders = order_result["orders"]
             if len(orders) > 0:
                 order = orders[0]
@@ -170,7 +170,7 @@ class OkexClient(object):
         except Exception as e:
             print("***depth:%s" % e)
         price_info = self.priceInfo[symbol]
-        if data.get("asks") is not None:
+        if data is not None and data.get("asks") is not None:
             price_info["asks"] = data["asks"][::-1]
             price_info["bids"] = data["bids"]
         else:

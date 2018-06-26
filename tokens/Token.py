@@ -279,5 +279,5 @@ def __main__(client, symbol):
             counter += 1
         except Exception as e:
             print(e, traceback.format_exc())
-            send_email("unhandled exception:%s" % e)
+            send_email("%s:unhandled exception:%s" % (symbol, traceback.format_exc()))
             exit()

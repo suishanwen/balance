@@ -5,7 +5,7 @@ import time
 import sys
 
 from api.HuobiProAPI import *
-from util.MyUtil import from_dict, from_time_stamp, write_log
+from util.MyUtil import from_dict, from_time_stamp, write_log, send_email
 
 
 # from websocket import create_connection
@@ -85,6 +85,7 @@ class HuobiProClient(object):
                                 my_order_info.price)
         except Exception as e:
             print("***send_order:%s" % e)
+            send_email("%s:send_order failed:%s" % (my_order_info.symbol, e))
             result = self.check_order_list(my_order_info)
         if result is not None and result.get('status') == 'ok':
             print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,

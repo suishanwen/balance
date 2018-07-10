@@ -271,10 +271,8 @@ class HuobiProClient(object):
                         print(symbol.upper(), symbol_info["total"], "available", symbol_info["available"],
                               "freezed", symbol_info["freezed"])
                 else:
-                    print("getAccountInfo Failed!retry...")
                     self.get_account_info()
             else:
-                print("getAccounts Failed!retry...")
                 self.get_account_info()
         except Exception as err:
             print(err)

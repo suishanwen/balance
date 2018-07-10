@@ -53,7 +53,10 @@ def http_get_request(url, params, add_to_headers=None):
     try:
 
         if response.status_code == 200:
-            return response.json()
+            data = response.json()
+            if data is not None and data.get("status") == "error":
+                print("err:%s" % data.get("err-msg"))
+            return data
         else:
             return
     except BaseException as e:
@@ -73,7 +76,10 @@ def http_post_request(url, params, add_to_headers=None):
     try:
 
         if response.status_code == 200:
-            return response.json()
+            data = response.json()
+            if data is not None and data.get("status") == "error":
+                print("err:%s" % data.get("err-msg"))
+            return data
         else:
             return
     except BaseException as e:

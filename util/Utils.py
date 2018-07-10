@@ -29,11 +29,7 @@ SECRET_KEY = configBase.get("huobipro", "secret_key")
 
 # Need to replace with the actual value generated from below command
 # openssl ecparam -name secp256k1 -genkey -noout -out secp256k1-key.pem
-PRIVATE_KEY = '''-----BEGIN EC PRIVATE KEY-----
-    MHQCAQEEIGsZdYPWE/j9v3PyQuTP7XEJM5AmX02FCCHeIscumc9PoAcGBSuBBAAK
-oUQDQgAEH1WA/nxcZIXvRRIucEJ2viijhd7oEbzNqYJz/5gBF7381i8CPuKv06XH
-5eHglrcOW3V9r/6YByBIXn/sUd/4hw==
-    -----END EC PRIVATE KEY-----'''
+PRIVATE_KEY = configBase.get("huobipro", "private_key").replace("|", "\n")
 
 # API request URL
 MARKET_URL = "https://api.huobi.pro"

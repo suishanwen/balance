@@ -14,9 +14,10 @@ import urllib
 import urllib.parse
 import urllib.request
 import requests
+import configparser
 from ecdsa import SigningKey
 from hashlib import sha256
-import configparser
+from util.Socks5 import open_socks
 
 # read config
 configBase = configparser.ConfigParser()
@@ -38,6 +39,10 @@ TRADE_URL = "https://api.huobi.pro"
 # Can first request to call get_accounts()to find the target acct_id,later can just specify the actual acc_id in the api call
 ACCOUNT_ID = None
 
+# local socks5 proxy
+OPEN_SOCKS = configBase.get("huobipro", "socks")
+if OPEN_SOCKS == "1":
+    open_socks()
 
 # 'Timestamp': '2017-06-02T06:13:49'
 

@@ -107,9 +107,9 @@ def modify_trans_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_transaction,
     buy_rate = math.floor(math.log(client.currentBase / _avg_sell, client.rateP))
     buy_transaction_rate = _next_buy_transaction / client.transaction
     if buy_rate > 1 and buy_rate > buy_transaction_rate:
-        return round(buy_rate * client.transaction, 3), round(
-            client.currentBase / math.pow(client.rateP, buy_rate),
-            4), _next_sell_transaction, _next_sell
+        return round(client.transaction * buy_rate - client.transaction * (client.rateP - 1) *
+                     buy_rate * (buy_rate - 1) / 2, 3), \
+               round(client.currentBase / math.pow(client.rateP, buy_rate), 4), _next_sell_transaction, _next_sell
     sell_rate = math.floor(math.log(_avg_buy / client.currentBase, client.rateP))
     sell_transaction_rate = _next_sell_transaction / client.transaction
     if sell_rate > 1 and sell_rate > sell_transaction_rate:

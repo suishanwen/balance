@@ -118,7 +118,7 @@ def modify_trans_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_transaction,
                round(client.transaction * sell_rate + client.transaction * (client.rateP - 1) * (
                        1 + sell_rate) * sell_rate / 2, 3), \
                round(client.currentBase * math.pow(client.rateP, sell_rate), 4)
-    return _next_buy_transaction, _next_buy, _next_sell_transaction, _next_sell
+    return _next_buy_transaction, _next_buy, _next_sell_transaction * client.rateP, _next_sell
 
 
 def modify_amt_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_amount, _next_sell, _next_sell_amount, client):

@@ -2,6 +2,7 @@ import configparser
 import json
 import math
 import datetime
+import time
 import traceback
 # import time
 import api.OrderInfo as OrderInfo
@@ -279,6 +280,8 @@ def __main__(client, symbol):
                     fp.close()
                     next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
             counter += 1
+            if period == '4hour':
+                time.sleep(10)
         except Exception as e:
             print(e, traceback.format_exc())
             send_email("%s:unhandled exception:%s" % (symbol, traceback.format_exc()))

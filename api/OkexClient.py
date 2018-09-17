@@ -85,7 +85,7 @@ class OkexClient(object):
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         status = self.check_order_status(my_order_info)
         if status == -1:
-            write_log("order " + my_order_info.orderId + " canceled")
+            write_log("order " + str(my_order_info.orderId) + " canceled")
         elif status != self.COMPLETE_STATUS:
             # not canceled or cancel failed(part dealed) and not complete continue cancelling
             return self.cancel_my_order(my_order_info)

@@ -160,7 +160,7 @@ def add_statistics(client, my_order_info):
         count = json.loads(config.get(cfg_field, "count"))
     except Exception as err:
         print(err)
-        if str(err).find("No Section") > -1:
+        if str(err).find("No section") > -1:
             config.add_section(cfg_field)
     day = datetime.date.today().day
     if day == len(count):

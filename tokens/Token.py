@@ -279,6 +279,7 @@ def __main__(client, symbol):
                     config.write(fp)
                     fp.close()
                     next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
+                    send_email(str(order_info))
             counter += 1
             if period == '4hour':
                 time.sleep(10)

@@ -57,7 +57,7 @@ def write_log(text=""):
         f.writelines("\n")
         f.close()
         # write old logs
-        old_f = open(str(from_time_stamp(int(time.time()) - 86400))[0:7] + '.txt', 'w')
+        old_f = open(str(from_time_stamp(int(time.time()) - 86400*10))[0:7] + '.txt', 'w')
         old_f.writelines(open('log.txt').readlines()[::-1])
         # write count
         config = configparser.ConfigParser()

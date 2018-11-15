@@ -249,7 +249,7 @@ def __main__(client, symbol):
                     fp = open("config.ini", "w")
                     config.write(fp)
                     fp.close()
-                    send_email(str(order_info))
+                    send_email("ma:" + str(order_info))
                     old_ma = ma
             counter += 1
             last_clost = first_close

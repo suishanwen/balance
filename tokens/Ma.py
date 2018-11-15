@@ -217,7 +217,7 @@ def __main__(client, symbol):
     init_config(client, symbol)
     client.get_account_info()
     counter = buy = sell = avg_sell = avg_buy = first_close = last_clost = 0
-    ma = old_ma = config.get(symbol, "ma")
+    ma = old_ma = int(config.get(symbol, "ma"))
     while True:
         try:
             if counter > 300:

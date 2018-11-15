@@ -252,7 +252,7 @@ def __main__(client, symbol):
                     send_email("ma:" + str(order_info))
                     old_ma = ma
             counter += 1
-            last_clost = first_close
+            last_close = first_close
             if period == '4hour':
                 time.sleep(10)
         except Exception as e:

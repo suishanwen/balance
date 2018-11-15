@@ -60,7 +60,9 @@ def add_statistics(client, my_order_info):
         new_amount = round(amount + my_order_info.totalDealAmount, 4)
     else:
         new_amount = round(amount - my_order_info.totalDealAmount, 4)
-    abs_avg_price = round(new_abs_transaction / abs(new_abs_amount), 4)
+    abs_avg_price = 0
+    if new_abs_amount != 0:
+        abs_avg_price = round(new_abs_transaction / abs(new_abs_amount), 4)
     avg_price = round(new_transaction / abs(new_amount), 4)
     config.set(cfg_field, "absamount", str(new_abs_amount))
     config.set(cfg_field, "abstransaction", str(new_abs_transaction))

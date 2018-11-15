@@ -118,18 +118,16 @@ def __main__(client, symbol):
                 client.get_coin_price(symbol)
                 for i in range(3):
                     buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
-                    if avg_sell * sell_amount >= client.transaction:
+                    if sell_amount >= client.amount:
                         break
-                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell,
-                                                   round(client.transaction / avg_sell, client.ACCURACY), ma)
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, client.amount, ma)
             elif ma < 0 and old_ma > 0 and last_close != first_close:
                 client.get_coin_price(symbol)
                 for i in range(3):
                     buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
-                    if avg_buy * buy_amount >= client.transaction:
+                    if buy_amount >= client.amount:
                         break
-                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy,
-                                                   round(client.transaction / avg_buy, client.ACCURACY), ma)
+                order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, client.amount, ma)
             if order_info is not None:
                 order_process(client, order_info)
                 if order_info.totalAmount - order_info.totalDealAmount < client.MIN_AMOUNT:

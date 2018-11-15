@@ -204,7 +204,6 @@ def init_config(client, symbol):
     client.mode = config.get(symbol, "mode")
     client.amount = float(config.get(symbol, "amount"))
     client.transaction = float(config.get(symbol, "transaction"))
-    client.rateP = (100 + client.percentage) * 0.01
     client.SYMBOL_T = symbol
     client.BALANCE_T = str(symbol).replace("_", "").replace("usdt", "")
     client.accountInfo[client.BALANCE_T] = {"total": 0, "available": 0, "freezed": 0}

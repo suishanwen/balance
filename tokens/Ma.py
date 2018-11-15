@@ -204,8 +204,6 @@ def init_config(client, symbol):
     client.mode = config.get(symbol, "mode")
     client.amount = float(config.get(symbol, "amount"))
     client.transaction = float(config.get(symbol, "transaction"))
-    client.currentBase = float(config.get(symbol, "currentbase"))
-    client.percentage = float(config.get(symbol, "percentage"))
     client.rateP = (100 + client.percentage) * 0.01
     client.SYMBOL_T = symbol
     client.BALANCE_T = str(symbol).replace("_", "").replace("usdt", "")

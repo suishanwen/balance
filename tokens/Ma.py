@@ -216,7 +216,7 @@ def init_config(client, symbol):
 def __main__(client, symbol):
     init_config(client, symbol)
     client.get_account_info()
-    counter = buy = sell = avg_sell = avg_buy = first_close = last_clost = 0
+    counter = buy = sell = avg_sell = avg_buy = first_close = last_close = 0
     ma = old_ma = float(config.get(symbol, "ma"))
     while True:
         try:
@@ -226,20 +226,20 @@ def __main__(client, symbol):
                 ma, first_close = get_ma(client, symbol)
             client.get_coin_price(symbol)
             order_info = None
-            if ma > 0 and old_ma < 0 and last_clost != first_close:
+            if ma > 0 and old_ma < 0 and last_close != first_close:
                 for i in range(3):
                     buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
                     if avg_sell * sell_amount >= client.transaction:
                         break
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell,
-                                                   round(client.transaction / avg_sell, client.ACCURACY))
-            elif ma < 0 and old_ma > 0 and last_clost != first_close:
+                                                   round(client.transaction / avg_sell, client.ACCURACY), avg_sell)
+            elif ma < 0 and old_ma > 0 and last_close != first_close:
                 for i in range(3):
                     buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
                     if avg_buy * buy_amount >= client.transaction:
                         break
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy,
-                                                   round(client.transaction / avg_buy, client.ACCURACY))
+                                                   round(client.transaction / avg_buy, client.ACCURACY), avg_buy)
             if order_info is not None:
                 order_process(client, order_info)
                 if order_info.totalAmount - order_info.totalDealAmount < client.MIN_AMOUNT:

@@ -33,7 +33,7 @@ def send_email(content):
     message = MIMEText(content, 'plain', 'utf-8')
     message['From'] = Header("controlservice@sina.com")
     message['To'] = Header("my-email")
-    message['Subject'] = Header('我的爬虫通知')
+    message['Subject'] = Header('bitcoinrobot')
     try:
         smtp_obj = smtplib.SMTP()
         smtp_obj.connect(mail_host, 25)  # 25 为 SMTP 端口号

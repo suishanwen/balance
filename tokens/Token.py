@@ -91,7 +91,7 @@ def re_org_history(my_order_info):
 def get_next_buy_sell_info(client):
     # buy_rate, sell_rate = get_next_buy_sell_rate(client, symbol)
     buy_rate, sell_rate = 1, 1
-    next_buy_price = round(client.currentBase / math.pow(client.rateP, buy_rate), 4)
+    _next_buy_price = round(client.currentBase / math.pow(client.rateP, buy_rate), 4)
     _next_sell_price = round(client.currentBase * math.pow(client.rateP, sell_rate), 4)
     if client.mode == "transaction":
         next_buy_val = client.transaction * buy_rate
@@ -100,23 +100,40 @@ def get_next_buy_sell_info(client):
         next_buy_val = round(
             client.amount * buy_rate + client.amount * (client.rateP - 1) * (1 + buy_rate) * buy_rate / 2, 2)
         next_sell_val = client.amount * sell_rate
-    return next_buy_price, next_buy_val, _next_sell_price, next_sell_val
+    return _next_buy_price, next_buy_val, _next_sell_price, next_sell_val
 
 
+# rate>1 earn usdt
+# def modify_trans_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_transaction, _next_sell, _next_sell_transaction,
+#                           client):
+#     buy_rate = math.floor(math.log(client.currentBase / _avg_sell, client.rateP))
+#     buy_transaction_rate = _next_buy_transaction / client.transaction
+#     if buy_rate > 1 and buy_rate > buy_transaction_rate:
+#         return round(client.transaction * buy_rate - client.transaction * (client.rateP - 1) *
+#                      buy_rate * (buy_rate - 1) / 2, 3), \
+#                round(client.currentBase / math.pow(client.rateP, buy_rate), 4), _next_sell_transaction, _next_sell
+#     sell_rate = math.floor(math.log(_avg_buy / client.currentBase, client.rateP))
+#     sell_transaction_rate = _next_sell_transaction / client.transaction
+#     if sell_rate > 1 and sell_rate > sell_transaction_rate:
+#         return _next_buy_transaction, _next_buy, \
+#                round(client.transaction * sell_rate + client.transaction * (client.rateP - 1) * (
+#                        1 + sell_rate) * sell_rate / 2, 3), \
+#                round(client.currentBase * math.pow(client.rateP, sell_rate), 4)
+#     return _next_buy_transaction, _next_buy, _next_sell_transaction, _next_sell
+
+# rate>1 earn coin
 def modify_trans_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_transaction, _next_sell, _next_sell_transaction,
                           client):
     buy_rate = math.floor(math.log(client.currentBase / _avg_sell, client.rateP))
     buy_transaction_rate = _next_buy_transaction / client.transaction
     if buy_rate > 1 and buy_rate > buy_transaction_rate:
-        return round(client.transaction * buy_rate - client.transaction * (client.rateP - 1) *
-                     buy_rate * (buy_rate - 1) / 2, 3), \
+        return client.transaction * buy_rate, \
                round(client.currentBase / math.pow(client.rateP, buy_rate), 4), _next_sell_transaction, _next_sell
     sell_rate = math.floor(math.log(_avg_buy / client.currentBase, client.rateP))
     sell_transaction_rate = _next_sell_transaction / client.transaction
     if sell_rate > 1 and sell_rate > sell_transaction_rate:
         return _next_buy_transaction, _next_buy, \
-               round(client.transaction * sell_rate + client.transaction * (client.rateP - 1) * (
-                       1 + sell_rate) * sell_rate / 2, 3), \
+               client.transaction * sell_rate, \
                round(client.currentBase * math.pow(client.rateP, sell_rate), 4)
     return _next_buy_transaction, _next_buy, _next_sell_transaction, _next_sell
 

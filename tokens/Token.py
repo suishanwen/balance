@@ -241,14 +241,15 @@ def __main__(client, symbol):
                         4)))
             order_info = None
             if ma > 0 and next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
-                next_base = next_buy_p
+                # next_base = next_buy_p
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_BUY, sell, next_buy_amount, next_base)
             elif ma < 0 and next_sell_p <= avg_buy and buy_amount >= next_sell_amount:
-                next_base = next_sell_p
+                # next_base = next_sell_p
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount, next_base)
             if order_info is not None:
                 order_process(client, order_info)
                 if order_info.totalAmount - order_info.totalDealAmount < client.MIN_AMOUNT:
+                    next_base = order_info.avgPrice
                     client.currentBase = round(next_base, 4)
                     config.read("config.ini")
                     config.set(symbol, "currentBase", str(client.currentBase))

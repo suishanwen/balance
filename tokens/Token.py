@@ -248,8 +248,8 @@ def __main__(client, symbol):
                 order_info = OrderInfo.MyOrderInfo(symbol, client.TRADE_SELL, buy, next_sell_amount, next_base)
             if order_info is not None:
                 order_process(client, order_info)
-                next_base = order_info.avgPrice
                 if order_info.totalAmount - order_info.totalDealAmount < client.MIN_AMOUNT:
+                    next_base = order_info.avgPrice
                     client.currentBase = round(next_base, 4)
                     config.read("config.ini")
                     config.set(symbol, "currentBase", str(client.currentBase))

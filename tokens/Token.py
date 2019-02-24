@@ -201,8 +201,8 @@ def __main__(client, symbol):
     ma = avg_sell = avg_buy = next_base = next_sell_p = next_sell_amount = buy = buy_amount = \
         next_buy_p = next_buy_amount = sell = sell_amount = 0
     next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
-    while True:
-        try:
+    try:
+        while True:
             if counter > 300:
                 next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
                 counter = 0
@@ -263,7 +263,7 @@ def __main__(client, symbol):
             counter += 1
             if period == '4hour':
                 time.sleep(10)
-        except Exception as e:
-            print(e, traceback.format_exc())
-            send_email("%s:unhandled exception:%s" % (symbol, traceback.format_exc()))
-            exit()
+    except Exception as e:
+        print(e, traceback.format_exc())
+        send_email("%s:unhandled exception:%s" % (symbol, traceback.format_exc()))
+        exit()

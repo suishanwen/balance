@@ -102,8 +102,8 @@ def __main__(client, symbol):
     client.get_account_info()
     counter = buy = sell = avg_sell = avg_buy = first_close = last_close = 0
     ma = old_ma = float(config.get(symbol, "ma"))
-    while True:
-        try:
+    try:
+        while True:
             if counter > 300:
                 counter = 0
             elif counter % 15 == 0:
@@ -145,7 +145,7 @@ def __main__(client, symbol):
             last_close = first_close
             if period == '4hour':
                 time.sleep(10)
-        except Exception as e:
-            print(e, traceback.format_exc())
-            send_email("%s:unhandled exception:%s" % (symbol, traceback.format_exc()))
-            exit()
+    except Exception as e:
+        print(e, traceback.format_exc())
+        send_email("%s:unhandled exception:%s" % (symbol, traceback.format_exc()))
+        exit()

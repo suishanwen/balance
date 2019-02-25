@@ -150,13 +150,13 @@ class OkexClient(object):
                         wait_count -= 1
             if status != 2:
                 status = self.cancel_my_order(my_order_info)
-            # if my_order_info.dealAmount > 0:
-            my_order_info.reset_total_deal_amount(my_order_info.dealAmount)
-            if my_order_info.orderType == self.TRADE_SELL:
-                my_order_info.set_transaction("plus")
-            else:
-                my_order_info.set_transaction("minus")
-            my_order_info.set_avg_price(round(
+            if my_order_info.totalDealAmount > 0:
+                my_order_info.reset_total_deal_amount(my_order_info.dealAmount)
+                if my_order_info.orderType == self.TRADE_SELL:
+                    my_order_info.set_transaction("plus")
+                else:
+                    my_order_info.set_transaction("minus")
+                my_order_info.set_avg_price(round(
                 ((my_order_info.totalDealAmount - my_order_info.dealAmount) * avg_price_bak
                  + my_order_info.dealAmount * my_order_info.avgPrice) / my_order_info.totalDealAmount, 4))
             return status

@@ -221,24 +221,25 @@ def __main__(client, symbol):
                 if not ((next_buy_p >= avg_sell and sell_amount < next_buy_amount) or (
                         next_sell_p <= avg_buy and buy_amount < next_sell_amount)):
                     break
-            print(
-                "\nBase:{} ,ma:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
-                    client.currentBase,
-                    ma,
-                    next_sell_p,
-                    next_sell_amount,
-                    buy,
-                    buy_amount,
-                    round(
-                        next_sell_p - buy,
-                        4),
-                    next_buy_p,
-                    next_buy_amount,
-                    sell,
-                    sell_amount,
-                    round(
-                        next_buy_p - sell,
-                        4)))
+            if counter % 15 == 0:
+                print(
+                    "\nBase:{} ,ma:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
+                        client.currentBase,
+                        ma,
+                        next_sell_p,
+                        next_sell_amount,
+                        buy,
+                        buy_amount,
+                        round(
+                            next_sell_p - buy,
+                            4),
+                        next_buy_p,
+                        next_buy_amount,
+                        sell,
+                        sell_amount,
+                        round(
+                            next_buy_p - sell,
+                            4)))
             order_info = None
             if ma > 0 and next_buy_p >= avg_sell and sell_amount >= next_buy_amount:
                 next_base = next_buy_p

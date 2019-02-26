@@ -3,7 +3,6 @@
 
 import time
 import sys
-from util.Logger import logger
 
 from api.HuobiProAPI import *
 from util.MyUtil import from_dict, from_time_stamp, write_log
@@ -57,34 +56,33 @@ class OkexClient(object):
 
     @classmethod
     def make_order(cls, my_order_info):
-        logger.info(
+        print(
             u'\n-------------------------------------------spot order------------------------------------------------')
         result = {}
         try:
             result = okcoinSpot.trade(my_order_info.symbol, my_order_info.orderType, my_order_info.price,
                                       my_order_info.amount)
         except Exception as e:
-            logger.info("***trade:%s" % e)
+            print("***trade:%s" % e)
         if result is not None and result.get('result'):
-            logger.info("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType,
-                        my_order_info.price,
-                        my_order_info.amount, "  ", from_time_stamp(int(time.time())))
+            print("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
+                  my_order_info.amount, "  ", from_time_stamp(int(time.time())))
             return result['order_id']
         else:
-            logger.info("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                        my_order_info.amount)
+            print("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,
+                  my_order_info.amount)
             return -1
 
     def cancel_my_order(self, my_order_info):
-        logger.info(
+        print(
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = {}
         try:
             result = okcoinSpot.cancel_order(my_order_info.symbol, my_order_info.orderId)
         except Exception as e:
-            logger.info("***cancel_order:%s" % e)
+            print("***cancel_order:%s" % e)
         if result is None or not result.get('result'):
-            logger.info(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
+            print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         status = self.check_order_status(my_order_info)
         if status == -1:
             write_log("order " + str(my_order_info.orderId) + " canceled")
@@ -99,7 +97,7 @@ class OkexClient(object):
         try:
             order_result = okcoinSpot.orderinfo(my_order_info.symbol, my_order_info.orderId)
         except Exception as e:
-            logger.info("***orderinfo:%s" % e)
+            print("***orderinfo:%s" % e)
         if order_result is not None and order_result.get('result'):
             orders = order_result["orders"]
             if len(orders) > 0:
@@ -109,26 +107,26 @@ class OkexClient(object):
                 my_order_info.set_deal_amount(float(order["deal_amount"]))
                 my_order_info.set_avg_price(order["avg_price"])
                 if status == -1:
-                    logger.info("order", order_id, "canceled")
+                    print("order", order_id, "canceled")
                 elif status == 0:
                     if wait_count == self.TRADE_WAIT_COUNT:
-                        logger.info("timeout no deal")
+                        print("timeout no deal")
                     else:
-                        logger.info("no deal", end=" ")
+                        print("no deal", end=" ")
                         sys.stdout.flush()
                 elif status == 1:
                     if wait_count == self.TRADE_WAIT_COUNT:
-                        logger.info("part dealed ", my_order_info.dealAmount)
+                        print("part dealed ", my_order_info.dealAmount)
                     else:
-                        logger.info("part dealed ", my_order_info.dealAmount, end=" ")
+                        print("part dealed ", my_order_info.dealAmount, end=" ")
                         sys.stdout.flush()
                 elif status == 2:
-                    logger.info("order", order_id, "complete deal")
+                    print("order", order_id, "complete deal")
                 elif status == 3:
-                    logger.info("order", order_id, "canceling")
+                    print("order", order_id, "canceling")
                 return status
         else:
-            logger.info(order_id, "checkOrderStatus failed,try again.")
+            print(order_id, "checkOrderStatus failed,try again.")
             return self.check_order_status(my_order_info, wait_count)
 
     def trade(self, my_order_info):
@@ -170,7 +168,7 @@ class OkexClient(object):
         try:
             data = okcoinSpot.depth(symbol)
         except Exception as e:
-            logger.info("***depth:%s" % e)
+            print("***depth:%s" % e)
         price_info = self.priceInfo[symbol]
         if data is not None and data.get("asks") is not None:
             price_info["asks"] = data["asks"][::-1]
@@ -203,20 +201,20 @@ class OkexClient(object):
             return self.priceInfo[symbol]["bids"][0][0]
 
     def get_account_info(self):
-        logger.info(
+        print(
             u'---------------------------------------spot account info------------------------------------------------')
         try:
             my_account_info = okcoinSpot.userinfo()
             if my_account_info.get('result'):
                 freezed = from_dict(my_account_info, "info", "funds", "freezed")
                 free = from_dict(my_account_info, "info", "funds", "free")
-                logger.info(u"USDT", free["usdt"], "freezed", freezed["usdt"])
-                logger.info(self.BALANCE_T.upper(), free[self.BALANCE_T], "freezed", freezed[self.BALANCE_T])
+                print(u"USDT", free["usdt"], "freezed", freezed["usdt"])
+                print(self.BALANCE_T.upper(), free[self.BALANCE_T], "freezed", freezed[self.BALANCE_T])
             else:
-                logger.info("getAccountInfo Fail,Try again!")
+                print("getAccountInfo Fail,Try again!")
                 self.get_account_info()
         except Exception as err:
-            logger.info(err)
+            print(err)
             self.get_account_info()
 
     @classmethod
@@ -229,7 +227,7 @@ class OkexClient(object):
         try:
             result = okcoinSpot.klines(symbol, period, size)
         except Exception as e:
-            logger.info("***klines:%s" % e)
+            print("***klines:%s" % e)
         if isinstance(result, list):
             return list(map(cls.get_line_close, result))[::-1]
         else:

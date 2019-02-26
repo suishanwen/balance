@@ -6,6 +6,7 @@ import time
 import traceback
 import api.OrderInfo as OrderInfo
 from util.MyUtil import write_log, send_email
+from util.Logger import logger
 
 # read config
 config = configparser.ConfigParser()
@@ -35,7 +36,7 @@ def load_history(symbol):
     try:
         history = config.get(symbol, "history")
     except Exception as _err:
-        print(_err)
+        logger.error(_err)
     if history != "":
         history_list = json.loads(history)
     return history_list
@@ -135,7 +136,7 @@ def add_statistics(client, my_order_info):
         abs_transaction = float(config.get(cfg_field, "abstransaction"))
         count = json.loads(config.get(cfg_field, "count"))
     except Exception as err:
-        print(err)
+        logger.error(err)
         if str(err).find("No section") > -1:
             config.add_section(cfg_field)
     day = datetime.date.today().day
@@ -222,8 +223,8 @@ def __main__(client, symbol):
                         next_sell_p <= avg_buy and buy_amount < next_sell_amount)):
                     break
             if counter % 15 == 0:
-                print(
-                    "\nBase:{} ,ma:{} ,nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
+                logger.info(
+                    "\nbase:{},ma:{},nextSell:[{},{}] - buy:[{},{}] (+{}) | nextBuy:[{},{}] - sell:[{},{}]({})".format(
                         client.currentBase,
                         ma,
                         next_sell_p,
@@ -265,6 +266,6 @@ def __main__(client, symbol):
             if period == '4hour':
                 time.sleep(10)
     except Exception as e:
-        print(e, traceback.format_exc())
+        logger.error(e, traceback.format_exc())
         send_email("%s:unhandled exception:%s" % (symbol, traceback.format_exc()))
         exit()

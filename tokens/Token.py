@@ -175,7 +175,7 @@ def get_ma(client, symbol):
         sum1 += i
     for i in data2:
         sum2 += i
-    return round(sum1 / len(data1) - sum2 / len(data2), 4)
+    return round(sum1 / len(data1) - sum2 / len(data2), 6)
 
 
 def init_config(client, symbol):

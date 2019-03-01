@@ -87,10 +87,12 @@ def get_next_buy_sell_info(client):
 def modify_trans_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_transaction, _next_sell, _next_sell_transaction,
                           client):
     buy_rate = math.log(client.currentBase / _avg_sell, client.rateP)
+    buy_rate = math.floor(buy_rate / 0.1) * 0.1
     buy_transaction_rate = _next_buy_transaction / client.transaction
     if buy_rate > 1 and buy_rate > buy_transaction_rate:
         return client.transaction * buy_rate, _avg_sell, _next_sell_transaction, _next_sell
     sell_rate = math.log(_avg_buy / client.currentBase, client.rateP)
+    sell_rate = math.floor(sell_rate / 0.1) * 0.1
     sell_transaction_rate = _next_sell_transaction / client.transaction
     if sell_rate > 1 and sell_rate > sell_transaction_rate:
         return _next_buy_transaction, _next_buy, \

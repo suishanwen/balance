@@ -90,13 +90,14 @@ def modify_trans_by_price(_avg_buy, _avg_sell, _next_buy, _next_buy_transaction,
     buy_rate = math.floor(buy_rate / 0.1) * 0.1
     buy_transaction_rate = _next_buy_transaction / client.transaction
     if buy_rate > 1 and buy_rate > buy_transaction_rate:
-        return client.transaction * buy_rate, _avg_sell, _next_sell_transaction, _next_sell
+        return client.transaction * buy_rate, round(client.currentBase / math.pow(client.rateP, buy_rate),
+                                                    4), _next_sell_transaction, _next_sell
     sell_rate = math.log(_avg_buy / client.currentBase, client.rateP)
     sell_rate = math.floor(sell_rate / 0.1) * 0.1
     sell_transaction_rate = _next_sell_transaction / client.transaction
     if sell_rate > 1 and sell_rate > sell_transaction_rate:
         return _next_buy_transaction, _next_buy, \
-               client.transaction * sell_rate, _avg_buy
+               client.transaction * sell_rate, round(client.currentBase * math.pow(client.rateP, sell_rate), 4)
     return _next_buy_transaction, _next_buy, _next_sell_transaction, _next_sell
 
 
@@ -201,7 +202,7 @@ def __main__(client, symbol):
     init_config(client, symbol)
     client.get_account_info()
     counter = 0
-    ma = avg_sell = avg_buy = next_sell_p = next_sell_amount = buy = buy_amount = \
+    ma = avg_sell = avg_buy = next_base = next_sell_p = next_sell_amount = buy = buy_amount = \
         next_buy_p = next_buy_amount = sell = sell_amount = 0
     next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
     try:
@@ -253,7 +254,6 @@ def __main__(client, symbol):
             if order_info is not None:
                 order_process(client, order_info)
                 if order_info.totalAmount - order_info.totalDealAmount < client.MIN_AMOUNT:
-                    next_base = order_info.avgPrice
                     client.currentBase = round(next_base, 4)
                     config.read("config.ini")
                     config.set(symbol, "currentBase", str(client.currentBase))

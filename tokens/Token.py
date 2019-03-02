@@ -213,7 +213,7 @@ def __main__(client, symbol):
             elif counter % 15 == 0:
                 ma = get_ma(client, symbol)
             client.get_coin_price(symbol)
-            for i in range(3):
+            for i in range(5):
                 buy, avg_buy, buy_amount, sell, avg_sell, sell_amount = client.get_price_info(symbol, i + 1)
                 next_buy_amount, next_buy_p, next_sell_amount, next_sell_p = modify_val_by_price(avg_buy,
                                                                                                  avg_sell,
@@ -222,8 +222,8 @@ def __main__(client, symbol):
                                                                                                  next_sell,
                                                                                                  next_sell_val,
                                                                                                  client)
-                if not ((next_buy_p >= avg_sell and sell_amount < next_buy_amount) or (
-                        next_sell_p <= avg_buy and buy_amount < next_sell_amount)):
+                if not ((ma > 0 and next_buy_p >= avg_sell and sell_amount < next_buy_amount) or (
+                        ma < 0 and next_sell_p <= avg_buy and buy_amount < next_sell_amount)):
                     break
             if counter % 15 == 0:
                 logger.info(

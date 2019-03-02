@@ -70,4 +70,4 @@ class MyOrderInfo(object):
         per_count = round(abs(self.transaction) / count * client.percentage / 100)
         if self.orderType == client.TRADE_BUY:
             count -= 1
-        self.count = round(math.floor(((1 + count) * count / 2 * per_count) / 0.1) * 0.1, 1)
+        self.count = round(((1 + count) * count / 2 * per_count), 3)

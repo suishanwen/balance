@@ -144,7 +144,7 @@ def add_statistics(client, my_order_info):
             config.add_section(cfg_field)
     day = datetime.date.today().day
     if day == len(count):
-        count[day - 1] = count[day - 1] + my_order_info.count
+        count[day - 1] = round(count[day - 1] + my_order_info.count, 3)
     elif day > len(count):
         for i in range(day - len(count) - 1):
             count.append(0)

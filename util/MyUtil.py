@@ -21,7 +21,7 @@ def from_time_stamp(time_stamp):
     return datetime.datetime.fromtimestamp(float(time_stamp))
 
 
-def send_email(content):
+def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
     # 第三方 SMTP 服务
     mail_host = "smtp.sina.com"  # 设置服务器
     mail_user = "controlservice@sina.com"  # 用户名
@@ -30,19 +30,21 @@ def send_email(content):
     sender = 'controlservice@sina.com'
     receivers = ['suishanwen@icloud.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
 
-    message = MIMEText(content, 'plain', 'utf-8')
+    message = MIMEText(content, _subtype, 'utf-8')
     message['From'] = Header("controlservice@sina.com")
     message['To'] = Header("my-email")
-    message['Subject'] = Header('bitcoinrobot')
+    message['Subject'] = Header(_subject)
     try:
         smtp_obj = smtplib.SMTP()
         smtp_obj.connect(mail_host, 25)  # 25 为 SMTP 端口号
         smtp_obj.login(mail_user, mail_pass)
         smtp_obj.sendmail(sender, receivers, message.as_string())
         print("邮件发送成功")
+        return True
     except smtplib.SMTPException as err:
         print(err)
         print("Error: 邮件发送失败")
+        return False
 
 
 def write_log(text=""):
@@ -57,7 +59,7 @@ def write_log(text=""):
         f.writelines("\n")
         f.close()
         # write old logs
-        old_f = open(str(from_time_stamp(int(time.time()) - 86400*10))[0:7] + '.txt', 'w')
+        old_f = open(str(from_time_stamp(int(time.time()) - 86400 * 10))[0:7] + '.txt', 'w')
         old_f.writelines(open('log.txt').readlines()[::-1])
         # write count
         config = configparser.ConfigParser()

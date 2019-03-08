@@ -5,8 +5,9 @@ import datetime
 import time
 import traceback
 import api.OrderInfo as OrderInfo
-from util.MyUtil import write_log, send_email
+from util.MyUtil import write_log, send_email, from_time_stamp
 from util.Logger import logger
+from util.Statistic import analyze_log
 
 # read config
 config = configparser.ConfigParser()
@@ -198,6 +199,16 @@ def init_config(client, symbol):
         client.MIN_AMOUNT = 0.0001
 
 
+def check_statistic_email(client):
+    time_stamp = str(from_time_stamp(int(time.time())))
+    dd = int(time_stamp[8:10])
+    hh = int(time_stamp[11:13])
+    mm = int(time_stamp[14:16])
+    if client.emailDay != dd and hh == 18 and mm >= 3:
+        if send_email(analyze_log(), "html", "收益统计[bitcoinrobot]"):
+            client.emailDay = dd
+
+
 def __main__(client, symbol):
     init_config(client, symbol)
     client.get_account_info()
@@ -208,6 +219,7 @@ def __main__(client, symbol):
     try:
         while True:
             if counter > 300:
+                check_statistic_email(client)
                 next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
                 counter = 0
             elif counter % 15 == 0:

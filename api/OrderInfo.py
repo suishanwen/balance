@@ -1,11 +1,11 @@
 import time
-import math
+import re
 
 from util.MyUtil import from_time_stamp
 
 
 class MyOrderInfo(object):
-    def __init__(self, symbol, order_type, price=0, amount=0, base=0):
+    def __init__(self, symbol="", order_type="", price=0, amount=0, base=0):
         self.orderId = ""
         self.symbol = symbol
         self.orderType = order_type
@@ -19,18 +19,22 @@ class MyOrderInfo(object):
         self.transaction = 0
         self.count = 0
         self.triggerSeconds = int(time.time())
+        self.timestamp = from_time_stamp(self.triggerSeconds)
+        self.canceled = 0
 
     def __repr__(self):
-        return ' '.join(
-            [str(self.orderId), self.symbol, self.orderType,
-             str(self.base),
-             str(self.price),
-             str(self.avgPrice),
-             str(self.dealAmount),
-             str(self.totalDealAmount),
-             str(self.transaction),
-             "[" + str(self.count) + "]",
-             str(from_time_stamp(int(time.time())))])
+        data = [str(self.orderId), self.symbol, self.orderType,
+                str(self.base),
+                str(self.price),
+                str(self.avgPrice),
+                str(self.dealAmount),
+                str(self.totalDealAmount),
+                str(self.transaction),
+                "[" + str(self.count) + "]",
+                self.timestamp]
+        if self.canceled == 1:
+            data.append('[已撤销]')
+        return ' '.join(data)
 
     def set_order_id(self, order_id):
         self.orderId = order_id
@@ -71,3 +75,20 @@ class MyOrderInfo(object):
         if self.orderType == client.TRADE_BUY:
             count -= 1
         self.count = round(((1 + count) * count / 2 * per_count), 3)
+
+    def from_log(self, line):
+        match_obj = re.match(r"(.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.* .*)", line, re.M | re.I)
+        if match_obj:
+            self.orderId = match_obj.group(1)
+            self.symbol = match_obj.group(2)
+            self.orderType = match_obj.group(3)
+            self.base = float(match_obj.group(4))
+            self.price = float(match_obj.group(5))
+            self.avgPrice = float(match_obj.group(6))
+            self.dealAmount = float(match_obj.group(7))
+            self.totalAmount = float(match_obj.group(8))
+            self.totalDealAmount = float(match_obj.group(8))
+            self.amount = float(match_obj.group(8))
+            self.transaction = float(match_obj.group(9))
+            self.count = float(re.search("[0-9]+(.[0-9]+)?", match_obj.group(10)).group())
+            self.timestamp = match_obj.group(11)

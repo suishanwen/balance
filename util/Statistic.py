@@ -93,10 +93,10 @@ def generate_email(order_list):
             quantity_change = trx_quantity_buy - trx_quantity_sell
             quantity_change_price = abs(usdt_change / quantity_change)
             points_consume = trx_usdt_total * fee_rate
-            if quantity_change >= 0:
-                change_type = "增"
-            else:
-                change_type = "减"
+        if quantity_change >= 0:
+            change_type = "增"
+        else:
+            change_type = "减"
         email_content += "\n<div>"
         email_content += "\n<h3>%s</h3>" % symbol
         email_content += "\n<table>"
@@ -112,7 +112,7 @@ def generate_email(order_list):
         email_content += get_tr("总交易均价$", trx_price_avg)
         email_content += get_tr("余额变化$", usdt_change)
         email_content += get_tr("持仓变化", quantity_change)
-        email_content += get_tr("{}仓位均价".format(change_type), quantity_change_price)
+        email_content += get_tr("{}仓均价".format(change_type), quantity_change_price)
         email_content += get_tr("理论收益$", reward_weight_usdt)
         email_content += get_tr("点卡消耗", points_consume)
         email_content += "\n</table>"

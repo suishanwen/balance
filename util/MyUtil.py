@@ -22,22 +22,17 @@ def from_time_stamp(time_stamp):
 
 
 def send_email(content, _subtype='plain', _subject="bitcoinrobot", sender_no=1):
-    _sender1 = "controlservice2@sina.com"
-    _sender2 = "controlservice@sina.com"
-    if sender_no == 1:
-        _sender = _sender1
-    else:
-        _sender = _sender2
+    senders = ("controlservice2@sina.com", "controlservice@sina.com")
     # 第三方 SMTP 服务
     mail_host = "smtp.sina.com"  # 设置服务器
-    mail_user = _sender  # 用户名
+    mail_user = senders[sender_no]  # 用户名
     mail_pass = "a123456"  # 口令
 
-    sender = _sender
+    sender = senders[sender_no]
     receivers = ['suishanwen@icloud.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
 
     message = MIMEText(content, _subtype, 'utf-8')
-    message['From'] = Header(_sender)
+    message['From'] = Header(senders[sender_no])
     message['To'] = Header("my-email")
     message['Subject'] = Header(_subject)
     try:

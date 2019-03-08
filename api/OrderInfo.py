@@ -31,7 +31,7 @@ class MyOrderInfo(object):
                 str(self.totalDealAmount),
                 str(self.transaction),
                 "[" + str(self.count) + "]",
-                self.timestamp]
+                str(self.timestamp)]
         if self.canceled == 1:
             data.append('[已撤销]')
         return ' '.join(data)

@@ -204,7 +204,7 @@ def check_statistic_email(client):
     dd = int(time_stamp[8:10])
     hh = int(time_stamp[11:13])
     mm = int(time_stamp[14:16])
-    if client.emailDay != dd and hh == 18 and mm >= 8:
+    if client.emailDay != dd and hh == 23 and mm >= 55:
         if send_email(generate_email(analyze_log()), "html", "收益统计[bitcoinrobot]"):
             client.emailDay = dd
 

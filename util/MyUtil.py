@@ -21,7 +21,7 @@ def from_time_stamp(time_stamp):
     return datetime.datetime.fromtimestamp(float(time_stamp))
 
 
-def send_email(content, _subtype='plain', _subject="bitcoinrobot", sender_no=1):
+def send_email(content, _subtype='plain', _subject="bitcoinrobot", sender_no=0):
     senders = ("controlservice2@sina.com", "controlservice@sina.com")
     # 第三方 SMTP 服务
     mail_host = "smtp.sina.com"  # 设置服务器
@@ -45,8 +45,8 @@ def send_email(content, _subtype='plain', _subject="bitcoinrobot", sender_no=1):
     except smtplib.SMTPException as err:
         print(err)
         print("Error: 邮件发送失败,{}".format(err))
-        if sender_no == 1 and str(err).find("550") != -1:
-            send_email(content, _subtype, _subject, 2)
+        if sender_no == 0 and str(err).find("550") != -1:
+            send_email(content, _subtype, _subject, 1)
         return False
 
 

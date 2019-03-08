@@ -21,17 +21,23 @@ def from_time_stamp(time_stamp):
     return datetime.datetime.fromtimestamp(float(time_stamp))
 
 
-def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
+def send_email(content, _subtype='plain', _subject="bitcoinrobot", sender_no=1):
+    _sender1 = "controlservice2@sina.com"
+    _sender2 = "controlservice@sina.com"
+    if sender_no == 1:
+        _sender = _sender1
+    else:
+        _sender = _sender2
     # 第三方 SMTP 服务
     mail_host = "smtp.sina.com"  # 设置服务器
-    mail_user = "controlservice@sina.com"  # 用户名
+    mail_user = _sender  # 用户名
     mail_pass = "a123456"  # 口令
 
-    sender = 'controlservice@sina.com'
+    sender = _sender
     receivers = ['suishanwen@icloud.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
 
     message = MIMEText(content, _subtype, 'utf-8')
-    message['From'] = Header("controlservice@sina.com")
+    message['From'] = Header(_sender)
     message['To'] = Header("my-email")
     message['Subject'] = Header(_subject)
     try:
@@ -43,7 +49,9 @@ def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
         return True
     except smtplib.SMTPException as err:
         print(err)
-        print("Error: 邮件发送失败")
+        print("Error: 邮件发送失败,{}".format(err))
+        if sender_no == 1 and str(err).find("550") != -1:
+            send_email(content, _subtype, _subject, 2)
         return False
 
 

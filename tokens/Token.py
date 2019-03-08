@@ -7,7 +7,7 @@ import traceback
 import api.OrderInfo as OrderInfo
 from util.MyUtil import write_log, send_email, from_time_stamp
 from util.Logger import logger
-from util.Statistic import analyze_log
+from util.Statistic import analyze_log, generate_email
 
 # read config
 config = configparser.ConfigParser()
@@ -204,8 +204,8 @@ def check_statistic_email(client):
     dd = int(time_stamp[8:10])
     hh = int(time_stamp[11:13])
     mm = int(time_stamp[14:16])
-    if client.emailDay != dd and hh == 18 and mm >= 3:
-        if send_email(analyze_log(), "html", "收益统计[bitcoinrobot]"):
+    if client.emailDay != dd and hh == 18 and mm >= 8:
+        if send_email(generate_email(analyze_log()), "html", "收益统计[bitcoinrobot]"):
             client.emailDay = dd
 
 

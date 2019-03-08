@@ -112,7 +112,7 @@ def generate_email(order_list):
         email_content += get_tr("总交易均价$", trx_price_avg)
         email_content += get_tr("余额变化$", usdt_change)
         email_content += get_tr("持仓变化", quantity_change)
-        email_content += get_tr("{}仓均价".format(change_type), quantity_change_price)
+        email_content += get_tr("{}仓均价$".format(change_type), quantity_change_price)
         email_content += get_tr("理论收益$", reward_weight_usdt)
         email_content += get_tr("点卡消耗", points_consume)
         email_content += "\n</table>"

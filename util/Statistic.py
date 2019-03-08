@@ -63,6 +63,8 @@ def generate_email(order_list):
         usdt_change = 0
         # 持仓变化
         quantity_change = 0
+        # 持仓增减均价
+        quantity_change_price = 0
         # 理论收益
         reward_weight_usdt = 0
         # 吃单费率
@@ -87,8 +89,9 @@ def generate_email(order_list):
                 reward_weight_usdt += order.count
             else:
                 trx_count_canceled += 1
-            trx_price_avg = round(trx_usdt_total / trx_quantity_total, 4)
+            trx_price_avg = trx_usdt_total / trx_quantity_total
             quantity_change = trx_quantity_buy - trx_quantity_sell
+            quantity_change_price = abs(usdt_change / quantity_change)
             points_consume = trx_usdt_total * fee_rate
         email_content += "\n<div>"
         email_content += "\n<h3>%s</h3>" % symbol
@@ -105,6 +108,7 @@ def generate_email(order_list):
         email_content += get_tr("总交易均价$", trx_price_avg)
         email_content += get_tr("余额变化$", usdt_change)
         email_content += get_tr("持仓变化", quantity_change)
+        email_content += get_tr("增减仓位均价", quantity_change_price)
         email_content += get_tr("理论收益$", reward_weight_usdt)
         email_content += get_tr("点卡消耗", points_consume)
         email_content += "\n</table>"

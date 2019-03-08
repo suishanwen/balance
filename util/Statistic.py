@@ -89,10 +89,10 @@ def generate_email(order_list):
                 reward_weight_usdt += order.count
             else:
                 trx_count_canceled += 1
-            trx_price_avg = trx_usdt_total / trx_quantity_total
-            quantity_change = trx_quantity_buy - trx_quantity_sell
-            quantity_change_price = abs(usdt_change / quantity_change)
-            points_consume = trx_usdt_total * fee_rate
+        trx_price_avg = trx_usdt_total / trx_quantity_total
+        quantity_change = trx_quantity_buy - trx_quantity_sell
+        quantity_change_price = abs(usdt_change / quantity_change)
+        points_consume = trx_usdt_total * fee_rate
         if quantity_change >= 0:
             change_type = "增"
         else:

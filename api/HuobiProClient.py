@@ -280,8 +280,8 @@ class HuobiProClient(object):
             self.get_account_info()
 
     @classmethod
-    def get_line_close(cls, data):
-        return data.get('close')
+    def get_line_data(cls, data):
+        return [data.get('open'), data.get('high'), data.get('low'), data.get('close'), data.get('amount')]
 
     @classmethod
     def get_klines(cls, symbol, period, size):
@@ -291,6 +291,6 @@ class HuobiProClient(object):
         except Exception as e:
             print("***get_kline:%s" % e)
         if result is not None and result.get('status') == 'ok':
-            return list(map(cls.get_line_close, result.get('data')))
+            return list(map(cls.get_line_data, result.get('data')))
         else:
             return cls.get_klines(symbol, period, size)

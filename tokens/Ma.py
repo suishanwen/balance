@@ -73,7 +73,8 @@ def add_statistics(client, my_order_info):
 
 
 def get_ma(client, symbol):
-    data2 = client.get_klines(symbol, period, size2)
+    data = client.get_klines(symbol, period, size2)
+    data2 = list(map(lambda x: float(x[3]), data))
     data1 = data2[0:size1]
     sum1 = sum2 = 0
     for i in data1:

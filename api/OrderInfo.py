@@ -5,7 +5,7 @@ from util.MyUtil import from_time_stamp
 
 
 class MyOrderInfo(object):
-    def __init__(self, symbol="", order_type="", price=0, amount=0, base=0):
+    def __init__(self, symbol="", order_type="", price=0, amount=0, base=0, trigger="ma"):
         self.orderId = ""
         self.symbol = symbol
         self.orderType = order_type
@@ -18,6 +18,7 @@ class MyOrderInfo(object):
         self.avgPrice = 0
         self.transaction = 0
         self.count = 0
+        self.trigger = trigger
         self.triggerSeconds = int(time.time())
         self.timestamp = from_time_stamp(self.triggerSeconds)
         self.canceled = 0
@@ -31,7 +32,8 @@ class MyOrderInfo(object):
                 str(self.totalDealAmount),
                 str(self.transaction),
                 "[" + str(self.count) + "]",
-                str(self.timestamp)]
+                str(self.timestamp),
+                str(self.trigger)]
         if self.canceled == 1:
             data.append('[已撤销]')
         return ' '.join(data)
@@ -77,7 +79,9 @@ class MyOrderInfo(object):
         self.count = round(((1 + count) * count / 2 * per_count), 3)
 
     def from_log(self, line):
-        match_obj = re.match(r"(.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.* .*)", line, re.M | re.I)
+        match_obj = re.match("(.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.* .*) (.*)", line, re.M | re.I)
+        if not match_obj:
+            match_obj = re.match("(.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.* .*)", line, re.M | re.I)
         if match_obj:
             self.orderId = match_obj.group(1)
             self.symbol = match_obj.group(2)
@@ -92,3 +96,7 @@ class MyOrderInfo(object):
             self.transaction = float(match_obj.group(9))
             self.count = float(re.search("[0-9]+(.[0-9]+)?", match_obj.group(10)).group())
             self.timestamp = match_obj.group(11)
+            if match_obj.lastindex == 12:
+                self.trigger = match_obj.group(12)
+            else:
+                self.trigger = "ma"

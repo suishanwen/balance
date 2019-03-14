@@ -219,9 +219,10 @@ class OkexClient(object):
             self.get_account_info()
 
     @classmethod
-    def get_line_close(cls, data):
-        return float(data[4])
+    def get_line_data(cls, data):
+        return data[1:6]
 
+    # (开,高,低,收,交易量)
     @classmethod
     def get_klines(cls, symbol, period, size):
         result = {}
@@ -230,6 +231,6 @@ class OkexClient(object):
         except Exception as e:
             print("***klines:%s" % e)
         if isinstance(result, list):
-            return list(map(cls.get_line_close, result))[::-1]
+            return list(map(cls.get_line_data, result))[::-1]
         else:
             return cls.get_klines(symbol, period, size)

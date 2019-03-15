@@ -6,6 +6,11 @@ import json
 from email.mime.text import MIMEText
 from email.header import Header
 
+# read config
+config = configparser.ConfigParser()
+config.read("config.ini")
+receivers = [config.get("trade", "email")]
+
 
 def has_attr(_dict, args):
     return args in _dict.keys()
@@ -21,32 +26,26 @@ def from_time_stamp(time_stamp):
     return datetime.datetime.fromtimestamp(float(time_stamp))
 
 
-def send_email(content, _subtype='plain', _subject="bitcoinrobot", sender_no=0):
-    senders = ("controlservice2@sina.com", "controlservice@sina.com")
+def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
     # 第三方 SMTP 服务
-    mail_host = "smtp.sina.com"  # 设置服务器
-    mail_user = senders[sender_no]  # 用户名
-    mail_pass = "a123456"  # 口令
-
-    sender = senders[sender_no]
-    receivers = ['suishanwen@icloud.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+    mail_host = "smtp.gmail.com"  # 设置服务器
+    mail_user = "controlservice9@gmail.com"  # 用户名
+    mail_pass = "pupso7-waXtuz-qitceh"  # 口令
 
     message = MIMEText(content, _subtype, 'utf-8')
-    message['From'] = Header(senders[sender_no])
-    message['To'] = Header("my-email")
+    message['From'] = Header(mail_user)
+    message['To'] = Header(",".join(receivers))
     message['Subject'] = Header(_subject)
     try:
-        smtp_obj = smtplib.SMTP()
-        smtp_obj.connect(mail_host, 25)  # 25 为 SMTP 端口号
-        smtp_obj.login(mail_user, mail_pass)
-        smtp_obj.sendmail(sender, receivers, message.as_string())
+        server = smtplib.SMTP_SSL(mail_host, 465)
+        server.ehlo()
+        server.login(mail_user, mail_pass)
+        server.sendmail(mail_user, receivers, message.as_string())
+        server.close()
         print("邮件发送成功")
         return True
     except smtplib.SMTPException as err:
-        print(err)
         print("Error: 邮件发送失败,{}".format(err))
-        if sender_no == 0 and str(err).find("550") != -1:
-            send_email(content, _subtype, _subject, 1)
         return False
 
 

@@ -47,6 +47,8 @@ def generate_email(order_list):
         trx_count_valid_buy = 0
         # 策略交易次数（卖）
         trx_count_valid_sell = 0
+        # 反转触发次数
+        trx_count_reverse = 0
         # 部分成交撤单次数
         trx_count_canceled = 0
         # 总成交金额
@@ -83,6 +85,8 @@ def generate_email(order_list):
                 else:
                     trx_count_valid_sell += 1
                     trx_quantity_sell += order.totalAmount
+                if order.trigger == "reverse":
+                    trx_count_reverse += 1
                 trx_usdt_total += abs(order.transaction)
                 trx_quantity_total += order.totalAmount
                 usdt_change += order.transaction
@@ -108,6 +112,7 @@ def generate_email(order_list):
         email_content += get_tr("策略交易次数", trx_count_valid)
         email_content += get_tr("策略交易次数（买）", trx_count_valid_buy)
         email_content += get_tr("策略交易次数（卖）", trx_count_valid_sell)
+        email_content += get_tr("反转触发次数", trx_count_reverse)
         email_content += get_tr("总成交金额$", trx_usdt_total)
         email_content += get_tr("总成交数量", trx_quantity_total)
         email_content += get_tr("总成交数量（买）", trx_quantity_buy)

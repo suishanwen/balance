@@ -220,7 +220,7 @@ class OkexClient(object):
 
     @classmethod
     def get_line_data(cls, data):
-        return data[1:6]
+        return [float(data[1]), float(data[2]), float(data[3]), float(data[4]), float(data[5])]
 
     # (开,高,低,收,交易量)
     @classmethod

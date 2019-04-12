@@ -204,7 +204,7 @@ class OkexClient(object):
 
     def get_account_info(self):
         logger.info(
-            u'---------------------------------------spot account info------------------------------------------------')
+            '---------------------------------------spot account info------------------------------------------------')
         try:
             accounts = ['USDT', self.BALANCE_T.upper()]
             for symbol in accounts:

@@ -240,6 +240,6 @@ class OkexClient(object):
         except Exception as e:
             print("***klines:%s" % e)
         if isinstance(result, list):
-            return list(map(cls.get_line_data, result))[::-1]
+            return list(map(cls.get_line_data, result))
         else:
             return cls.get_klines(symbol, period, size)

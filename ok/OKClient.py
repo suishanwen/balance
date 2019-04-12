@@ -4,7 +4,7 @@ import importlib
 sys.path.append("/home/balance")
 importlib.reload(sys)
 import tokens.Token as Token
-import api.OkexClient as Client
+import api.OkexClientV3 as Client
 import configparser
 import json
 import threading

@@ -24,7 +24,7 @@ class HuobiProClient(object):
     TRADE_BUY = "buy-limit"
     TRADE_SELL = "sell-limit"
 
-    COMPLETE_STATUS = 'filled'
+    FILLED_STATUS = 'filled'
 
     MIN_AMOUNT = 0.1
     ACCURACY = 2
@@ -112,7 +112,7 @@ class HuobiProClient(object):
         state = self.check_order_status(my_order_info)
         if state == 'canceled' or state == 'partial-canceled':
             write_log("order " + my_order_info.orderId + " canceled")
-        elif state != self.COMPLETE_STATUS:
+        elif state != self.FILLED_STATUS:
             # not canceled or cancel failed(part dealed) and not complete continue cancelling
             return self.cancel_my_order(my_order_info)
         return state

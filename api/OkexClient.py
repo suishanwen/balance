@@ -32,7 +32,8 @@ class OkexClient(object):
     TRADE_BUY = "buy"
     TRADE_SELL = "sell"
 
-    COMPLETE_STATUS = 2
+    FILLED_STATUS = 2
+    CANCELLED_STATUS = -1
 
     MIN_AMOUNT = 1
     ACCURACY = 4
@@ -87,9 +88,9 @@ class OkexClient(object):
         if result is None or not result.get('result'):
             print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         status = self.check_order_status(my_order_info)
-        if status == -1:
+        if status == self.CANCELLED_STATUS:
             write_log("order " + str(my_order_info.orderId) + " canceled")
-        elif status != self.COMPLETE_STATUS:
+        elif status != self.FILLED_STATUS:
             # not canceled or cancel failed(part dealed) and not complete continue cancelling
             return self.cancel_my_order(my_order_info)
         return status
@@ -109,7 +110,7 @@ class OkexClient(object):
                 status = order["status"]
                 my_order_info.set_deal_amount(float(order["deal_amount"]))
                 my_order_info.set_avg_price(order["avg_price"])
-                if status == -1:
+                if status == self.CANCELLED_STATUS:
                     print("order", order_id, "canceled")
                 elif status == 0:
                     if wait_count == self.TRADE_WAIT_COUNT:
@@ -123,7 +124,7 @@ class OkexClient(object):
                     else:
                         print("part dealed ", my_order_info.dealAmount, end=" ")
                         sys.stdout.flush()
-                elif status == 2:
+                elif status == self.FILLED_STATUS:
                     print("order", order_id, "complete deal")
                 elif status == 3:
                     print("order", order_id, "canceling")
@@ -134,7 +135,7 @@ class OkexClient(object):
 
     def trade(self, my_order_info):
         if my_order_info.amount < self.MIN_AMOUNT:
-            return 2
+            return self.FILLED_STATUS
         if my_order_info.price == 0:
             my_order_info.set_price(self.get_trade_price(my_order_info.symbol, my_order_info.orderType))
         order_id = self.make_order(my_order_info)
@@ -143,15 +144,15 @@ class OkexClient(object):
             wait_count = 0
             status = 0
             avg_price_bak = my_order_info.avgPrice
-            while wait_count < self.TRADE_WAIT_COUNT and status != 2:
+            while wait_count < self.TRADE_WAIT_COUNT and status != self.FILLED_STATUS:
                 status = self.check_order_status(my_order_info, wait_count)
                 # time.sleep(0.1)
                 wait_count += 1
-                if wait_count == self.TRADE_WAIT_COUNT and status != 2:
+                if wait_count == self.TRADE_WAIT_COUNT and status != self.FILLED_STATUS:
                     trade_price = self.get_trade_price(my_order_info.symbol, my_order_info.orderType)
                     if trade_price == my_order_info.price:
                         wait_count -= 1
-            if status != 2:
+            if status != self.FILLED_STATUS:
                 status = self.cancel_my_order(my_order_info)
             my_order_info.reset_total_deal_amount(my_order_info.dealAmount)
             if my_order_info.totalDealAmount > 0:

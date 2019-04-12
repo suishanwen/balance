@@ -73,7 +73,7 @@ class OkexClient(object):
             return result['order_id']
         else:
             print("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                  my_order_info.amount)
+                  my_order_info.amount, round(my_order_info.price * my_order_info.amount, 3))
             return -1
 
     def cancel_my_order(self, my_order_info):

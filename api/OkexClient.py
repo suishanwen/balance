@@ -3,8 +3,8 @@
 
 import time
 import sys
+import configparser
 
-from api.HuobiProAPI import *
 from util.MyUtil import from_dict, from_time_stamp, write_log
 from api.OkexSpotAPI import OkexSpot
 

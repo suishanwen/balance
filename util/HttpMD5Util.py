@@ -7,8 +7,17 @@ import urllib
 import json
 import hashlib
 import ssl
+import configparser
+from util.Socks5 import open_socks
 
+# read config
+configBase = configparser.ConfigParser()
+configBase.read("../key.ini")
 context = ssl._create_unverified_context()
+# local socks5 proxy
+OPEN_SOCKS = configBase.get("okex", "socks")
+if OPEN_SOCKS == "1":
+    open_socks()
 
 
 def build_my_sign(params, secretKey):

@@ -5,6 +5,7 @@ import configparser
 import sys
 import time
 import datetime
+import traceback
 from util.MyUtil import from_time_stamp
 from util.Logger import logger
 import api.okex_sdk_v3.spot_api as spot
@@ -219,7 +220,8 @@ class OkexClient(object):
                     print("getAccountInfo Fail,Try again!")
                     self.get_account_info()
         except Exception as err:
-            print(err)
+            logger.error(err, traceback.format_exc())
+            exit()
             self.get_account_info()
 
     @classmethod

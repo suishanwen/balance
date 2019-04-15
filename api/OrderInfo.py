@@ -5,7 +5,7 @@ from util.MyUtil import from_time_stamp
 
 
 class MyOrderInfo(object):
-    def __init__(self, symbol="", order_type="", price=0, amount=0, base=0, trigger="ma"):
+    def __init__(self, symbol="", order_type="", price=0, amount=0, base=0, trigger=0):
         self.orderId = ""
         self.symbol = symbol
         self.orderType = order_type
@@ -18,7 +18,7 @@ class MyOrderInfo(object):
         self.avgPrice = 0
         self.transaction = 0
         self.count = 0
-        self.trigger = trigger
+        self.trigger = self.get_trigger(trigger)
         self.triggerSeconds = int(time.time())
         self.timestamp = from_time_stamp(self.triggerSeconds)
         self.canceled = 0
@@ -37,6 +37,16 @@ class MyOrderInfo(object):
         if self.canceled == 1:
             data.append('[已撤销]')
         return ' '.join(data)
+
+    @classmethod
+    def get_trigger(cls, trigger):
+        if abs(trigger) == 1:
+            return "dma"
+        elif abs(trigger) == 2:
+            return "reverse"
+        elif abs(trigger) == 3:
+            return "needle"
+        return ""
 
     def set_order_id(self, order_id):
         self.orderId = order_id

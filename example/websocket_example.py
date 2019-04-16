@@ -84,69 +84,17 @@ async def subscribe_without_login(url, channels):
         print("{}".format(res))
 
 
-# subscribe channel need login
-#
-# swap/account //用户账户信息频道
-# swap/position //用户持仓信息频道
-# swap/order //用户交易数据频道
-async def subscribe(url, api_key, passphrase, secret_key, channels):
-    async with websockets.connect(url) as websocket:
-        # login
-        timestamp = str(server_timestamp())
-        login_str = login_params(str(timestamp), api_key, passphrase, secret_key)
-        await websocket.send(login_str)
-
-        login_res = await websocket.recv()
-        # print(f"receive < {login_res}")
-
-        sub_param = {"op": "subscribe", "args": channels}
-        sub_str = json.dumps(sub_param)
-        await  websocket.send(sub_str)
-        print(f"send: {sub_str}")
-
-        print("receive:")
-        res = await websocket.recv()
-        res = inflate(res)
-        print(f"{res}")
-
-        res = await websocket.recv()
-        res = inflate(res)
-        print(f"{res}")
-
-
-# unsubscribe channels
-async def unsubscribe(url, api_key, passphrase, secret_key, channels):
-    async with websockets.connect(url) as websocket:
-        timestamp = str(server_timestamp())
-
-        login_str = login_params(str(timestamp), api_key, passphrase, secret_key)
-
-        await websocket.send(login_str)
-
-        greeting = await websocket.recv()
-        # print(f"receive < {greeting}")
-
-        sub_param = {"op": "unsubscribe", "args": channels}
-        sub_str = json.dumps(sub_param)
-        await  websocket.send(sub_str)
-        print(f"send: {sub_str}")
-
-        res = await websocket.recv()
-        res = inflate(res)
-        print(f"{res}")
-
-
 # unsubscribe channels
 async def unsubscribe_without_login(url, channels):
     async with websockets.connect(url) as websocket:
         sub_param = {"op": "unsubscribe", "args": channels}
         sub_str = json.dumps(sub_param)
         await  websocket.send(sub_str)
-        print(f"send: {sub_str}")
+        print("send: {}".format(sub_str))
 
         res = await websocket.recv()
         res = inflate(res)
-        print(f"{res}")
+        print("{}".format(res))
 
 
 api_key = ''

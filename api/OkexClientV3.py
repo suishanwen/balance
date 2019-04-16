@@ -4,7 +4,7 @@
 import configparser
 import time
 import datetime
-import util.WebsocketUtil as webSocket
+# import util.WebsocketUtil as webSocket
 from util.MyUtil import from_time_stamp
 from util.Logger import logger
 import api.okex_sdk_v3.spot_api as spot
@@ -166,21 +166,21 @@ class OkexClient(object):
         else:
             return "failed"
 
-    # def get_coin_price(self, symbol):
-    #     data = {}
-    #     try:
-    #         data = spotAPI.get_depth(symbol)
-    #     except Exception as e:
-    #         logger.error("***depth:%s" % e)
-    #     price_info = self.priceInfo[symbol]
-    #     if data is not None and data.get("asks") is not None:
-    #         price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
-    #         price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"]))
-    #     else:
-    #         self.get_coin_price(symbol)
+    def get_coin_price(self, symbol):
+        data = {}
+        try:
+            data = spotAPI.get_depth(symbol)
+        except Exception as e:
+            logger.error("***depth:%s" % e)
+        price_info = self.priceInfo[symbol]
+        if data is not None and data.get("asks") is not None:
+            price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
+            price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"]))
+        else:
+            self.get_coin_price(symbol)
 
-    def get_coin_price(self):
-        webSocket.conn(self)
+    # def get_coin_price(self):
+    #     webSocket.conn(self)
 
     def get_price_info(self, symbol, depth):
         price_info = self.priceInfo[symbol]
@@ -200,7 +200,7 @@ class OkexClient(object):
         return bids[depth - 1][0], avg_buy, amount_buy_sum, asks[depth - 1][0], avg_sell, amount_sell_sum
 
     def get_trade_price(self, symbol, order_type):
-        self.get_coin_price()
+        self.get_coin_price(symbol)
         if order_type == self.TRADE_BUY:
             return self.priceInfo[symbol]["asks"][0][0]
         else:

@@ -9,6 +9,7 @@ import hmac
 import base64
 import zlib
 
+
 def get_server_time():
     url = "http://www.okex.com/api/general/v3/time"
     response = requests.get(url)
@@ -17,11 +18,13 @@ def get_server_time():
     else:
         return ""
 
+
 def server_timestamp():
     server_time = get_server_time()
     parsed_t = dp.parse(server_time)
     timestamp = parsed_t.timestamp()
     return timestamp
+
 
 def login_params(timestamp, api_key, passphrase, secret_key):
     message = timestamp + 'GET' + '/users/self/verify'
@@ -33,13 +36,15 @@ def login_params(timestamp, api_key, passphrase, secret_key):
     login_str = json.dumps(login_param)
     return login_str
 
+
 def inflate(data):
     decompress = zlib.decompressobj(
-            -zlib.MAX_WBITS  # see above
+        -zlib.MAX_WBITS  # see above
     )
     inflated = decompress.decompress(data)
     inflated += decompress.flush()
     return inflated
+
 
 # subscribe channel without login
 #
@@ -67,16 +72,17 @@ async def subscribe_without_login(url, channels):
         sub_param = {"op": "subscribe", "args": channels}
         sub_str = json.dumps(sub_param)
         await  websocket.send(sub_str)
-        print(f"send: {sub_str}")
+        print("send: {}".format(sub_str))
 
         print("receive:")
         res = await websocket.recv()
         res = inflate(res)
-        print(f"{res}")
+        print("{}".format(res))
 
         res = await websocket.recv()
         res = inflate(res)
-        print(f"{res}")
+        print("{}".format(res))
+
 
 # subscribe channel need login
 #
@@ -107,6 +113,7 @@ async def subscribe(url, api_key, passphrase, secret_key, channels):
         res = inflate(res)
         print(f"{res}")
 
+
 # unsubscribe channels
 async def unsubscribe(url, api_key, passphrase, secret_key, channels):
     async with websockets.connect(url) as websocket:
@@ -128,6 +135,7 @@ async def unsubscribe(url, api_key, passphrase, secret_key, channels):
         res = inflate(res)
         print(f"{res}")
 
+
 # unsubscribe channels
 async def unsubscribe_without_login(url, channels):
     async with websockets.connect(url) as websocket:
@@ -140,6 +148,7 @@ async def unsubscribe_without_login(url, channels):
         res = inflate(res)
         print(f"{res}")
 
+
 api_key = ''
 seceret_key = ''
 passphrase = ''
@@ -149,4 +158,4 @@ channels = ["swap/ticker:BTC-USD-SWAP"]
 # asyncio.get_event_loop().run_until_complete(subscribe(url, api_key, passphrase, seceret_key, channels))
 # asyncio.get_event_loop().run_until_complete(unsubscribe(url, api_key, passphrase, seceret_key, channels))
 asyncio.get_event_loop().run_until_complete(subscribe_without_login(url, channels))
-asyncio.get_event_loop().run_until_complete(unsubscribe_without_login(url, channels))
+# asyncio.get_event_loop().run_until_complete(unsubscribe_without_login(url, channels))

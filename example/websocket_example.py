@@ -52,5 +52,5 @@ async def subscribe_without_login(url, channels):
 
 
 url = 'wss://real.okex.com:10442/ws/v3'
-channels = ["spot/depth5:OKB-USDT"]
+channels = ["spot/depth5:okb_usdt"]
 asyncio.get_event_loop().run_until_complete(subscribe_without_login(url, channels))

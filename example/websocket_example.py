@@ -45,7 +45,7 @@ async def subscribe_without_login(url, channels):
         res = await websocket.recv()
         res = inflate(res)
         print("{}".format(res))
-        for i in range(10):
+        for i in range(1000):
             res = await websocket.recv()
             res = inflate(res)
             print("{}".format(res))

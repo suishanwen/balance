@@ -1,40 +1,7 @@
-#!/usr/bin/env python
-
 import asyncio
 import websockets
 import json
-import requests
-import dateutil.parser as dp
-import hmac
-import base64
 import zlib
-
-
-def get_server_time():
-    url = "http://www.okex.com/api/general/v3/time"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.json()['iso']
-    else:
-        return ""
-
-
-def server_timestamp():
-    server_time = get_server_time()
-    parsed_t = dp.parse(server_time)
-    timestamp = parsed_t.timestamp()
-    return timestamp
-
-
-def login_params(timestamp, api_key, passphrase, secret_key):
-    message = timestamp + 'GET' + '/users/self/verify'
-    mac = hmac.new(bytes(secret_key, encoding='utf8'), bytes(message, encoding='utf-8'), digestmod='sha256')
-    d = mac.digest()
-    sign = base64.b64encode(d)
-
-    login_param = {"op": "login", "args": [api_key, passphrase, timestamp, sign.decode("utf-8")]}
-    login_str = json.dumps(login_param)
-    return login_str
 
 
 def inflate(data):
@@ -84,26 +51,6 @@ async def subscribe_without_login(url, channels):
         print("{}".format(res))
 
 
-# unsubscribe channels
-async def unsubscribe_without_login(url, channels):
-    async with websockets.connect(url) as websocket:
-        sub_param = {"op": "unsubscribe", "args": channels}
-        sub_str = json.dumps(sub_param)
-        await  websocket.send(sub_str)
-        print("send: {}".format(sub_str))
-
-        res = await websocket.recv()
-        res = inflate(res)
-        print("{}".format(res))
-
-
-api_key = ''
-seceret_key = ''
-passphrase = ''
 url = 'wss://real.okex.com:10442/ws/v3'
-# asyncio.get_event_loop().run_until_complete(login(url, api_key, passphrase, seceret_key))
-channels = ["swap/ticker:BTC-USD-SWAP"]
-# asyncio.get_event_loop().run_until_complete(subscribe(url, api_key, passphrase, seceret_key, channels))
-# asyncio.get_event_loop().run_until_complete(unsubscribe(url, api_key, passphrase, seceret_key, channels))
+channels = ["swap/depth5:okb_usdt"]
 asyncio.get_event_loop().run_until_complete(subscribe_without_login(url, channels))
-# asyncio.get_event_loop().run_until_complete(unsubscribe_without_login(url, channels))

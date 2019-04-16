@@ -15,19 +15,19 @@ def inflate(data):
     return inflated
 
 
-def ping(websocket, client):
+async def ping(websocket, client):
     time.sleep(15)
     res = await websocket.send("ping")
     if res == "pong":
         logger.info(res)
-        ping(websocket, client)
+        await ping(websocket, client)
     else:
         logger.warning("restart socket")
         websocket.close()
         conn(client)
 
 
-def recv(websocket, client):
+async def recv(websocket, client):
     try:
         while True:
             price_info = client.priceInfo[client.SYMBOL_T]

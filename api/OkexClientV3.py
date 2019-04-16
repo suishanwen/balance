@@ -65,9 +65,6 @@ class OkexClient(object):
     emailDay = 0
     buyRate = 1
     sellRate = 1
-    socketHeight = 0
-    # 0未启动 1 运行中 2重启
-    socketStatus = 0
 
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}

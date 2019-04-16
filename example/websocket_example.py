@@ -45,12 +45,12 @@ async def subscribe_without_login(url, channels):
         res = await websocket.recv()
         res = inflate(res)
         print("{}".format(res))
-
-        res = await websocket.recv()
-        res = inflate(res)
-        print("{}".format(res))
+        for i in range(10):
+            res = await websocket.recv()
+            res = inflate(res)
+            print("{}".format(res))
 
 
 url = 'wss://real.okex.com:10442/ws/v3'
-channels = ["spot/depth5:okb_usdt"]
+channels = ["spot/depth5:OKB-USDT", "swap/candle60s:OKB-USDT"]
 asyncio.get_event_loop().run_until_complete(subscribe_without_login(url, channels))

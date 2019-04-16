@@ -2,10 +2,8 @@
 # encoding: utf-8
 
 import configparser
-import sys
 import time
 import datetime
-import traceback
 from util.MyUtil import from_time_stamp
 from util.Logger import logger
 import api.okex_sdk_v3.spot_api as spot
@@ -77,21 +75,24 @@ class OkexClient(object):
 
     @classmethod
     def make_order(cls, my_order_info):
-        print(
-            u'\n-------------------------------------------spot order------------------------------------------------')
+        logger.info('-----------------------------------------spot order----------------------------------------------')
         result = {}
         try:
             result = spotAPI.take_order(my_order_info.orderType, my_order_info.symbol, 2, my_order_info.price,
                                         my_order_info.amount)
         except Exception as e:
-            print("***trade:%s" % e)
+            logger.error("***trade:%s" % e)
         if result is not None and result.get('result'):
-            print("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                  my_order_info.amount, "  ", from_time_stamp(int(time.time())))
+            logger.info(
+                "Order {} {} {} {} {} {}".format(result['order_id'], my_order_info.symbol, my_order_info.orderType,
+                                                 my_order_info.price, my_order_info.amount,
+                                                 from_time_stamp(int(time.time()))))
             return result['order_id']
         else:
-            print("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                  my_order_info.amount, round(my_order_info.price * my_order_info.amount, 3))
+            logger.error(
+                "order failed！{} {} {} {} {}".format(my_order_info.symbol, my_order_info.orderType, my_order_info.price,
+                                                     my_order_info.amount,
+                                                     round(my_order_info.price * my_order_info.amount, 3)))
             return -1
 
     def check_order_status(self, my_order_info, wait_count=0):
@@ -100,7 +101,7 @@ class OkexClient(object):
         try:
             order_result = spotAPI.get_order_info(my_order_info.orderId, my_order_info.symbol)
         except Exception as e:
-            print("***orderinfo:%s" % e)
+            logger.error("***orderinfo:%s" % e)
         if order_result is not None and order_result.get('order_id') == my_order_info.orderId:
             order = order_result
             order_id = order["order_id"]
@@ -110,28 +111,26 @@ class OkexClient(object):
                 my_order_info.set_deal_amount(filled_size)
                 my_order_info.set_avg_price(float(order["filled_notional"]) / filled_size)
             if status == self.CANCELLED_STATUS:
-                print("order", order_id, "canceled")
+                logger.info("order {} canceled".format(order_id))
             elif status == 'open':
                 if wait_count == self.TRADE_WAIT_COUNT:
-                    print("timeout no deal")
+                    logger.info("timeout no deal")
                 else:
-                    print("no deal", end=" ")
-                    sys.stdout.flush()
+                    logger.info("no deal")
             elif status == 'part_filled':
                 if wait_count == self.TRADE_WAIT_COUNT:
-                    print("part dealed ", my_order_info.dealAmount)
+                    logger.info("timeout part deal {}".format(my_order_info.dealAmount))
                 else:
-                    print("part dealed ", my_order_info.dealAmount, end=" ")
-                    sys.stdout.flush()
+                    logger.info("part deal {}".format(my_order_info.dealAmount))
             elif status == self.FILLED_STATUS:
-                print("order", order_id, "filled")
+                logger.info("order {} filled".format(order_id))
             elif status == 'canceling':
-                print("order", order_id, "canceling")
+                logger.info("order {} canceling".format(order_id))
             elif status == 'ordering':
-                print("order", order_id, "ordering")
+                logger.info("order {} ordering".format(order_id))
             return status
         else:
-            print(order_id, "checkOrderStatus failed,try again.")
+            logger.warning("order {} checkOrderStatus failed,try again.".format(order_id))
             return self.check_order_status(my_order_info, wait_count)
 
     def trade(self, my_order_info):
@@ -171,7 +170,7 @@ class OkexClient(object):
         try:
             data = spotAPI.get_depth(symbol)
         except Exception as e:
-            print("***depth:%s" % e)
+            logger.error("***depth:%s" % e)
         price_info = self.priceInfo[symbol]
         if data is not None and data.get("asks") is not None:
             price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
@@ -204,8 +203,7 @@ class OkexClient(object):
             return self.priceInfo[symbol]["bids"][0][0]
 
     def get_account_info(self):
-        print(
-            '---------------------------------------spot account info------------------------------------------------')
+        logger.info('-----------------------------------spot account info--------------------------------------------')
         try:
             accounts = ['USDT', self.BALANCE_T.upper()]
             for symbol in accounts:
@@ -215,11 +213,10 @@ class OkexClient(object):
                                                                           t_account["available"],
                                                                           t_account["frozen"]))
                 else:
-                    print("getAccountInfo Fail,Try again!")
+                    logger.warning("getAccountInfo Fail,Try again!")
                     self.get_account_info()
         except Exception as err:
-            logger.error(err, traceback.format_exc())
-            exit()
+            logger.error(err)
             self.get_account_info()
 
     @classmethod
@@ -238,7 +235,7 @@ class OkexClient(object):
         try:
             result = spotAPI.get_kline(symbol, start, end, granularity)
         except Exception as e:
-            print("***klines:%s" % e)
+            logger.error("***klines:%s" % e)
         if isinstance(result, list):
             return list(map(cls.get_line_data, result))
         else:

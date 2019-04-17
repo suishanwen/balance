@@ -219,10 +219,11 @@ class OkexClient(object):
     def get_coin_price(self, symbol):
         self.ws_connect()
         self.socketData = None
-        threading.Thread(target=self.socket_recv, args=(self,)).start()
-        i = 0
         pong = self.ws.send("ping")
         logger.info("ping->>>>>{}".format(pong))
+        logger.info(self.inflate(self.ws.recv()))
+        threading.Thread(target=self.socket_recv, args=(self,)).start()
+        i = 0
         while not self.socketData:
             time.sleep(0.1)
             i += 1

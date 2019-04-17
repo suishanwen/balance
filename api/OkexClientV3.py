@@ -195,7 +195,8 @@ class OkexClient(object):
                     pair = self.SYMBOL_T.upper().replace("_", "-")
                     sub_param = {"op": "subscribe", "args": ["spot/depth5:{}".format(pair)]}
                     sub_str = json.dumps(sub_param)
-                    result = self.ws.send(sub_str)
+                    self.ws.send(sub_str)
+                    result = json.loads(self.inflate(self.ws.recv()))
                     logger.info(result)
                     break
                 except socket.timeout:

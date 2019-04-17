@@ -221,7 +221,8 @@ class OkexClient(object):
         self.socketData = None
         pong = self.ws.send("ping")
         logger.info("ping->>>>>{}".format(pong))
-        logger.info(self.inflate(self.ws.recv()))
+        data = self.inflate(self.ws.recv())
+        logger.info("ping---recv-->{}".format(data.decode(encoding="utf-8")))
         threading.Thread(target=self.socket_recv, args=(self,)).start()
         i = 0
         while not self.socketData:

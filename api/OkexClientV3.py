@@ -227,8 +227,11 @@ class OkexClient(object):
             i += 1
             if i == 150:
                 self.ping = True
-                self.ws.send(b"ping")
-                logger.info("ping.........")
+                try:
+                    self.ws.send(b"ping")
+                    logger.info("ping.........")
+                except Exception as e:
+                    logger.info("ping exception，{}".format(e))
                 time.sleep(1)
                 break
         if self.ping and self.socketData != 'pong':

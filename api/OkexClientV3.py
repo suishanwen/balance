@@ -196,7 +196,7 @@ class OkexClient(object):
                     sub_param = {"op": "subscribe", "args": ["spot/depth5:{}".format(pair)]}
                     sub_str = json.dumps(sub_param)
                     self.ws.send(sub_str)
-                    result = json.loads(self.inflate(self.ws.recv()))
+                    result = self.inflate(self.ws.recv())
                     logger.info(result)
                     break
                 except socket.timeout:
@@ -215,7 +215,6 @@ class OkexClient(object):
     @classmethod
     def socket_recv(cls, client):
         client.socketData = cls.inflate(client.ws.recv())
-        logger.info("socket_recv---->{}".format(client.socketData))
 
     def get_coin_price(self, symbol):
         self.ws_connect()

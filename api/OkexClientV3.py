@@ -219,13 +219,15 @@ class OkexClient(object):
     def get_coin_price(self, symbol):
         self.ws_connect()
         self.socketData = None
+        pong = self.ws.send(b"ping")
+        logger.info("ping->>>>>{}".format(pong))
         threading.Thread(target=self.socket_recv, args=(self,)).start()
         i = 0
         while not self.socketData:
             time.sleep(0.1)
             i += 1
             if i == 150:
-                pong = self.ws.send("ping")
+                pong = self.ws.send(b"ping")
                 logger.info("ping->>>>>{}".format(pong))
                 if pong != "pong":
                     logger.warning("ping failed,reconnect!")

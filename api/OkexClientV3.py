@@ -218,10 +218,11 @@ class OkexClient(object):
 
     def get_coin_price(self, symbol):
         self.ws_connect()
-        price_info = self.priceInfo[symbol]
         self.socketData = None
         threading.Thread(target=self.socket_recv, args=(self,)).start()
         i = 0
+        pong = self.ws.send("ping")
+        logger.info("ping->>>>>{}".format(pong))
         while not self.socketData:
             time.sleep(0.1)
             i += 1
@@ -236,6 +237,7 @@ class OkexClient(object):
         res = json.loads(self.socketData.decode(encoding="utf-8"))
         if res and res.get("data") is not None:
             data = res.get("data")[0]
+            price_info = self.priceInfo[symbol]
             price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
             price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"]))
 

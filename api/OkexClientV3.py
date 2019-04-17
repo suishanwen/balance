@@ -234,7 +234,7 @@ class OkexClient(object):
                     self.get_coin_price(symbol)
                     break
         logger.info("self.socketData---->{}".format(self.socketData))
-        res = json.load(self.socketData.decode())
+        res = json.load(self.socketData.decode(encoding="utf-8"))
         logger.info("res->>>{}".format(res))
         if res and res.get("data") is not None:
             data = res.get("data")

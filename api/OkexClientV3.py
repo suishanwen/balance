@@ -237,7 +237,7 @@ class OkexClient(object):
         res = json.loads(self.socketData.decode(encoding="utf-8"))
         logger.info("res->>>{}".format(res))
         if res and res.get("data") is not None:
-            data = res.get("data")
+            data = res.get("data")[0]
             price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
             price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"]))
 

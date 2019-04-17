@@ -195,7 +195,7 @@ class OkexClient(object):
                     pair = self.SYMBOL_T.upper().replace("_", "-")
                     sub_param = {"op": "subscribe", "args": ["spot/depth5:{}".format(pair)]}
                     sub_str = json.dumps(sub_param)
-                    result = self.inflate(self.ws.send(sub_str))
+                    result = self.ws.send(sub_str)
                     logger.info(result)
                     break
                 except socket.timeout:
@@ -226,7 +226,7 @@ class OkexClient(object):
             time.sleep(0.1)
             i += 1
             if i == 150:
-                pong = self.inflate(self.ws.send("ping"))
+                pong = self.ws.send("ping")
                 logger.info("ping->>>>>{}".format(pong))
                 if pong != "pong":
                     logger.warning("ping failed,reconnect!")

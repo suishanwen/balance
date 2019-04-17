@@ -234,6 +234,7 @@ class OkexClient(object):
                     await self.get_coin_price(symbol)
                     break
         res = json.loads(self.socketData)
+        logger.info("res->>>{}".format(res))
         if res and res.get("data") is not None:
             data = res.get("data")
             price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))

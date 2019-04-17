@@ -213,10 +213,10 @@ class OkexClient(object):
         return inflated
 
     @classmethod
-    def socket_recv(cls, client):
-        client.socketData = client.ws.recv()
+    async def socket_recv(cls, client):
+        client.socketData = await cls.inflate(client.ws.recv())
 
-    def get_coin_price(self, symbol):
+    async def get_coin_price(self, symbol):
         self.ws_connect()
         price_info = self.priceInfo[symbol]
         self.socketData = None
@@ -226,14 +226,14 @@ class OkexClient(object):
             time.sleep(0.1)
             i += 1
             if i == 150:
-                pong = self.inflate(self.ws.send("ping"))
+                pong = await self.inflate(self.ws.send("ping"))
                 logger.info("ping->>>>>{}".format(pong))
                 if pong != "pong":
                     logger.warning("ping failed,reconnect!")
                     self.ws.close()
-                    self.get_coin_price(symbol)
+                    await self.get_coin_price(symbol)
                     break
-        res = json.loads(self.inflate(self.socketData))
+        res = json.loads(self.socketData)
         if res and res.get("data") is not None:
             data = res.get("data")
             price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))

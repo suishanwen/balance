@@ -197,7 +197,7 @@ class OkexClient(object):
                     sub_str = json.dumps(sub_param)
                     self.ws.send(sub_str)
                     result = self.inflate(self.ws.recv())
-                    logger.info(result)
+                    logger.info("{} subscribe:{}".format(pair, result))
                     break
                 except socket.timeout:
                     logger.error('\nconnect ws error,retry...')
@@ -233,9 +233,7 @@ class OkexClient(object):
                     self.ws.close()
                     self.get_coin_price(symbol)
                     break
-        logger.info("self.socketData---->{}".format(self.socketData))
         res = json.loads(self.socketData.decode(encoding="utf-8"))
-        logger.info("res->>>{}".format(res))
         if res and res.get("data") is not None:
             data = res.get("data")[0]
             price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))

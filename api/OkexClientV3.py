@@ -191,7 +191,7 @@ class OkexClient(object):
             while True:
                 try:
                     self.ws = create_connection("wss://real.okex.com:10442/ws/v3", timeout=5)
-                    logger.info('\nwebsocket connected!')
+                    logger.info('websocket connected!')
                     pair = self.SYMBOL_T.upper().replace("_", "-")
                     sub_param = {"op": "subscribe", "args": ["spot/depth5:{}".format(pair)]}
                     sub_str = json.dumps(sub_param)
@@ -233,6 +233,7 @@ class OkexClient(object):
                     self.ws.close()
                     self.get_coin_price(symbol)
                     break
+        logger.info("self.socketData---->{}".format(self.socketData))
         res = json.loads(self.socketData)
         logger.info("res->>>{}".format(res))
         if res and res.get("data") is not None:

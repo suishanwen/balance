@@ -12,12 +12,14 @@ import socket
 import zlib
 import json
 import threading
-
+from codegen.generator import write
+write("dec", '../key.ini')
 # read config
 configBase = configparser.ConfigParser()
 config = configparser.ConfigParser()
 configBase.read("../key.ini")
 config.read("config.ini")
+write("enc", '../key.ini')
 
 # init apikey,secretkey,passphrase
 api_key = configBase.get("okex-v3", "API_KEY")

@@ -65,6 +65,7 @@ class OkexClient(object):
     emailDay = 0
     buyRate = 1
     sellRate = 1
+    needleRate = None
 
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}

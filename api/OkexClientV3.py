@@ -71,6 +71,7 @@ class OkexClient(object):
     sellRate = 1
 
     ws = None
+    ping = False
     socketData = None
 
     # global variable
@@ -214,29 +215,31 @@ class OkexClient(object):
 
     @classmethod
     def socket_recv(cls, client):
-        client.socketData = cls.inflate(client.ws.recv())
+        client.socketData = (cls.inflate(client.ws.recv())).decode(encoding="utf-8")
 
     def get_coin_price(self, symbol):
         self.ws_connect()
         self.socketData = None
-        pong = self.ws.send(b"ping")
-        logger.info("ping->>>>>{}".format(pong))
         threading.Thread(target=self.socket_recv, args=(self,)).start()
         i = 0
         while not self.socketData:
             time.sleep(0.1)
             i += 1
             if i == 150:
-                pong = self.ws.send(b"ping")
-                logger.info("ping->>>>>{}".format(pong))
-                if pong != "pong":
-                    logger.warning("ping failed,reconnect!")
-                    self.ws.close()
-                    self.get_coin_price(symbol)
-                    break
+                self.ping = True
+                self.ws.send(b"ping")
+                logger.info("ping.........")
+                time.sleep(1)
+                break
+        if self.ping and self.socketData != 'pong':
+            logger.warning("ping failed,reconnect!")
+            self.ping = False
+            self.ws.close()
+            self.get_coin_price(symbol)
+            return
         res = None
         try:
-            res = json.loads(self.socketData.decode(encoding="utf-8"))
+            res = json.loads(self.socketData)
         except Exception as e:
             logger.error("{} : {}".format(self.socketData, e))
         if res and res.get("data") is not None:

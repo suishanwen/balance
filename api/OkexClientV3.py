@@ -8,6 +8,11 @@ import datetime
 from util.MyUtil import from_time_stamp
 from util.Logger import logger
 import api.okex_sdk_v3.spot_api as spot
+from websocket import create_connection
+import socket
+import zlib
+import json
+import threading
 
 # read config
 configBase = configparser.ConfigParser()
@@ -65,6 +70,9 @@ class OkexClient(object):
     emailDay = 0
     buyRate = 1
     sellRate = 1
+
+    ws = None
+    socketData = None
 
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}
@@ -166,21 +174,70 @@ class OkexClient(object):
         else:
             return "failed"
 
+    # def get_coin_price(self, symbol):
+    #     data = {}
+    #     try:
+    #         data = spotAPI.get_depth(symbol)
+    #     except Exception as e:
+    #         logger.error("***depth:%s" % e)
+    #     price_info = self.priceInfo[symbol]
+    #     if data is not None and data.get("asks") is not None:
+    #         price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
+    #         price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"]))
+    #     else:
+    #         self.get_coin_price(symbol)
+
+    def ws_connect(self):
+        if self.ws is None or not self.ws.connected:
+            while True:
+                try:
+                    self.ws = create_connection("wss://real.okex.com:10442/ws/v3", timeout=5)
+                    logger.info('\nwebsocket connected!')
+                    pair = self.SYMBOL_T.upper().replace("_", "-")
+                    sub_param = {"op": "subscribe", "args": ["spot/depth5:{}".format(pair)]}
+                    sub_str = json.dumps(sub_param)
+                    result = self.inflate(self.ws.send(sub_str))
+                    logger.info(result)
+                    break
+                except socket.timeout:
+                    logger.error('\nconnect ws error,retry...')
+                    time.sleep(2)
+
+    @classmethod
+    def inflate(cls, data):
+        decompress = zlib.decompressobj(
+            -zlib.MAX_WBITS  # see above
+        )
+        inflated = decompress.decompress(data)
+        inflated += decompress.flush()
+        return inflated
+
+    @classmethod
+    def socket_recv(cls, client):
+        client.socketData = client.ws.recv()
+
     def get_coin_price(self, symbol):
-        data = {}
-        try:
-            data = spotAPI.get_depth(symbol)
-        except Exception as e:
-            logger.error("***depth:%s" % e)
+        self.ws_connect()
         price_info = self.priceInfo[symbol]
-        if data is not None and data.get("asks") is not None:
+        self.socketData = None
+        threading.Thread(target=self.socket_recv, args=(self,)).start()
+        i = 0
+        while not self.socketData:
+            time.sleep(0.1)
+            i += 1
+            if i == 150:
+                pong = self.inflate(self.ws.send("ping"))
+                logger.info("ping->>>>>{}".format(pong))
+                if pong != "pong":
+                    logger.warning("ping failed,reconnect!")
+                    self.ws.close()
+                    self.get_coin_price(symbol)
+                    break
+        res = json.loads(self.inflate(self.socketData))
+        if res and res.get("data") is not None:
+            data = res.get("data")
             price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
             price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"]))
-        else:
-            self.get_coin_price(symbol)
-
-    # def get_coin_price(self):
-    #     webSocket.conn(self)
 
     def get_price_info(self, symbol, depth):
         price_info = self.priceInfo[symbol]

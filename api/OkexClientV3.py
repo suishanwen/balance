@@ -234,7 +234,11 @@ class OkexClient(object):
                     self.ws.close()
                     self.get_coin_price(symbol)
                     break
-        res = json.loads(self.socketData.decode(encoding="utf-8"))
+        res = None
+        try:
+            res = json.loads(self.socketData.decode(encoding="utf-8"))
+        except Exception as e:
+            logger.error("{} : {}".format(self.socketData, e))
         if res and res.get("data") is not None:
             data = res.get("data")[0]
             price_info = self.priceInfo[symbol]

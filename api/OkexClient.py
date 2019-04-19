@@ -70,7 +70,7 @@ class OkexClient(object):
             print("***trade:%s" % e)
         if result is not None and result.get('result'):
             print("OrderId", result['order_id'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                  my_order_info.amount, "  ", from_time_stamp(int(time.time())))
+                  my_order_info.amount, "  ", from_time_stamp())
             return result['order_id']
         else:
             print("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,

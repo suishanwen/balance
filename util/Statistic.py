@@ -11,7 +11,7 @@ config.read("config.ini")
 
 
 def analyze_log():
-    yy_mm_dd = str(from_time_stamp(int(time.time())))[0:10]
+    yy_mm_dd = str(from_time_stamp())[0:10]
     order_list = []
     f = open(r'log.txt')
     line = f.readline()
@@ -35,7 +35,7 @@ def analyze_log():
 def generate_email(order_list):
     symbols = json.loads(config.get("trade", "symbol"))
     email_content = "<html>\n<body>\n<div>"
-    email_content += "\n<h2>收益统计 {}</h2>".format(str(from_time_stamp(int(time.time())))[0:10])
+    email_content += "\n<h2>收益统计 {}</h2>".format(str(from_time_stamp())[0:10])
     # 交易币种
     for symbol in symbols:
         order_list_symbol = list(filter(lambda x: True if x.symbol == symbol else False, order_list))

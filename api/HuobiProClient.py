@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # encoding: utf-8
 
-import time
 import sys
 
 from api.HuobiProAPI import *
@@ -92,7 +91,7 @@ class HuobiProClient(object):
             result = self.check_order_list(my_order_info)
         if result is not None and result.get('status') == 'ok':
             print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                  my_order_info.amount, "  ", from_time_stamp(int(time.time())))
+                  my_order_info.amount, "  ", from_time_stamp())
             return result['data']
         else:
             print("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,

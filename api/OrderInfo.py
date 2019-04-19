@@ -1,4 +1,3 @@
-import datetime
 import re
 
 from util.MyUtil import from_time_stamp
@@ -19,8 +18,7 @@ class MyOrderInfo(object):
         self.transaction = 0
         self.count = 0
         self.trigger = self.get_trigger(trigger)
-        self.triggerSeconds = int("%0.0f" % datetime.datetime.utcnow().timestamp()) + 3600 * 8
-        self.timestamp = from_time_stamp(self.triggerSeconds)
+        self.timestamp = from_time_stamp()
         self.canceled = 0
 
     def __repr__(self):

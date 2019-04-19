@@ -1,6 +1,3 @@
-running logs: https://bitcoinrobot.cn/balance/ok/log.txt
-
-
 每日收益统计
 
 

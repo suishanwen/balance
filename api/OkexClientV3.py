@@ -97,7 +97,7 @@ class OkexClient(object):
             logger.info(
                 "Order {} {} {} {} {} {}".format(result['order_id'], my_order_info.symbol, my_order_info.orderType,
                                                  my_order_info.price, my_order_info.amount,
-                                                 from_time_stamp(int(time.time()))))
+                                                 from_time_stamp()))
             return result['order_id']
         else:
             logger.error(

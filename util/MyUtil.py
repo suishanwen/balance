@@ -3,8 +3,10 @@ import smtplib
 import time
 import configparser
 import json
+import pytz
 from email.mime.text import MIMEText
 from email.header import Header
+
 
 # read config
 config = configparser.ConfigParser()
@@ -22,8 +24,9 @@ def from_dict(_dict, *args):
     return _dict
 
 
-def from_time_stamp(time_stamp):
-    return datetime.datetime.fromtimestamp(float(time_stamp))
+def from_time_stamp(seconds=int(time.time())):
+    return datetime.datetime.fromtimestamp(seconds, pytz.timezone('Asia/Shanghai')).strftime(
+        '%Y-%m-%d %H:%M:%S')
 
 
 def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
@@ -51,7 +54,7 @@ def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
 
 def write_log(text=""):
     s = open('log.txt').read()
-    mm = str(from_time_stamp(int(time.time())))[0:7]
+    mm = str(from_time_stamp())[0:7]
     if s.find(mm) != -1:
         f = open(r'log.txt', 'w')
         f.write(text + "\n" + s)

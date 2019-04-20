@@ -31,6 +31,11 @@ def from_time_stamp(seconds=0):
         '%Y-%m-%d %H:%M:%S')
 
 
+def get_day_bj():
+    return datetime.datetime.fromtimestamp(int(time.time()), pytz.timezone('Asia/Shanghai')).strftime(
+        '%d')
+
+
 def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
     # 第三方 SMTP 服务
     mail_host = "smtp.gmail.com"  # 设置服务器

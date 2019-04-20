@@ -1,11 +1,11 @@
 import datetime
 import smtplib
+import time
 import configparser
 import json
 import pytz
 from email.mime.text import MIMEText
 from email.header import Header
-
 
 # read config
 config = configparser.ConfigParser()
@@ -23,7 +23,10 @@ def from_dict(_dict, *args):
     return _dict
 
 
-def from_time_stamp(seconds=int(datetime.datetime.utcnow().timestamp())):
+def from_time_stamp(seconds=0):
+    # remark: int(time.time()) 不能放到参数默认值，否则会初始化为常量
+    if seconds == 0:
+        seconds = int(time.time())
     return datetime.datetime.fromtimestamp(seconds, pytz.timezone('Asia/Shanghai')).strftime(
         '%Y-%m-%d %H:%M:%S')
 
@@ -63,10 +66,9 @@ def write_log(text=""):
         f.writelines("\n")
         f.close()
         # write old logs
-        old_f = open(str(from_time_stamp(int(datetime.datetime.utcnow().timestamp()) - 86400 * 10))[0:7] + '.txt', 'w')
+        old_f = open(str(from_time_stamp(int(time.time()) - 86400 * 10))[0:7] + '.txt', 'w')
         old_f.writelines(open('log.txt').readlines()[::-1])
         # write count
-        config = configparser.ConfigParser()
         config.read("config.ini")
         symbols = json.loads(config.get("trade", "symbol"))
         for symbol in symbols:

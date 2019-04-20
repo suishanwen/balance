@@ -1,6 +1,5 @@
 import datetime
 import smtplib
-import time
 import configparser
 import json
 import pytz
@@ -24,7 +23,7 @@ def from_dict(_dict, *args):
     return _dict
 
 
-def from_time_stamp(seconds=int(time.time())):
+def from_time_stamp(seconds=int(datetime.datetime.utcnow().timestamp())):
     return datetime.datetime.fromtimestamp(seconds, pytz.timezone('Asia/Shanghai')).strftime(
         '%Y-%m-%d %H:%M:%S')
 
@@ -64,7 +63,7 @@ def write_log(text=""):
         f.writelines("\n")
         f.close()
         # write old logs
-        old_f = open(str(from_time_stamp(int(time.time()) - 86400 * 10))[0:7] + '.txt', 'w')
+        old_f = open(str(from_time_stamp(int(datetime.datetime.utcnow().timestamp()) - 86400 * 10))[0:7] + '.txt', 'w')
         old_f.writelines(open('log.txt').readlines()[::-1])
         # write count
         config = configparser.ConfigParser()

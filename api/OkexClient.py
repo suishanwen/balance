@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # encoding: utf-8
 
-import time
 import sys
 import configparser
 

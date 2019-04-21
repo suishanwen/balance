@@ -4,5 +4,8 @@
 每日收益统计
 
 
-![image](http://bitcoinrobot.cn/file/img/bitcoinrobot_stat.png)
+![image](https://bitcoinrobot.cn/api/file/statistic)
+
+
+![image](https://bitcoinrobot.cn/file/img/bitcoinrobot_stat.png)
 

@@ -4,6 +4,6 @@
 
 
 
-![image](https://bitcoinrobot.cn/api/file/stats)
+![image](https://bitcoinrobot.cn/api/file/statics)
 
 

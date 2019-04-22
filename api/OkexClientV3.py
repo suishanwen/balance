@@ -7,12 +7,12 @@ import datetime
 from util.MyUtil import from_time_stamp
 from util.Logger import logger
 import api.okex_sdk_v3.spot_api as spot
-from websocket import create_connection
-import socket
+from websocket import create_connection, WebSocketTimeoutException
 import zlib
 import json
 import threading
 from codegen.generator import write
+
 write("dec", '../key.ini')
 # read config
 configBase = configparser.ConfigParser()
@@ -202,7 +202,7 @@ class OkexClient(object):
                     result = self.inflate(self.ws.recv())
                     logger.info("{} subscribe:{}".format(pair, result))
                     break
-                except socket.timeout:
+                except WebSocketTimeoutException:
                     logger.error('\nconnect ws error,retry...')
                     time.sleep(2)
 

@@ -1,6 +1,9 @@
-每日收益统计
+[![HitCount](http://hits.dwyl.io/suishanwen/balance.svg)](http://hits.dwyl.io/suishanwen/balance)
 
 
-<div>
- <img stlye="display:inline-block" src="http://bitcoinrobot.cn/file/img/bitcoinrobot_stat.png"/> 
-</div>
+
+
+
+![image](https://bitcoinrobot.cn/api/file/statics)
+
+

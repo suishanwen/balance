@@ -191,20 +191,19 @@ class OkexClient(object):
 
     def ws_connect(self):
         if self.ws is None or not self.ws.connected:
-            while True:
-                try:
-                    self.ws = create_connection("wss://real.okex.com:10442/ws/v3", timeout=5)
-                    logger.info('websocket connected!')
-                    pair = self.SYMBOL_T.upper().replace("_", "-")
-                    sub_param = {"op": "subscribe", "args": ["spot/depth5:{}".format(pair)]}
-                    sub_str = json.dumps(sub_param)
-                    self.ws.send(sub_str)
-                    result = self.inflate(self.ws.recv())
-                    logger.info("{} subscribe:{}".format(pair, result))
-                    break
-                except Exception as e:
-                    logger.error('\nconnect ws error[{}],retry...'.format(e))
-                    time.sleep(2)
+            try:
+                self.ws = create_connection("wss://real.okex.com:10442/ws/v3", timeout=5)
+                logger.info('websocket connected!')
+                pair = self.SYMBOL_T.upper().replace("_", "-")
+                sub_param = {"op": "subscribe", "args": ["spot/depth5:{}".format(pair)]}
+                sub_str = json.dumps(sub_param)
+                self.ws.send(sub_str)
+                result = self.inflate(self.ws.recv())
+                logger.info("{} subscribe:{}".format(pair, result))
+            except Exception as e:
+                logger.error('\nconnect ws error[{}],retry...'.format(e))
+                time.sleep(2)
+                self.ws_connect()
 
     @classmethod
     def inflate(cls, data):

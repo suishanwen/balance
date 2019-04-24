@@ -6,7 +6,7 @@ import json
 import pytz
 from email.mime.text import MIMEText
 from email.header import Header
-
+from util.Logger import logger
 # read config
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -51,10 +51,10 @@ def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
         server.login(mail_user, mail_pass)
         server.sendmail(mail_user, receivers, message.as_string())
         server.close()
-        print("邮件发送成功")
+        logger.info("邮件发送成功")
         return True
     except smtplib.SMTPException as err:
-        print("Error: 邮件发送失败,{}".format(err))
+        logger.error("Error: 邮件发送失败,{}".format(err))
         return False
 
 
@@ -81,7 +81,7 @@ def write_log(text=""):
             try:
                 sum_count = sum(json.loads(config.get(cfg_field, "count")))
             except Exception as err:
-                print(err)
+                logger.error("Error: write_log,{}".format(err))
             old_f.writelines(symbol + " [" + str(sum_count) + "]")
         old_f.close()
         f = open(r'log.txt', 'w')

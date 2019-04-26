@@ -1,4 +1,4 @@
-[![HitCount](http://hits.dwyl.io/suishanwen/balance.svg)](http://hits.dwyl.io/suishanwen/balance)
+
 
 
 

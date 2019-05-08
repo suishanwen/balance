@@ -39,6 +39,7 @@ class HuobiProClient(object):
     emailDay = 0
     buyRate = 1
     sellRate = 1
+    nightMode = False
 
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}

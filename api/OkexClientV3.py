@@ -71,6 +71,7 @@ class OkexClient(object):
     emailDay = 0
     buyRate = 1
     sellRate = 1
+    nightMode = False
 
     ws = None
     ping = False

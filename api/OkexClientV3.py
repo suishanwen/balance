@@ -46,7 +46,7 @@ granularityDict = {
 
 
 class OkexClient(object):
-    BALANCE_USD = "USDT"
+    BALANCE_USD = "usdt"
     BALANCE_T = ""
 
     SYMBOL_T = ""
@@ -280,7 +280,7 @@ class OkexClient(object):
     def get_account_info(self):
         logger.info('-----------------------------------spot account info--------------------------------------------')
         try:
-            accounts = [BALANCE_USD, self.BALANCE_T.upper()]
+            accounts = [self.BALANCE_USD.upper(), self.BALANCE_T.upper()]
             for symbol in accounts:
                 t_account = spotAPI.get_coin_account_info(symbol)
                 if t_account.get('currency') == symbol:

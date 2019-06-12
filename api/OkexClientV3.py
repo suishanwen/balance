@@ -284,7 +284,7 @@ class OkexClient(object):
             for symbol in accounts:
                 t_account = spotAPI.get_coin_account_info(symbol)
                 if t_account.get('currency') == symbol:
-                    logger.info("%s:balance %s available %s frozen %s" % (symbol, t_account["available"],
+                    logger.info("%s:balance %s available %s frozen %s" % (symbol, t_account["balance"],
                                                                           t_account["available"],
                                                                           t_account["frozen"]))
                 else:

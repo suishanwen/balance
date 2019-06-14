@@ -245,6 +245,7 @@ class OkexClient(object):
                     time.sleep(1)
                     if self.socketData == "pong":
                         self.pong = True
+                        logger.info("pong!!!!!!!!!")
                     i += 1
                 break
         if self.ping and not self.pong:

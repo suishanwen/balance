@@ -243,6 +243,7 @@ class OkexClient(object):
                 while not self.pong and i < 5:
                     threading.Thread(target=self.socket_recv, args=(self,)).start()
                     time.sleep(1)
+                    logger.info("ping:{}".format(self.socketData))
                     if self.socketData == "pong":
                         self.pong = True
                         logger.info("pong!!!!!!!!!")

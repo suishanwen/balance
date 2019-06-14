@@ -236,7 +236,7 @@ class OkexClient(object):
                 self.pong = False
                 try:
                     self.socketData = None
-                    self.ws.send(b"ping")
+                    self.ws.send("ping")
                     logger.info("ping.........")
                 except Exception as e:
                     logger.info("ping exception，{}".format(e))

@@ -221,7 +221,7 @@ class OkexClient(object):
         try:
             client.socketData = (cls.inflate(client.ws.recv())).decode(encoding="utf-8")
         except Exception as e:
-            logger.error('\nrecv Exception:[{}]'.format(e))
+            logger.error('recv Exception:[{}]'.format(e))
 
     def get_coin_price(self, symbol):
         self.ws_connect()

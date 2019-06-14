@@ -227,34 +227,38 @@ class OkexClient(object):
         self.socketData = None
         threading.Thread(target=self.socket_recv, args=(self,)).start()
         i = 0
-        while not self.socketData:
-            time.sleep(0.1)
-            i += 1
-            if i == 150:
-                self.ping = True
-                try:
-                    self.ws.send(b"ping")
-                    logger.info("ping.........")
-                except Exception as e:
-                    logger.info("ping exception，{}".format(e))
-                time.sleep(1)
-                break
-        if self.ping and self.socketData != 'pong':
-            logger.warning("ping failed,reconnect!")
-            self.ping = False
-            self.ws.close()
-            self.get_coin_price(symbol)
-            return
-        res = None
-        try:
-            res = json.loads(self.socketData)
-        except Exception as e:
-            logger.error("{} : {}".format(self.socketData, e))
-        if res and res.get("data") is not None:
-            data = res.get("data")[0]
-            price_info = self.priceInfo[symbol]
-            price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
-            price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"]))
+        while True:
+            self.ws.send(b"ping")
+            time.sleep(1)
+            logger.info("socketData:{}".format(self.socketData))
+        # while not self.socketData:
+        #     time.sleep(0.1)
+        #     i += 1
+        #     if i == 150:
+        #         self.ping = True
+        #         try:
+        #             self.ws.send(b"ping")
+        #             logger.info("ping.........")
+        #         except Exception as e:
+        #             logger.info("ping exception，{}".format(e))
+        #         time.sleep(1)
+        #         break
+        # if self.ping and self.socketData != 'pong':
+        #     logger.warning("ping failed,reconnect!")
+        #     self.ping = False
+        #     self.ws.close()
+        #     self.get_coin_price(symbol)
+        #     return
+        # res = None
+        # try:
+        #     res = json.loads(self.socketData)
+        # except Exception as e:
+        #     logger.error("{} : {}".format(self.socketData, e))
+        # if res and res.get("data") is not None:
+        #     data = res.get("data")[0]
+        #     price_info = self.priceInfo[symbol]
+        #     price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
+        #     price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"]))
 
     def get_price_info(self, symbol, depth):
         price_info = self.priceInfo[symbol]

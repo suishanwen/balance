@@ -31,108 +31,108 @@ def analyze_log():
     return order_list
 
 
-def generate_email(order_list):
-    symbols = json.loads(config.get("trade", "symbol"))
+def generate_email(symbol, order_list):
+    # symbols = json.loads(config.get("trade", "symbol"))
     email_content = "<html>\n<body>\n<div>"
     email_content += "\n<h2>收益统计 {}</h2>".format(str(from_time_stamp())[0:10])
     # 交易币种
-    for symbol in symbols:
-        order_list_symbol = list(filter(lambda x: True if x.symbol == symbol else False, order_list))
-        # 总交易次数
-        trx_count_total = len(order_list_symbol)
-        # 策略交易次数
-        trx_count_valid = 0
-        # 策略交易次数（买）
-        trx_count_valid_buy = 0
-        # 策略交易次数（卖）
-        trx_count_valid_sell = 0
-        # 反转触发次数
-        trx_count_reverse = 0
-        # 插针触发次数
-        trx_count_needle = 0
-        # 部分成交撤单次数
-        trx_count_canceled = 0
-        # 总成交金额
-        trx_usdt_total = 0
-        # 总成交数量
-        trx_quantity_total = 0
-        # 总成交数量（买）
-        trx_quantity_buy = 0
-        # 总成交数量（卖）
-        trx_quantity_sell = 0
-        # 总交易均价
-        trx_price_avg = 0
-        # 余额变化
-        usdt_change = 0
-        # 持仓变化
-        quantity_change = 0
-        # 持仓增减均价
-        quantity_change_price = 0
-        # 理论收益
-        reward_weight_usdt = 0
-        # 吃单费率
-        fee_rate = 0.0015
-        # 点卡消耗
-        points_consume = 0
-        # 交易单
-        order_sheet = ""
-        for order in order_list_symbol:
-            order_sheet += "\n<p>" + order.__str__() + "</p>"
-            if order.canceled == 0:
-                trx_count_valid += 1
-                if order.orderType == "buy":
-                    trx_count_valid_buy += 1
-                    trx_quantity_buy += order.totalAmount
-                else:
-                    trx_count_valid_sell += 1
-                    trx_quantity_sell += order.totalAmount
-                if order.trigger == "reverse":
-                    trx_count_reverse += 1
-                elif order.trigger == "needle":
-                    trx_count_needle += 1
-                trx_usdt_total += abs(order.transaction)
-                trx_quantity_total += order.totalAmount
-                usdt_change += order.transaction
-                reward_weight_usdt += order.count
+    # for symbol in symbols:
+    order_list_symbol = list(filter(lambda x: True if x.symbol == symbol else False, order_list))
+    # 总交易次数
+    trx_count_total = len(order_list_symbol)
+    # 策略交易次数
+    trx_count_valid = 0
+    # 策略交易次数（买）
+    trx_count_valid_buy = 0
+    # 策略交易次数（卖）
+    trx_count_valid_sell = 0
+    # 反转触发次数
+    trx_count_reverse = 0
+    # 插针触发次数
+    trx_count_needle = 0
+    # 部分成交撤单次数
+    trx_count_canceled = 0
+    # 总成交金额
+    trx_usdt_total = 0
+    # 总成交数量
+    trx_quantity_total = 0
+    # 总成交数量（买）
+    trx_quantity_buy = 0
+    # 总成交数量（卖）
+    trx_quantity_sell = 0
+    # 总交易均价
+    trx_price_avg = 0
+    # 余额变化
+    usdt_change = 0
+    # 持仓变化
+    quantity_change = 0
+    # 持仓增减均价
+    quantity_change_price = 0
+    # 理论收益
+    reward_weight_usdt = 0
+    # 吃单费率
+    fee_rate = 0.0015
+    # 点卡消耗
+    points_consume = 0
+    # 交易单
+    order_sheet = ""
+    for order in order_list_symbol:
+        order_sheet += "\n<p>" + order.__str__() + "</p>"
+        if order.canceled == 0:
+            trx_count_valid += 1
+            if order.orderType == "buy":
+                trx_count_valid_buy += 1
+                trx_quantity_buy += order.totalAmount
             else:
-                trx_count_canceled += 1
-        if trx_quantity_total != 0:
-            trx_price_avg = trx_usdt_total / trx_quantity_total
-        quantity_change = trx_quantity_buy - trx_quantity_sell
-        if usdt_change > 0 and quantity_change > 0:
-            quantity_change_price = -trx_price_avg
+                trx_count_valid_sell += 1
+                trx_quantity_sell += order.totalAmount
+            if order.trigger == "reverse":
+                trx_count_reverse += 1
+            elif order.trigger == "needle":
+                trx_count_needle += 1
+            trx_usdt_total += abs(order.transaction)
+            trx_quantity_total += order.totalAmount
+            usdt_change += order.transaction
+            reward_weight_usdt += order.count
         else:
-            if quantity_change != 0:
-                quantity_change_price = abs(usdt_change / quantity_change)
-        points_consume = trx_usdt_total * fee_rate
-        if quantity_change >= 0:
-            change_type = "增"
-        else:
-            change_type = "减"
-        email_content += "\n<div>"
-        email_content += "\n<h3>%s</h3>" % symbol
-        email_content += "\n<table>"
-        email_content += get_tr("总交易次数", trx_count_total)
-        email_content += get_tr("部分成交撤单次数", trx_count_canceled)
-        email_content += get_tr("策略交易次数", trx_count_valid)
-        email_content += get_tr("策略交易次数（买）", trx_count_valid_buy)
-        email_content += get_tr("策略交易次数（卖）", trx_count_valid_sell)
-        email_content += get_tr("反转触发次数", trx_count_reverse)
-        email_content += get_tr("插针触发次数", trx_count_needle)
-        email_content += get_tr("总成交金额$", trx_usdt_total)
-        email_content += get_tr("总成交数量", trx_quantity_total)
-        email_content += get_tr("总成交数量（买）", trx_quantity_buy)
-        email_content += get_tr("总成交数量（卖）", trx_quantity_sell)
-        email_content += get_tr("总交易均价$", trx_price_avg)
-        email_content += get_tr("余额变化$", usdt_change)
-        email_content += get_tr("持仓变化", quantity_change)
-        email_content += get_tr("{}仓均价$".format(change_type), quantity_change_price)
-        email_content += get_tr("理论收益$", reward_weight_usdt)
-        email_content += get_tr("点卡消耗", points_consume)
-        email_content += "\n</table>"
-        email_content += "\n</div><br/>"
-        email_content += "\n<h4>交易单</h4>"
-        email_content += "\n<div>" + order_sheet + "\n</div>"
+            trx_count_canceled += 1
+    if trx_quantity_total != 0:
+        trx_price_avg = trx_usdt_total / trx_quantity_total
+    quantity_change = trx_quantity_buy - trx_quantity_sell
+    if usdt_change > 0 and quantity_change > 0:
+        quantity_change_price = -trx_price_avg
+    else:
+        if quantity_change != 0:
+            quantity_change_price = abs(usdt_change / quantity_change)
+    points_consume = trx_usdt_total * fee_rate
+    if quantity_change >= 0:
+        change_type = "增"
+    else:
+        change_type = "减"
+    email_content += "\n<div>"
+    email_content += "\n<h3>%s</h3>" % symbol
+    email_content += "\n<table>"
+    email_content += get_tr("总交易次数", trx_count_total)
+    email_content += get_tr("部分成交撤单次数", trx_count_canceled)
+    email_content += get_tr("策略交易次数", trx_count_valid)
+    email_content += get_tr("策略交易次数（买）", trx_count_valid_buy)
+    email_content += get_tr("策略交易次数（卖）", trx_count_valid_sell)
+    email_content += get_tr("反转触发次数", trx_count_reverse)
+    email_content += get_tr("插针触发次数", trx_count_needle)
+    email_content += get_tr("总成交金额$", trx_usdt_total)
+    email_content += get_tr("总成交数量", trx_quantity_total)
+    email_content += get_tr("总成交数量（买）", trx_quantity_buy)
+    email_content += get_tr("总成交数量（卖）", trx_quantity_sell)
+    email_content += get_tr("总交易均价$", trx_price_avg)
+    email_content += get_tr("余额变化$", usdt_change)
+    email_content += get_tr("持仓变化", quantity_change)
+    email_content += get_tr("{}仓均价$".format(change_type), quantity_change_price)
+    email_content += get_tr("理论收益$", reward_weight_usdt)
+    email_content += get_tr("点卡消耗", points_consume)
+    email_content += "\n</table>"
+    email_content += "\n</div><br/>"
+    email_content += "\n<h4>交易单</h4>"
+    email_content += "\n<div>" + order_sheet + "\n</div>"
     email_content += "\n</div>\n</body>\n</html>"
     return email_content
 

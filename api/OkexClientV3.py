@@ -236,12 +236,12 @@ class OkexClient(object):
                 self.pong = False
                 try:
                     self.ws.send(b"ping")
-                    threading.Thread(target=self.socket_recv, args=(self,)).start()
                     logger.info("ping.........")
                 except Exception as e:
                     logger.info("ping exception，{}".format(e))
                 i = 0
                 while not self.pong and i < 5:
+                    threading.Thread(target=self.socket_recv, args=(self,)).start()
                     time.sleep(1)
                     logger.info("ping:{}".format(self.socketData))
                     if self.socketData == "pong":

@@ -74,6 +74,7 @@ class OkexClient(object):
     nightMode = False
 
     ws = None
+    recvException = False
     ping = False
     pong = False
     socketData = None
@@ -218,9 +219,11 @@ class OkexClient(object):
 
     @classmethod
     def socket_recv(cls, client):
+        client.recvException = False
         try:
             client.socketData = (cls.inflate(client.ws.recv())).decode(encoding="utf-8")
         except Exception as e:
+            client.recvException = True
             logger.error('recv Exception:[{}]'.format(e))
 
     def get_coin_price(self, symbol):
@@ -231,7 +234,7 @@ class OkexClient(object):
         while not self.socketData:
             time.sleep(0.1)
             i += 1
-            if i == 150:
+            if i == 150 or self.recvException:
                 self.ping = True
                 self.pong = False
                 t = 0

@@ -254,9 +254,9 @@ class OkexClient(object):
         if self.ping:
             if not self.pong:
                 logger.warning("[{}]no pong in 5s,reconnect!".format(symbol))
-                self.ping = False
                 self.ws.close()
                 self.get_coin_price(symbol)
+            self.ping = False
             return
         res = None
         try:

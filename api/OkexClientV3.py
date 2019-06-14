@@ -234,15 +234,15 @@ class OkexClient(object):
             if i == 150:
                 self.ping = True
                 self.pong = False
-                try:
-                    self.ws.send("ping")
-                    logger.info("[{}]ping.........".format(symbol))
-                except Exception as e:
-                    logger.info("[{}]ping exception，{}".format(symbol, e))
                 t = 0
                 while not self.pong and t < 5:
+                    try:
+                        self.ws.send("ping")
+                        logger.info("[{}]ping.........".format(symbol))
+                    except Exception as e:
+                        logger.info("[{}]ping exception，{}".format(symbol, e))
                     threading.Thread(target=self.socket_recv, args=(self,)).start()
-                    if self.socketData == "pong":
+                    if self.socketData:
                         self.pong = True
                         logger.info("[{}]pong!!!!!!!!!".format(symbol))
                     t += 1

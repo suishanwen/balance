@@ -235,7 +235,6 @@ class OkexClient(object):
                 self.ping = True
                 self.pong = False
                 try:
-                    self.socketData = None
                     self.ws.send("ping")
                     logger.info("ping.........")
                 except Exception as e:
@@ -243,18 +242,18 @@ class OkexClient(object):
                 t = 0
                 while not self.pong and t < 5:
                     threading.Thread(target=self.socket_recv, args=(self,)).start()
-                    logger.info("ping:{}".format(self.socketData))
                     if self.socketData == "pong":
                         self.pong = True
                         logger.info("pong!!!!!!!!!")
                     t += 1
                     time.sleep(1)
                 break
-        if self.ping and not self.pong:
-            logger.warning("no pong in 5s,reconnect!")
-            self.ping = False
-            self.ws.close()
-            self.get_coin_price(symbol)
+        if self.ping:
+            if not self.pong:
+                logger.warning("no pong in 5s,reconnect!")
+                self.ping = False
+                self.ws.close()
+                self.get_coin_price(symbol)
             return
         res = None
         try:

@@ -229,6 +229,7 @@ class OkexClient(object):
         i = 0
         while True:
             self.ws.send(b"ping")
+            threading.Thread(target=self.socket_recv, args=(self,)).start()
             time.sleep(1)
             logger.info("socketData:{}".format(self.socketData))
         # while not self.socketData:

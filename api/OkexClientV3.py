@@ -227,7 +227,7 @@ class OkexClient(object):
     def get_coin_price(self, symbol):
         self.ws_connect()
         self.socketData = None
-        gevent.spawn(self.socket_recv).join(15)
+        gevent.spawn(self.socket_recv, self).join(15)
         if not self.socketData:
             self.ping = True
             self.pong = False
@@ -236,7 +236,7 @@ class OkexClient(object):
                 try:
                     self.ws.send("ping")
                     logger.info("[{}]ping.........".format(symbol))
-                    gevent.spawn(self.socket_recv).join(3)
+                    gevent.spawn(self.socket_recv, self).join(3)
                 except Exception as e:
                     logger.info("[{}]ping exception，{}".format(symbol, e))
                 if self.socketData:

@@ -4,13 +4,13 @@
 import configparser
 import time
 import datetime
-from util.MyUtil import from_time_stamp
-from util.Logger import logger
-import api.okex_sdk_v3.spot_api as spot
-from websocket import create_connection
+import gevent
 import zlib
 import json
-import threading
+import api.okex_sdk_v3.spot_api as spot
+from util.MyUtil import from_time_stamp
+from util.Logger import logger
+from websocket import create_connection
 from codegen.generator import write
 
 write("dec", '../key.ini')
@@ -74,7 +74,6 @@ class OkexClient(object):
     nightMode = False
 
     ws = None
-    recvException = False
     ping = False
     pong = False
     socketData = None
@@ -223,34 +222,27 @@ class OkexClient(object):
         try:
             client.socketData = (cls.inflate(client.ws.recv())).decode(encoding="utf-8")
         except Exception as e:
-            client.recvException = True
             logger.error('recv Exception:[{}]'.format(e))
 
     def get_coin_price(self, symbol):
         self.ws_connect()
         self.socketData = None
-        threading.Thread(target=self.socket_recv, args=(self,)).start()
-        i = 0
-        while not self.socketData:
-            time.sleep(0.1)
-            i += 1
-            if i == 150 or self.recvException:
-                self.ping = True
-                self.pong = False
-                t = 0
-                while not self.pong and t < 5:
-                    try:
-                        self.ws.send("ping")
-                        logger.info("[{}]ping.........".format(symbol))
-                    except Exception as e:
-                        logger.info("[{}]ping exception，{}".format(symbol, e))
-                    threading.Thread(target=self.socket_recv, args=(self,)).start()
-                    if self.socketData:
-                        self.pong = True
-                        logger.info("[{}]pong!!!!!!!!!".format(symbol))
-                    t += 1
-                    time.sleep(1)
-                break
+        gevent.spawn(self.socket_recv).join(15)
+        if not self.socketData:
+            self.ping = True
+            self.pong = False
+            t = 0
+            while not self.pong and t < 3:
+                try:
+                    self.ws.send("ping")
+                    logger.info("[{}]ping.........".format(symbol))
+                    gevent.spawn(self.socket_recv).join(3)
+                except Exception as e:
+                    logger.info("[{}]ping exception，{}".format(symbol, e))
+                if self.socketData:
+                    self.pong = True
+                    logger.info("[{}]pong!!!!!!!!!".format(symbol))
+                t += 1
         if self.ping:
             self.ping = False
             if not self.pong:

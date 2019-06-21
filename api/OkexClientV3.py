@@ -72,6 +72,7 @@ class OkexClient(object):
     buyRate = 1
     sellRate = 1
     nightMode = False
+    kill = 0
 
     ws = None
     ping = False

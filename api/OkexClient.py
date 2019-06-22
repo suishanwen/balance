@@ -50,6 +50,7 @@ class OkexClient(object):
     sellRate = 1
     nightMode = False
     kill = 0
+    maOff = False
 
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}

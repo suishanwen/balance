@@ -44,6 +44,8 @@ class MyOrderInfo(object):
             return "reverse"
         elif abs(trigger) == 3:
             return "needle"
+        elif abs(trigger) == 9:
+            return "percent"
         return ""
 
     def set_order_id(self, order_id):

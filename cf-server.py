@@ -147,6 +147,7 @@ def log(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     fp = open('app/log.html', 'r', encoding="utf-8")
     html = fp.read().format(text=get_log())
+    fp.close()
     yield html.encode('utf-8')
 
 

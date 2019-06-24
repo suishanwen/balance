@@ -14,6 +14,9 @@
     <div style="width: 50px;height: 50px;background: gray;display: inline-block;cursor: pointer"
          onclick="shutdown()"><span
             style="line-height: 50px;padding-left: 7px;">结束</span></div>
+    <div style="width: 50px;height: 50px;background: gray;display: inline-block;cursor: pointer"
+         onclick="log()"><span
+            style="line-height: 50px;padding-left: 7px;">日志</span></div>
 </div>
 <br>
 #tbd
@@ -61,6 +64,10 @@
         $.get(`${path}/shutdown`, null, (data) => {
             alert(data);
         });
+    };
+
+    log = () => {
+        location.href = `${path}/log`;
     };
 </script>
 </html>

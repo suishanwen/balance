@@ -18,6 +18,10 @@ def write_config():
     fp.close()
 
 
+def get_log():
+    return open('ok/log.txt').read()
+
+
 def get_option_val(section, option):
     val = None
     try:
@@ -129,6 +133,12 @@ def shutdown(_, start_response):
     yield "ok".encode('utf-8')
 
 
+def log(_, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    html = open('app/log.html', 'r', encoding="utf-8")
+    yield html.read().format(text=get_log()).encode('utf-8')
+
+
 if __name__ == '__main__':
     from util.Resty import PathDispatcher
     from wsgiref.simple_server import make_server
@@ -141,6 +151,7 @@ if __name__ == '__main__':
     dispatcher.register('GET', '/modify', modify_val)
     dispatcher.register('GET', '/restart', restart)
     dispatcher.register('GET', '/shutdown', shutdown)
+    dispatcher.register('GET', '/log', log)
 
     # Launch a basic server
     httpd = make_server('', 7777, dispatcher)

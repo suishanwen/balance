@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>auth</title>
+</head>
+<body>
+<div>
+    <h3>请输入授权码</h3>
+    <input type="text" id="authCode" value=""/>
+    <input type="button" value="提交" onclick="auth()"/>
+</div>
+<script>
+    const path = "http://" + document.location.host;
+    auth = () => {
+        const val = document.getElementById("authCode").value;
+        if (val) {
+            localStorage.setItem("authCode", val);
+            location.href = `${path}`;
+        } else {
+            alert("请输入授权码!");
+        }
+    };
+</script>
+</body>
+</html>

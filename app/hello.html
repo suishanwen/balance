@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>hello</title>
+</head>
+<body>
+<script>
+    (() => {
+        const path = "http://" + document.location.host;
+        const stored = localStorage.getItem("authCode");
+        if (stored) {
+            location.href = `${path}/cfg?code=${stored}`;
+        } else {
+            location.href = `${path}/auth`;
+        }
+    })();
+</script>
+</body>
+</html>

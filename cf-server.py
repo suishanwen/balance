@@ -19,7 +19,10 @@ def write_config():
 
 
 def get_log():
-    return open('ok/log.txt').read().replace("\n", "<br/>")
+    f = open('ok/log.txt')
+    text = f.read().replace("\n", "<br/>")
+    f.close()
+    return text
 
 
 def get_option_val(section, option):
@@ -34,24 +37,32 @@ def get_option_val(section, option):
 def hello(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     try:
-        open(r'auth', 'r')
-        html = open('app/hello.html', 'r', encoding="utf-8")
-        yield html.read().encode('utf-8')
+        f = open(r'auth', 'r')
+        f.close()
+        fp = open('app/hello.html', 'r', encoding="utf-8")
+        html = fp.read()
+        fp.close()
+        yield html.encode('utf-8')
     except FileNotFoundError:
-        html = open('app/info.html', 'r', encoding="utf-8")
-        yield html.read().format(code=generate_auth(), msg="记住授权码并点击开始验证").encode('utf-8')
+        fp = open('app/info.html', 'r', encoding="utf-8")
+        html = fp.read().format(code=generate_auth(), msg="记住授权码并点击开始验证")
+        fp.close()
+        yield html.encode('utf-8')
 
 
 def auth(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
-    html = open('app/auth.html', 'r', encoding="utf-8")
-    yield html.read().encode('utf-8')
+    fp = open('app/auth.html', 'r', encoding="utf-8")
+    html = fp.read()
+    fp.close()
+    yield html.encode('utf-8')
 
 
 def cfg(environ, start_response):
     auth_code_in = environ['HTTP_COOKIE'][environ['HTTP_COOKIE'].index("code=") + 5:len(environ['HTTP_COOKIE'])]
     f = open(r'auth', 'r')
     auth_code = f.read()
+    f.close()
     start_response('200 OK', [('Content-type', 'text/html')])
     if auth_code == auth_code_in:
         read_config()
@@ -74,12 +85,15 @@ def cfg(environ, start_response):
                 val = get_option_val("{}-stat".format(symbol), option)
                 build_html += "<div>{} = {}</div>".format(option, val)
             build_html += "</div><hr/>"
-        html = open('app/config.html', 'r', encoding="utf-8")
-        resp = html.read().replace("#tbd", build_html)
-        yield resp.encode('utf-8')
+        fp = open('app/config.html', 'r', encoding="utf-8")
+        html = fp.read().replace("#tbd", build_html)
+        fp.close()
+        yield html.encode('utf-8')
     else:
-        html = open('app/info.html', 'r', encoding="utf-8")
-        yield html.read().format(code="406", msg="授权码验证失败,点击重试！").encode('utf-8')
+        fp = open('app/info.html', 'r', encoding="utf-8")
+        html = fp.read().format(code="406", msg="授权码验证失败,点击重试！")
+        fp.close()
+        yield html.encode('utf-8')
 
 
 def generate_auth():
@@ -131,8 +145,9 @@ def shutdown(_, start_response):
 
 def log(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
-    html = open('app/log.html', 'r', encoding="utf-8")
-    yield html.read().format(text=get_log()).encode('utf-8')
+    fp = open('app/log.html', 'r', encoding="utf-8")
+    html = fp.read().format(text=get_log())
+    yield html.encode('utf-8')
 
 
 if __name__ == '__main__':

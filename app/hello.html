@@ -6,11 +6,19 @@
 </head>
 <body>
 <script>
+    setCookie = (name, value) => {
+        var Days = 30;
+        var exp = new Date();
+        exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+        document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString();
+    };
+
     (() => {
         const path = location.href.split(":")[0] + "://" + document.location.host;
         const stored = localStorage.getItem("authCode");
         if (stored) {
-            location.href = `${path}/cfg?code=${stored}`;
+            setCookie("code", stored);
+            location.href = `${path}/cfg`;
         } else {
             location.href = `${path}/auth`;
         }

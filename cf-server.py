@@ -49,8 +49,7 @@ def auth(_, start_response):
 
 
 def cfg(environ, start_response):
-    params = environ['params']
-    auth_code_in = params.get("code")
+    auth_code_in = environ['HTTP_COOKIE'][environ['HTTP_COOKIE'].index("code=") + 5:len(environ['HTTP_COOKIE'])]
     f = open(r'auth', 'r')
     auth_code = f.read()
     start_response('200 OK', [('Content-type', 'text/html')])

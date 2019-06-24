@@ -8,7 +8,8 @@
 <div style="width:450px;margin: 0 auto;">
     <h3>请输入授权码</h3>
     <input type="text" id="authCode" value="" style="font-size: 30px"/>
-    <input type="button" value="提交" onclick="auth()" style="font-size: 30px"/>
+    <button onclick="auth()" style="height:60px;width:60px;display:inline-block;">提交</button>
+</div>
 </div>
 <script>
     const path = location.href.split(":")[0] + "://" + document.location.host;

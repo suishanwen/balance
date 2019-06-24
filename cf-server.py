@@ -27,18 +27,18 @@ def get_option_val(section, option):
     return val
 
 
-def hello(environ, start_response):
+def hello(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     try:
-        f = open(r'auth', 'r')
+        open(r'auth', 'r')
         html = open('app/hello.html', 'r', encoding="utf-8")
         yield html.read().encode('utf-8')
     except FileNotFoundError:
         html = open('app/info.html', 'r', encoding="utf-8")
-        yield html.read().format(code=generate_auth(), msg=f"记住授权码并点击开始验证").encode('utf-8')
+        yield html.read().format(code=generate_auth(), msg="记住授权码并点击开始验证").encode('utf-8')
 
 
-def auth(environ, start_response):
+def auth(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     html = open('app/auth.html', 'r', encoding="utf-8")
     yield html.read().encode('utf-8')
@@ -56,26 +56,30 @@ def cfg(environ, start_response):
         build_html = ""
         for symbol in json.loads(symbols):
             build_html += "<div>"
-            build_html += f"<div>[{symbol}]</div>"
+            build_html += "<div>[{}]</div>".format(symbol)
             options = config.options(symbol)
             for option in options:
                 val = get_option_val(symbol, option)
-                build_html += f"<div id='{symbol}_{option}'>{option} = <a onclick='modify(\"{symbol}\",\"{option}\")'>{val}</a></div>"
+                build_html += "<div id='{}_{}'>{} = <a onclick='modify(\"{}\",\"{}\")'>{}</a></div>".format(symbol,
+                                                                                                            option,
+                                                                                                            option,
+                                                                                                            symbol,
+                                                                                                            option, val)
             build_html += "</div>"
             build_html += "<br/>"
             build_html += "<div>"
-            build_html += f"<div>[{symbol}-stat]</div>"
-            options = config.options(f"{symbol}-stat")
+            build_html += "<div>[{}-stat]</div>".format(symbol)
+            options = config.options("{}-stat".format(symbol))
             for option in options:
-                val = get_option_val(f"{symbol}-stat", option)
-                build_html += f"<div>{option} = {val}</div>"
+                val = get_option_val("{}-stat".format(symbol), option)
+                build_html += "<div>{} = {}</div>".format(option, val)
             build_html += "</div><hr/>"
         html = open('app/config.html', 'r', encoding="utf-8")
         resp = html.read().replace("#tbd", build_html)
         yield resp.encode('utf-8')
     else:
         html = open('app/info.html', 'r', encoding="utf-8")
-        yield html.read().format(code="406", msg=f"授权码验证失败,点击重试！").encode('utf-8')
+        yield html.read().format(code="406", msg="授权码验证失败,点击重试！").encode('utf-8')
 
 
 def generate_auth():
@@ -99,7 +103,7 @@ def modify_val(environ, start_response):
     yield "ok".encode('utf-8')
 
 
-def restart(environ, start_response):
+def restart(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     cmd = """echo '----- pull code -----'
 rm -rf tokens/Token.py
@@ -117,7 +121,7 @@ nohup python3 OKClient.py>/home/balance/ok/nohup.out 2>&1 &"""
     yield "ok".encode('utf-8')
 
 
-def shutdown(environ, start_response):
+def shutdown(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     cmd = """ps -ef | grep OKClient.py | grep -v grep | awk '{print $2}' | xargs kill -9
 """

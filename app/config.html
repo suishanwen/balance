@@ -28,7 +28,7 @@
         let ele = $(`#${id}`);
         const test = $(`#${symbol}_${option}_val`);
         if (test.length === 0) {
-            const input = $(`<input id="${symbol}_${option}_val" type="text" value=""/>`);
+            const input = $(`<input id="${symbol}_${option}_val" type="text" value="" style="font-size:30px"/>`);
             const submit = $(`<input id="${symbol}_${option}_submit" type="button" value="修改" onclick="update('${symbol}','${option}')"/>`);
             ele.append(input);
             ele.append(submit);

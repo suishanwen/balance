@@ -5,24 +5,23 @@
     <title>Config</title>
     <!--<script src="https://bitcoinrobot.cn/file/assets/bootstrap.4.1.3/js/jquery.slim.min.js"></script>-->
     <script src="https://bitcoinrobot.cn/file/assets/jquery.2.2.2/jquery.min.js"></script>
-
 </head>
-<body>
+<body style="font-size: 30px">
 <div>
-    <div style="width: 50px;height: 50px;background: gray;display: inline-block;cursor: pointer"><span
-            style="line-height: 50px;padding-left: 7px;" onclick="restart()">重启</span></div>
-    <div style="width: 50px;height: 50px;background: gray;display: inline-block;cursor: pointer"
+    <div style="width: 100px;height: 100px;background: gray;display: inline-block;cursor: pointer"><span
+            style="line-height: 100px;padding-left: 20px;" onclick="restart()">重启</span></div>
+    <div style="width: 100px;height: 100px;background: gray;display: inline-block;cursor: pointer"
          onclick="shutdown()"><span
-            style="line-height: 50px;padding-left: 7px;">结束</span></div>
-    <div style="width: 50px;height: 50px;background: gray;display: inline-block;cursor: pointer"
+            style="line-height: 100px;padding-left: 20px;">结束</span></div>
+    <div style="width: 100px;height: 100px;background: gray;display: inline-block;cursor: pointer"
          onclick="log()"><span
-            style="line-height: 50px;padding-left: 7px;">日志</span></div>
+            style="line-height: 100px;padding-left: 20px;">日志</span></div>
 </div>
 <br>
 #tbd
 </body>
 <script>
-    const path = "http://" + document.location.host;
+    const path = location.href.split(":")[0] + "://" + document.location.host;
 
     modify = (symbol, option) => {
         const id = `${symbol}_${option}`;

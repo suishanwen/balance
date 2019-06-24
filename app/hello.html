@@ -7,7 +7,7 @@
 <body>
 <script>
     (() => {
-        const path = "http://" + document.location.host;
+        const path = location.href.split(":")[0] + "://" + document.location.host;
         const stored = localStorage.getItem("authCode");
         if (stored) {
             location.href = `${path}/cfg?code=${stored}`;

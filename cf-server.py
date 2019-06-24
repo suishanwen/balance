@@ -19,7 +19,7 @@ def write_config():
 
 
 def get_log():
-    return open('ok/log.txt').read()
+    return open('ok/log.txt').read().replace("\n", "<br/>")
 
 
 def get_option_val(section, option):
@@ -64,11 +64,8 @@ def cfg(environ, start_response):
             options = config.options(symbol)
             for option in options:
                 val = get_option_val(symbol, option)
-                build_html += "<div id='{}_{}'>{} = <a onclick='modify(\"{}\",\"{}\")'>{}</a></div>".format(symbol,
-                                                                                                            option,
-                                                                                                            option,
-                                                                                                            symbol,
-                                                                                                            option, val)
+                build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}</a>" \
+                              "</div>".format(symbol, option, option, symbol, option, val)
             build_html += "</div>"
             build_html += "<br/>"
             build_html += "<div>"

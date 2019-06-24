@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <title>系统提示</title>
 </head>
-<body>
-{code}
-<br/>
-<br/>
-<a onclick="location.href='/'" style="color: green;cursor: pointer">{msg}</a>
+
+<body style="font-size: 30px">
+<div style="width:400px;margin: 0 auto;">
+    {code}
+    <br/>
+    <br/>
+    <a onclick="location.href='/'" style="color: green;cursor: pointer">{msg}</a>
+</div>
 <script>
     localStorage.setItem("authCode", "");
 </script>

@@ -152,5 +152,5 @@ if __name__ == '__main__':
 
     # Launch a basic server
     httpd = make_server('', 7777, dispatcher)
-    print('Serving on port 7777...')
+    logger.info('Serving on port 7777...')
     httpd.serve_forever()

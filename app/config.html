@@ -32,6 +32,9 @@
             const submit = $(`<button id="${symbol}_${option}_submit" style="height:60px;width:60px;display:inline-block;" onclick="update('${symbol}','${option}')">修改</button>`);
             ele.append(input);
             ele.append(submit);
+        } else {
+            test.remove();
+            $(`#${symbol}_${option}_submit`).remove();
         }
     };
 

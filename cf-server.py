@@ -72,7 +72,8 @@ def cfg(environ, start_response):
                 options = config.options("{}-stat".format(symbol))
                 for option in options:
                     val = get_option_val("{}-stat".format(symbol), option)
-                    build_html += "<div>{} = {}</div>".format(option, val)
+                    build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}" \
+                                  "</a></div>".format(symbol + "-stat", option, option, symbol + "-stat", option, val)
                 build_html += "</div><hr/>"
             with open('app/config.html', 'r', encoding="utf-8") as fp:
                 yield fp.read().replace("#tbd", build_html).encode('utf-8')
@@ -88,6 +89,16 @@ def generate_auth():
         return auth_code
 
 
+def calc_avg_price(section):
+    transaction = float(get_option_val(section, "transaction"))
+    amount = float(get_option_val(section, "amount"))
+    if amount != 0:
+        avg_price = abs(round(transaction / amount, 4))
+        if transaction > 0 and amount > 0:
+            avg_price = -avg_price
+        config.set(section, "avgprice", str(avg_price))
+
+
 def modify_val(environ, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     params = environ['params']
@@ -95,8 +106,10 @@ def modify_val(environ, start_response):
     section = params.get('section')
     option = params.get('option')
     val = params.get('val')
-    if section and option:
+    if section and option and val:
         config.set(section, option, val)
+        if section.find("stat") != -1 and (option == "transaction" or option == "amount"):
+            calc_avg_price(section)
         write_config()
     yield "ok".encode('utf-8')
 

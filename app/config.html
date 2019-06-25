@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Config</title>
-    <!--<script src="https://bitcoinrobot.cn/file/assets/bootstrap.4.1.3/js/jquery.slim.min.js"></script>-->
     <script src="https://bitcoinrobot.cn/file/assets/jquery.2.2.2/jquery.min.js"></script>
 </head>
 <body style="font-size: 30px">
@@ -24,6 +23,9 @@
     const path = location.href.split(":")[0] + "://" + document.location.host;
 
     modify = (symbol, option) => {
+        if (symbol.indexOf("stat") !== -1 && option === "avgprice") {
+            return;
+        }
         const id = `${symbol}_${option}`;
         let ele = $(`#${id}`);
         const test = $(`#${symbol}_${option}_val`);

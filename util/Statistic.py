@@ -1,5 +1,4 @@
 import re
-import json
 import configparser
 from util.MyUtil import from_time_stamp
 from api.OrderInfo import MyOrderInfo
@@ -65,7 +64,7 @@ def generate_email(symbol, order_list):
     # 余额变化
     usdt_change = 0
     # 持仓变化
-    quantity_change = 0
+    # quantity_change = 0
     # 持仓增减均价
     quantity_change_price = 0
     # 理论收益
@@ -73,7 +72,7 @@ def generate_email(symbol, order_list):
     # 吃单费率
     fee_rate = 0.0015
     # 点卡消耗
-    points_consume = 0
+    # points_consume = 0
     # 交易单
     order_sheet = ""
     for order in order_list_symbol:
@@ -99,11 +98,10 @@ def generate_email(symbol, order_list):
     if trx_quantity_total != 0:
         trx_price_avg = trx_usdt_total / trx_quantity_total
     quantity_change = trx_quantity_buy - trx_quantity_sell
-    if usdt_change > 0 and quantity_change > 0:
-        quantity_change_price = -trx_price_avg
-    else:
-        if quantity_change != 0:
-            quantity_change_price = abs(usdt_change / quantity_change)
+    if quantity_change != 0:
+        quantity_change_price = abs(usdt_change / quantity_change)
+        if usdt_change > 0 and quantity_change > 0:
+            quantity_change_price = -quantity_change_price
     points_consume = trx_usdt_total * fee_rate
     if quantity_change >= 0:
         change_type = "增"

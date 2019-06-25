@@ -11,21 +11,20 @@ config.read("config.ini")
 def analyze_log():
     yy_mm_dd = str(from_time_stamp())[0:10]
     order_list = []
-    f = open(r'log.txt')
-    line = f.readline()
-    while line and (line.find(yy_mm_dd) != -1 or line.find("canceled") != -1):
-        search_canceled = re.search("order ([0-9]+) canceled", line)
-        if search_canceled:
-            order_id_canceled = search_canceled.group(1)
-            for order in order_list:
-                if order.orderId == order_id_canceled:
-                    order.canceled = 1
-        else:
-            order = MyOrderInfo()
-            order.from_log(line)
-            order_list.append(order)
+    with open(r'log.txt') as f:
         line = f.readline()
-    f.close()
+        while line and (line.find(yy_mm_dd) != -1 or line.find("canceled") != -1):
+            search_canceled = re.search("order ([0-9]+) canceled", line)
+            if search_canceled:
+                order_id_canceled = search_canceled.group(1)
+                for order in order_list:
+                    if order.orderId == order_id_canceled:
+                        order.canceled = 1
+            else:
+                order = MyOrderInfo()
+                order.from_log(line)
+                order_list.append(order)
+            line = f.readline()
     order_list = order_list[::-1]
     return order_list
 

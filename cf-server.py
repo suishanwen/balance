@@ -2,6 +2,9 @@ import subprocess
 import uuid
 import configparser
 import json
+import time
+import datetime
+import pytz
 from util.Logger import logger
 
 # read config
@@ -106,8 +109,37 @@ def modify_val(environ, start_response):
     section = params.get('section')
     option = params.get('option')
     val = params.get('val')
+    _type = params.get('type')
     if section and option and val:
-        config.set(section, option, val)
+        if _type == "plus" or _type == "minus":
+            old_val = config.get(section, option)
+            is_count = section.find("stat") != -1 and option == "count"
+            dd = 0
+            arr = []
+            if is_count:
+                dd = int(datetime.datetime.fromtimestamp(int(time.time()), pytz.timezone('Asia/Shanghai')).strftime(
+                    '%Y-%m-%d %H:%M:%S')[8:10])
+                arr = json.loads(old_val)
+                if len(arr) == dd:
+                    old_val = arr[dd - 1]
+                else:
+                    old_val = 0
+            if _type == "plus":
+                val = round(float(old_val) + float(val), 4)
+            elif _type == "minus":
+                val = round(float(old_val) - float(val), 4)
+            if is_count:
+                if len(arr) < dd:
+                    diff = dd - len(arr)
+                    for i in range(0, diff):
+                        arr.append(0)
+                elif len(arr) > dd:
+                    arr = []
+                    for i in range(0, dd):
+                        arr.append(0)
+                arr[dd - 1] = round(val, 3)
+                val = json.dumps(arr)
+        config.set(section, option, str(val))
         if section.find("stat") != -1 and (option == "transaction" or option == "amount"):
             calc_avg_price(section)
         write_config()

@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <title>Config</title>
     <script src="https://bitcoinrobot.cn/file/assets/jquery.2.2.2/jquery.min.js"></script>
+    <link href="https://bitcoinrobot.cn/file/assets/bootstrap.4.1.3/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body style="font-size: 30px">
 <div>
-    <div style="width: 100px;height: 100px;background: gray;display: inline-block;cursor: pointer"><span
+    <div style="width: 100px;height: 100px;background: gray;display: inline-block;cursor: pointer;margin-right: 20px;"><span
             style="line-height: 100px;padding-left: 20px;" onclick="restart()">重启</span></div>
-    <div style="width: 100px;height: 100px;background: gray;display: inline-block;cursor: pointer"
+    <div style="width: 100px;height: 100px;background: gray;display: inline-block;cursor: pointer;margin-right: 20px;"
          onclick="shutdown()"><span
             style="line-height: 100px;padding-left: 20px;">结束</span></div>
     <div style="width: 100px;height: 100px;background: gray;display: inline-block;cursor: pointer"
@@ -23,36 +24,65 @@
     const path = location.href.split(":")[0] + "://" + document.location.host;
 
     modify = (symbol, option) => {
-        if (symbol.indexOf("stat") !== -1 && option === "avgprice") {
+        if (symbol.indexOf("-stat") !== -1 && option === "avgprice") {
             return;
         }
         const id = `${symbol}_${option}`;
         let ele = $(`#${id}`);
-        const test = $(`#${symbol}_${option}_val`);
-        if (test.length === 0) {
-            const input = $(`<input id="${symbol}_${option}_val" type="text" value="" style="font-size:30px"/>`);
-            const submit = $(`<button id="${symbol}_${option}_submit" style="height:60px;width:60px;display:inline-block;" onclick="update('${symbol}','${option}')">修改</button>`);
-            ele.append(input);
-            ele.append(submit);
+        let form = $(`#${symbol}_${option}_form`);
+        if (form.length === 0) {
+            if (symbol.indexOf("-stat") !== -1) {
+                form = $(`<div id="${symbol}_${option}_form" class="form-row align-items-center">
+    <div class="col-auto">
+        <div class="input-group mb-2">
+            <div class="input-group-prepend" id="${symbol}_${option}_plus" style="cursor: pointer"
+                 onclick="update('${symbol}','${option}','plus')">
+                <span class="input-group-text">➕</span>
+            </div>
+            <input type="text" class="inlineFormInputGroup" id="${symbol}_${option}_val_plus"
+                   aria-describedby="${symbol}_${option}_plus">
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="input-group mb-2">
+            <div class="input-group-prepend" id="${symbol}_${option}_minus" style="cursor: pointer"
+                 onclick="update('${symbol}','${option}','minus')">
+                <span class="input-group-text">➖</span>
+            </div>
+            <input type="text" class="inlineFormInputGroup" id="${symbol}_${option}_val_minus"
+                   aria-describedby="${symbol}_${option}_minus">
+        </div>
+    </div>
+</div>`);
+            } else {
+                form = $(`<div id="${symbol}_${option}_form" class="input-group mb-3">
+    <div class="input-group-prepend" id="${symbol}_${option}_equal" style="cursor: pointer"
+         onclick="update('${symbol}','${option}','')">
+        <span class="input-group-text">修改</span>
+    </div>
+    <input type="text" class="form-control" id="${symbol}_${option}_val_"
+           aria-describedby="${symbol}_${option}_equal">
+</div>`);
+            }
+            ele.append(form);
         } else {
-            test.remove();
-            $(`#${symbol}_${option}_submit`).remove();
+            form.remove();
         }
     };
 
-    update = (symbol, option) => {
-        const input = $(`#${symbol}_${option}_val`);
+    update = (symbol, option, type) => {
+        const id = `${symbol}_${option}_val_${type}`;
+        const input = $(`#${id}`);
         const val = input.val();
         if (!input.val()) {
             alert("值不能为空！");
             return false;
         }
-        const url = `${path}/modify?section=${symbol}&option=${option}&val=${val}`;
+        const url = `${path}/modify?section=${symbol}&option=${option}&val=${val}&type=${type}`;
         console.log(url);
         $.get(url, null, (data) => {
             if (data === "ok") {
-                $(`#${symbol}_${option}_val`).remove();
-                $(`#${symbol}_${option}_submit`).remove();
+                $(`#${symbol}_${option}_form`).remove();
                 document.location.reload();
             }
         });

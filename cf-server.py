@@ -13,16 +13,13 @@ def read_config():
 
 
 def write_config():
-    fp = open("ok/config.ini", "w")
-    config.write(fp)
-    fp.close()
+    with open("ok/config.ini", "w") as fp:
+        config.write(fp)
 
 
 def get_log():
-    f = open('ok/log.txt')
-    text = f.read().replace("\n", "<br/>")
-    f.close()
-    return text
+    with open('ok/log.txt') as fp:
+        return fp.read().replace("\n", "<br/>")
 
 
 def get_option_val(section, option):
@@ -37,71 +34,58 @@ def get_option_val(section, option):
 def hello(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     try:
-        f = open(r'auth', 'r')
-        f.close()
-        fp = open('app/hello.html', 'r', encoding="utf-8")
-        html = fp.read()
-        fp.close()
-        yield html.encode('utf-8')
+        with open(r'auth', 'r'):
+            with open('app/hello.html', 'r', encoding="utf-8") as fp:
+                yield fp.read().encode('utf-8')
     except FileNotFoundError:
-        fp = open('app/info.html', 'r', encoding="utf-8")
-        html = fp.read().format(code=generate_auth(), msg="记住授权码并点击开始验证")
-        fp.close()
-        yield html.encode('utf-8')
+        with open('app/info.html', 'r', encoding="utf-8") as fp:
+            yield fp.read().format(code=generate_auth(), msg="记住授权码并点击开始验证").encode('utf-8')
 
 
 def auth(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
-    fp = open('app/auth.html', 'r', encoding="utf-8")
-    html = fp.read()
-    fp.close()
-    yield html.encode('utf-8')
+    with open('app/auth.html', 'r', encoding="utf-8") as fp:
+        yield fp.read().encode('utf-8')
 
 
 def cfg(environ, start_response):
     auth_code_in = environ['HTTP_COOKIE'][environ['HTTP_COOKIE'].index("code=") + 5:len(environ['HTTP_COOKIE'])]
-    f = open(r'auth', 'r')
-    auth_code = f.read()
-    f.close()
-    start_response('200 OK', [('Content-type', 'text/html')])
-    if auth_code == auth_code_in:
-        read_config()
-        symbols = get_option_val("trade", "symbol")
-        build_html = ""
-        for symbol in json.loads(symbols):
-            build_html += "<div>"
-            build_html += "<div>[{}]</div>".format(symbol)
-            options = config.options(symbol)
-            for option in options:
-                val = get_option_val(symbol, option)
-                build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}</a>" \
-                              "</div>".format(symbol, option, option, symbol, option, val)
-            build_html += "</div>"
-            build_html += "<br/>"
-            build_html += "<div>"
-            build_html += "<div>[{}-stat]</div>".format(symbol)
-            options = config.options("{}-stat".format(symbol))
-            for option in options:
-                val = get_option_val("{}-stat".format(symbol), option)
-                build_html += "<div>{} = {}</div>".format(option, val)
-            build_html += "</div><hr/>"
-        fp = open('app/config.html', 'r', encoding="utf-8")
-        html = fp.read().replace("#tbd", build_html)
-        fp.close()
-        yield html.encode('utf-8')
-    else:
-        fp = open('app/info.html', 'r', encoding="utf-8")
-        html = fp.read().format(code="406", msg="授权码验证失败,点击重试！")
-        fp.close()
-        yield html.encode('utf-8')
+    with open(r'auth', 'r') as f:
+        auth_code = f.read()
+        start_response('200 OK', [('Content-type', 'text/html')])
+        if auth_code == auth_code_in:
+            read_config()
+            symbols = get_option_val("trade", "symbol")
+            build_html = ""
+            for symbol in json.loads(symbols):
+                build_html += "<div>"
+                build_html += "<div>[{}]</div>".format(symbol)
+                options = config.options(symbol)
+                for option in options:
+                    val = get_option_val(symbol, option)
+                    build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}" \
+                                  "</a></div>".format(symbol, option, option, symbol, option, val)
+                build_html += "</div>"
+                build_html += "<br/>"
+                build_html += "<div>"
+                build_html += "<div>[{}-stat]</div>".format(symbol)
+                options = config.options("{}-stat".format(symbol))
+                for option in options:
+                    val = get_option_val("{}-stat".format(symbol), option)
+                    build_html += "<div>{} = {}</div>".format(option, val)
+                build_html += "</div><hr/>"
+            with open('app/config.html', 'r', encoding="utf-8") as fp:
+                yield fp.read().replace("#tbd", build_html).encode('utf-8')
+        else:
+            with open('app/info.html', 'r', encoding="utf-8") as fp:
+                yield fp.read().format(code="406 Forbidden", msg="授权码验证失败,点击重试！").encode('utf-8')
 
 
 def generate_auth():
-    f = open(r'auth', 'w')
-    auth_code = str(uuid.uuid1()).split("-")[0]
-    f.write(auth_code)
-    f.close()
-    return auth_code
+    with open(r'auth', 'w') as f:
+        auth_code = str(uuid.uuid1()).split("-")[0]
+        f.write(auth_code)
+        return auth_code
 
 
 def modify_val(environ, start_response):
@@ -145,10 +129,8 @@ def shutdown(_, start_response):
 
 def log(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
-    fp = open('app/log.html', 'r', encoding="utf-8")
-    html = fp.read().format(text=get_log())
-    fp.close()
-    yield html.encode('utf-8')
+    with open('app/log.html', 'r', encoding="utf-8") as fp:
+        yield fp.read().format(text=get_log()).encode('utf-8')
 
 
 if __name__ == '__main__':

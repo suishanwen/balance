@@ -7,6 +7,7 @@ import pytz
 from email.mime.text import MIMEText
 from email.header import Header
 from util.Logger import logger
+
 # read config
 config = configparser.ConfigParser()
 config.read("config.ini")
@@ -59,31 +60,29 @@ def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
 
 
 def write_log(text=""):
-    s = open('log.txt').read()
+    with open('log.txt') as f:
+        s = f.read()
     mm = str(from_time_stamp())[0:7]
     if s.find(mm) != -1:
-        f = open(r'log.txt', 'w')
-        f.write(text + "\n" + s)
-        f.close()
+        with open(r'log.txt', 'w') as f:
+            f.write(text + "\n" + s)
     else:
-        f = open(r'log.txt', 'a')
-        f.writelines("\n")
-        f.close()
+        with open(r'log.txt', 'a') as f:
+            f.writelines("\n")
         # write old logs
-        old_f = open(str(from_time_stamp(int(time.time()) - 86400 * 10))[0:7] + '.txt', 'w')
-        old_f.writelines(open('log.txt').readlines()[::-1])
-        # write count
-        config.read("config.ini")
-        symbols = json.loads(config.get("trade", "symbol"))
-        for symbol in symbols:
-            cfg_field = symbol + "-stat"
-            sum_count = 0
-            try:
-                sum_count = sum(json.loads(config.get(cfg_field, "count")))
-            except Exception as err:
-                logger.error("Error: write_log,{}".format(err))
-            old_f.writelines(symbol + " [" + str(sum_count) + "]")
-        old_f.close()
-        f = open(r'log.txt', 'w')
-        f.write(text)
-        f.close()
+        with open(str(from_time_stamp(int(time.time()) - 86400 * 10))[0:7] + '.txt', 'w') as old_f:
+            with open('log.txt') as f:
+                old_f.writelines(f.readlines()[::-1])
+            # write count
+            config.read("config.ini")
+            symbols = json.loads(config.get("trade", "symbol"))
+            for symbol in symbols:
+                cfg_field = symbol + "-stat"
+                sum_count = 0
+                try:
+                    sum_count = sum(json.loads(config.get(cfg_field, "count")))
+                except Exception as err:
+                    logger.error("Error: write_log,{}".format(err))
+                old_f.writelines(symbol + " [" + str(sum_count) + "]")
+        with open(r'log.txt', 'w') as f:
+            f.write(text)

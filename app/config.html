@@ -24,14 +24,15 @@
     const path = location.href.split(":")[0] + "://" + document.location.host;
 
     modify = (symbol, option) => {
-        if (symbol.indexOf("-stat") !== -1 && option === "avgprice") {
+        const isStat = symbol.indexOf("-stat") !== -1;
+        if (isStat && option === "avgprice") {
             return;
         }
         const id = `${symbol}_${option}`;
         let ele = $(`#${id}`);
         let form = $(`#${symbol}_${option}_form`);
         if (form.length === 0) {
-            if (symbol.indexOf("-stat") !== -1) {
+            if (isStat) {
                 form = $(`<div id="${symbol}_${option}_form" class="form-row align-items-center">
     <div class="col-auto">
         <div class="input-group mb-2">
@@ -65,6 +66,11 @@
 </div>`);
             }
             ele.append(form);
+            if (!isStat) {
+                setTimeout(() => {
+                    $(`#${symbol}_${option}_val_`).focus();
+                })
+            }
         } else {
             form.remove();
         }

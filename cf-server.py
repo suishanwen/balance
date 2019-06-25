@@ -146,9 +146,23 @@ def modify_val(environ, start_response):
     yield "ok".encode('utf-8')
 
 
+def pull(_, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    cmd = """cd /home/balance
+rm -rf tokens/Token.py
+git checkout tokens/Token.py
+git pull
+ps -ef | grep cf-server.py | grep -v grep | awk '{print $2}' | xargs kill -9
+cat /dev/null > nohup.out
+nohup python3 cf-server.py>/home/balance/cfg.out 2>&1 &"""
+    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    yield "ok".encode('utf-8')
+
+
 def restart(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     cmd = """echo '----- pull code -----'
+cd /home/balance
 rm -rf tokens/Token.py
 git checkout tokens/Token.py
 git pull
@@ -185,6 +199,7 @@ if __name__ == '__main__':
     # Create the dispatcher and register functions
     dispatcher = PathDispatcher()
     dispatcher.register('GET', '/', hello)
+    dispatcher.register('GET', '/pull', pull)
     dispatcher.register('GET', '/auth', auth)
     dispatcher.register('GET', '/cfg', cfg)
     dispatcher.register('GET', '/modify', modify_val)

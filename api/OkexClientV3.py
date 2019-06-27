@@ -322,8 +322,16 @@ class OkexClient(object):
         if len(self.kline_data) == 0:
             logger.error("***klines retry...")
             return self.get_klines(symbol, period, size)
-        elif isinstance(result, list) and len(result) == size - 1:
-            logger.warning("***klines refreshing...,{}".format(result))
+        elif isinstance(result, list) and len(result) == size - 1 and self.kline_data[0][0] != end:
+            first = json.loads(json.dumps(result[0]))
+            first[0] = end
+            first[1] = first[4]
+            first[2] = first[4]
+            first[3] = first[4]
+            first[5] = "0"
+            result.insert(0, first)
+            self.kline_data = list(map(self.get_line_data, result))
+            logger.warning("***klines refreshing...,{}".format(self.kline_data))
         elif len(self.kline_data) != size:
             logger.warning("***klines not refresh,{}".format(result))
         return self.kline_data

@@ -75,6 +75,7 @@ class OkexClient(object):
     kill = 0
     maOff = False
     kline_data = []
+    depth_data = {"asks": [], "bids": []}
 
     ws = None
     ping = False
@@ -196,7 +197,7 @@ class OkexClient(object):
                 self.ws = create_connection("wss://real.okex.com:10442/ws/v3", timeout=5)
                 logger.info('websocket connected!')
                 pair = self.SYMBOL_T.upper().replace("_", "-")
-                sub_param = {"op": "subscribe", "args": ["spot/depth5:{}".format(pair)]}
+                sub_param = {"op": "subscribe", "args": ["spot/depth:{}".format(pair)]}
                 sub_str = json.dumps(sub_param)
                 self.ws.send(sub_str)
                 result = self.inflate(self.ws.recv())
@@ -256,9 +257,15 @@ class OkexClient(object):
             logger.error("{} : {}".format(self.socketData, e))
         if res and res.get("data") is not None:
             data = res.get("data")[0]
+            if res.get("action") == "partial":
+                self.depth_data = data
+            elif res.get("action") == "update":
+                self.depth_data["asks"][0, len(data["asks"])] = data["asks"]
+                self.depth_data["bids"][0, len(data["bids"])] = data["bids"]
             price_info = self.priceInfo[symbol]
-            price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"]))
-            price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"]))
+            price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"][0:10]))
+            price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"][0:10]))
+            logger.info("priceInfo:{}".format(price_info))
 
     def get_price_info(self, symbol, depth):
         price_info = self.priceInfo[symbol]

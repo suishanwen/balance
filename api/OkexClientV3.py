@@ -323,5 +323,5 @@ class OkexClient(object):
             logger.error("***klines retry...")
             return self.get_klines(symbol, period, size)
         else:
-            logger.warning("***klines not refresh")
+            logger.warning("***klines not refresh,{}".format(result))
         return self.kline_data

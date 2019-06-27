@@ -303,7 +303,7 @@ class OkexClient(object):
 
     @classmethod
     def get_line_data(cls, data):
-        return [float(data[1]), float(data[2]), float(data[3]), float(data[4]), float(data[5])]
+        return [float(data[1]), float(data[2]), float(data[3]), float(data[4]), float(data[5]), data[0]]
 
     # (开,高,低,收,交易量)
     def get_klines(self, symbol, period, size):
@@ -322,7 +322,7 @@ class OkexClient(object):
         if len(self.kline_data) == 0:
             logger.error("***klines retry...")
             return self.get_klines(symbol, period, size)
-        elif isinstance(result, list) and len(result) == size - 1 and self.kline_data[0][0] != end:
+        elif isinstance(result, list) and len(result) == size - 1 and self.kline_data[0][5] != end:
             first = json.loads(json.dumps(result[0]))
             first[0] = end
             first[1] = first[4]

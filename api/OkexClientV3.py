@@ -332,6 +332,6 @@ class OkexClient(object):
             result.insert(0, first)
             self.kline_data = list(map(self.get_line_data, result))
             logger.warning("***klines refreshing...,{}".format(self.kline_data))
-        elif len(self.kline_data) != size:
+        elif len(self.kline_data) != size and len(result) != size - 1:
             logger.warning("***klines not refresh,{}".format(result))
         return self.kline_data

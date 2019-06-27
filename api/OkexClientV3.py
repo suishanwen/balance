@@ -257,6 +257,7 @@ class OkexClient(object):
             logger.error("{} : {}".format(self.socketData, e))
         if res and res.get("data") is not None:
             data = res.get("data")[0]
+            logger.info("priceInfo:action-{}".format(res.get("action")))
             if res.get("action") == "partial":
                 self.depth_data = data
             elif res.get("action") == "update":

@@ -114,6 +114,7 @@ class OkexClient(object):
         order_id = my_order_info.orderId
         order_result = {}
         try:
+            logger.info("check order status {}".format(wait_count))
             order_result = spotAPI.get_order_info(my_order_info.orderId, my_order_info.symbol)
         except Exception as e:
             logger.error("***orderinfo:%s" % e)
@@ -159,14 +160,9 @@ class OkexClient(object):
             wait_count = 0
             status = 0
             avg_price_bak = my_order_info.avgPrice
-            while wait_count < self.TRADE_WAIT_COUNT and status != self.FILLED_STATUS:
-                status = self.check_order_status(my_order_info, wait_count)
-                # time.sleep(0.1)
+            while status != self.FILLED_STATUS and status != self.CANCELLED_STATUS:
                 wait_count += 1
-                if wait_count == self.TRADE_WAIT_COUNT and status != self.FILLED_STATUS:
-                    trade_price = self.get_trade_price(my_order_info.symbol, my_order_info.orderType)
-                    if trade_price == my_order_info.price:
-                        wait_count -= 1
+                status = self.check_order_status(my_order_info, wait_count)
             my_order_info.reset_total_deal_amount(my_order_info.dealAmount)
             if my_order_info.totalDealAmount > 0:
                 if my_order_info.orderType == self.TRADE_SELL:

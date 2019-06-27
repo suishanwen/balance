@@ -317,7 +317,7 @@ class OkexClient(object):
             result = spotAPI.get_kline(symbol, start, end, granularity)
         except Exception as e:
             logger.error("***klines:%s" % e)
-        if isinstance(result, list):
+        if isinstance(result, list) and len(result) == size:
             return list(map(cls.get_line_data, result))
         else:
             return cls.get_klines(symbol, period, size)

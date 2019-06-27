@@ -306,7 +306,7 @@ class OkexClient(object):
 
     # (开,高,低,收,交易量)
     @classmethod
-    def get_klines(cls, symbol, period, size):
+    def get_klines(cls, symbol, period, size, count=0):
         result = {}
         granularity = granularityDict[period]
         end_s = int("%0.0f" % datetime.datetime.utcnow().timestamp())
@@ -320,4 +320,6 @@ class OkexClient(object):
         if isinstance(result, list) and len(result) == size:
             return list(map(cls.get_line_data, result))
         else:
-            return cls.get_klines(symbol, period, size)
+            count += 1
+            logger.error("***klines retry:{}".format(count))
+            return cls.get_klines(symbol, period, size, count)

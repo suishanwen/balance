@@ -319,9 +319,11 @@ class OkexClient(object):
             logger.error("***klines:%s" % e)
         if isinstance(result, list) and len(result) == size:
             self.kline_data = list(map(self.get_line_data, result))
-        elif len(self.kline_data) != size:
+        if len(self.kline_data) == 0:
             logger.error("***klines retry...")
             return self.get_klines(symbol, period, size)
-        else:
+        elif isinstance(result, list) and len(result) == size - 1:
+            logger.warning("***klines refreshing...,{}".format(result))
+        elif len(self.kline_data) != size:
             logger.warning("***klines not refresh,{}".format(result))
         return self.kline_data

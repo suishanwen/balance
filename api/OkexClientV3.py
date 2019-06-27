@@ -260,8 +260,8 @@ class OkexClient(object):
             if res.get("action") == "partial":
                 self.depth_data = data
             elif res.get("action") == "update":
-                self.depth_data["asks"][0, len(data["asks"])] = data["asks"]
-                self.depth_data["bids"][0, len(data["bids"])] = data["bids"]
+                self.depth_data["asks"][0:len(data["asks"])] = data["asks"]
+                self.depth_data["bids"][0:len(data["bids"])] = data["bids"]
             price_info = self.priceInfo[symbol]
             price_info["asks"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["asks"][0:10]))
             price_info["bids"] = list(map(lambda x: list(map(lambda d: float(d), x)), data["bids"][0:10]))

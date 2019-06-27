@@ -317,12 +317,13 @@ class OkexClient(object):
             result = spotAPI.get_kline(symbol, start, end, granularity)
         except Exception as e:
             logger.error("***klines:%s" % e)
-        if isinstance(result, list) and len(result) == size:
+        is_list = isinstance(result, list)
+        if is_list and len(result) == size:
             self.kline_data = list(map(self.get_line_data, result))
         if len(self.kline_data) == 0:
             logger.error("***klines retry...")
             return self.get_klines(symbol, period, size)
-        elif isinstance(result, list) and len(result) == size - 1 and self.kline_data[0][5] != end:
+        elif is_list and len(result) == size - 1 and self.kline_data[0][5] != end:
             first = json.loads(json.dumps(result[0]))
             first[0] = end
             first[1] = first[4]
@@ -332,6 +333,6 @@ class OkexClient(object):
             result.insert(0, first)
             self.kline_data = list(map(self.get_line_data, result))
             logger.warning("***klines refreshing...,{}".format(self.kline_data))
-        elif len(self.kline_data) != size and len(result) != size - 1:
+        elif is_list and len(result) != size and len(result) != size - 1:
             logger.warning("***klines not refresh,{}".format(result))
         return self.kline_data

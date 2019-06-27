@@ -10,18 +10,22 @@ from util.Logger import logger
 # read config
 config = configparser.ConfigParser()
 
+CONFIG_FILE = "ok/config.ini"
+LOG_FILE = "ok/log.txt"
+RUNNING_LOG_FILE = "ok/nohup.out"
+
 
 def read_config():
-    config.read("ok/config.ini")
+    config.read(CONFIG_FILE)
 
 
 def write_config():
-    with open("ok/config.ini", "w") as fp:
+    with open(CONFIG_FILE, "w") as fp:
         config.write(fp)
 
 
-def get_log():
-    with open('ok/log.txt') as fp:
+def get_log(file):
+    with open(file) as fp:
         return fp.read().replace("\n", "<br/>")
 
 
@@ -189,7 +193,13 @@ def shutdown(_, start_response):
 def log(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     with open('app/log.html', 'r', encoding="utf-8") as fp:
-        yield fp.read().format(text=get_log()).encode('utf-8')
+        yield fp.read().format(text=get_log(LOG_FILE)).encode('utf-8')
+
+
+def running_log(_, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    with open('app/log.html', 'r', encoding="utf-8") as fp:
+        yield fp.read().format(text=get_log(RUNNING_LOG_FILE)).encode('utf-8')
 
 
 if __name__ == '__main__':
@@ -206,6 +216,7 @@ if __name__ == '__main__':
     dispatcher.register('GET', '/restart', restart)
     dispatcher.register('GET', '/shutdown', shutdown)
     dispatcher.register('GET', '/log', log)
+    dispatcher.register('GET', '/log-run', running_log)
 
     # Launch a basic server
     httpd = make_server('', 7777, dispatcher)

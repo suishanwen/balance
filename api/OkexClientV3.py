@@ -74,6 +74,7 @@ class OkexClient(object):
     nightMode = False
     kill = 0
     maOff = False
+    kline_data = []
 
     ws = None
     ping = False
@@ -305,8 +306,7 @@ class OkexClient(object):
         return [float(data[1]), float(data[2]), float(data[3]), float(data[4]), float(data[5])]
 
     # (开,高,低,收,交易量)
-    @classmethod
-    def get_klines(cls, symbol, period, size, count=0):
+    def get_klines(self, symbol, period, size):
         result = {}
         granularity = granularityDict[period]
         end_s = int("%0.0f" % datetime.datetime.utcnow().timestamp())
@@ -318,8 +318,7 @@ class OkexClient(object):
         except Exception as e:
             logger.error("***klines:%s" % e)
         if isinstance(result, list) and len(result) == size:
-            return list(map(cls.get_line_data, result))
+            self.kline_data = list(map(self.get_line_data, result))
         else:
-            count += 1
-            logger.error("***klines retry:{}".format(count))
-            return cls.get_klines(symbol, period, size, count)
+            logger.warning("***klines not refresh")
+        return self.kline_data

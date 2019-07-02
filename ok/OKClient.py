@@ -15,5 +15,8 @@ config.read("config.ini")
 
 if __name__ == '__main__':
     symbols = json.loads(config.get("trade", "symbol"))
-    for symbol in symbols:
-        threading.Thread(target=Token.__main__, args=(Client.OkexClient(), symbol,)).start()
+    if len(symbols) > 1:
+        for symbol in symbols:
+            threading.Thread(target=Token.__main__, args=(Client.OkexClient(), symbol,)).start()
+    else:
+        Token.__main__(Client.OkexClient(), symbols[0])

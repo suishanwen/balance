@@ -51,6 +51,7 @@ class OkexClient(object):
     nightMode = False
     kill = 0
     maOff = False
+    kline_data = []
 
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}
@@ -228,14 +229,13 @@ class OkexClient(object):
         return [float(data[1]), float(data[2]), float(data[3]), float(data[4]), float(data[5])]
 
     # (开,高,低,收,交易量)
-    @classmethod
-    def get_klines(cls, symbol, period, size):
+    def get_klines(self, symbol, period, size):
         result = {}
         try:
             result = okcoinSpot.klines(symbol, period, size)
         except Exception as e:
             print("***klines:%s" % e)
         if isinstance(result, list):
-            return list(map(cls.get_line_data, result))[::-1]
+            self.kline_data = list(map(self.get_line_data, result))[::-1]
         else:
-            return cls.get_klines(symbol, period, size)
+            self.get_klines(symbol, period, size)

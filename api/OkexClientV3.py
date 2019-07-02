@@ -322,7 +322,7 @@ class OkexClient(object):
             self.kline_data = list(map(self.get_line_data, result))
         if len(self.kline_data) == 0:
             logger.error("***klines retry...")
-            return self.get_klines(symbol, period, size)
+            self.get_klines(symbol, period, size)
         elif is_list and len(result) == size - 1 and self.kline_data[0][5] != end:
             first = json.loads(json.dumps(result[0]))
             first[0] = end
@@ -334,4 +334,3 @@ class OkexClient(object):
             self.kline_data = list(map(self.get_line_data, result))
         elif is_list and len(result) != size and len(result) != size - 1:
             logger.warning("***klines not refresh,{}".format(result))
-        return self.kline_data

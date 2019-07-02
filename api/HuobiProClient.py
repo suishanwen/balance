@@ -42,6 +42,7 @@ class HuobiProClient(object):
     nightMode = False
     kill = 0
     maOff = False
+    kline_data = []
 
     # global variable
     accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}
@@ -287,14 +288,13 @@ class HuobiProClient(object):
     def get_line_data(cls, data):
         return [data.get('open'), data.get('high'), data.get('low'), data.get('close'), data.get('amount')]
 
-    @classmethod
-    def get_klines(cls, symbol, period, size):
+    def get_klines(self, symbol, period, size):
         result = {}
         try:
             result = get_kline(symbol, period, size)
         except Exception as e:
             print("***get_kline:%s" % e)
         if result is not None and result.get('status') == 'ok':
-            return list(map(cls.get_line_data, result.get('data')))
+            self.kline_data = list(map(self.get_line_data, result.get('data')))
         else:
-            return cls.get_klines(symbol, period, size)
+            self.get_klines(symbol, period, size)

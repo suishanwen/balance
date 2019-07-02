@@ -34,7 +34,6 @@ def get_config_text():
 def write_config_text(text):
     with open(CONFIG_FILE, "w") as fp:
         fp.write(text)
-    read_config()
 
 
 def get_log(file):

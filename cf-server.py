@@ -69,7 +69,9 @@ def require_auth(func):
     def wrapper(*args, **kw):
         environ = args[0]
         logger.info("require_auth")
-        cookies = environ['HTTP_COOKIE']
+        cookies = environ.get('HTTP_COOKIE')
+        if cookies is None:
+            return auth_fail(*args)
         index1 = cookies.find("code=") + 5
         index2 = cookies.find(";")
         if index2 < index1:

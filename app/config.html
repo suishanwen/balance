@@ -23,6 +23,7 @@
 </head>
 <body style="font-size: 30px">
 <div>
+    <div class="operate" onclick="edit()"><span>编辑</span></div>
     <div class="operate" onclick="pullAll()"><span>更新</span></div>
     <div class="operate" onclick="restart()"><span>重启</span></div>
     <div class="operate" onclick="shutdown()"><span>结束</span></div>
@@ -34,6 +35,11 @@
 </body>
 <script>
     const path = location.href.split(":")[0] + "://" + document.location.host;
+
+
+    edit = () => {
+        location.href = `${path}/edit`;
+    };
 
     modify = (symbol, option) => {
         const isStat = symbol.indexOf("-stat") !== -1;

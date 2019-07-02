@@ -1,3 +1,4 @@
+import functools
 import subprocess
 import uuid
 import configparser
@@ -24,6 +25,16 @@ def write_config():
         config.write(fp)
 
 
+def get_config_text():
+    with open(CONFIG_FILE, "r") as fp:
+        return fp.read()
+
+
+def write_config_text(text):
+    with open(CONFIG_FILE, "w") as fp:
+        fp.write(text)
+
+
 def get_log(file):
     with open(file) as fp:
         return fp.read().replace("\n", "<br/>")
@@ -36,6 +47,40 @@ def get_option_val(section, option):
     except configparser.NoSectionError or configparser.NoOptionError as e:
         logger.error(str(e))
     return val
+
+
+def generate_auth():
+    with open(r'auth', 'w') as f:
+        auth_code = str(uuid.uuid1()).split("-")[0]
+        f.write(auth_code)
+        return auth_code
+
+
+def auth_fail(_, start_response):
+    with open('app/info.html', 'r', encoding="utf-8") as fp:
+        logger.warning("授权码验证失败,点击重试")
+        start_response('200 OK', [('Content-type', 'text/html')])
+        yield fp.read().format(code="406 Forbidden", msg="授权码验证失败,点击重试！").encode('utf-8')
+
+
+def require_auth(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kw):
+        environ = args[0]
+        logger.info("require_auth")
+        cookies = environ['HTTP_COOKIE']
+        index1 = cookies.find("code=") + 5
+        index2 = cookies.find(";")
+        if index2 < index1:
+            index2 = len(cookies)
+        auth_code_in = cookies[index1:index2]
+        with open(r'auth', 'r') as f:
+            auth_code = f.read()
+            if auth_code != auth_code_in:
+                return auth_fail(*args)
+        return func(*args, **kw)
+
+    return wrapper
 
 
 def hello(_, start_response):
@@ -55,45 +100,38 @@ def auth(_, start_response):
         yield fp.read().encode('utf-8')
 
 
-def cfg(environ, start_response):
-    auth_code_in = environ['HTTP_COOKIE'][environ['HTTP_COOKIE'].index("code=") + 5:len(environ['HTTP_COOKIE'])]
-    with open(r'auth', 'r') as f:
-        auth_code = f.read()
-        start_response('200 OK', [('Content-type', 'text/html')])
-        if auth_code == auth_code_in:
-            read_config()
-            symbols = get_option_val("trade", "symbol")
-            build_html = ""
-            for symbol in json.loads(symbols):
-                build_html += "<div>"
-                build_html += "<div>[{}]</div>".format(symbol)
-                options = config.options(symbol)
-                for option in options:
-                    val = get_option_val(symbol, option)
-                    build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}" \
-                                  "</a></div>".format(symbol, option, option, symbol, option, val)
-                build_html += "</div>"
-                build_html += "<br/>"
-                build_html += "<div>"
-                build_html += "<div>[{}-stat]</div>".format(symbol)
-                options = config.options("{}-stat".format(symbol))
-                for option in options:
-                    val = get_option_val("{}-stat".format(symbol), option)
-                    build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}" \
-                                  "</a></div>".format(symbol + "-stat", option, option, symbol + "-stat", option, val)
-                build_html += "</div><hr/>"
-            with open('app/config.html', 'r', encoding="utf-8") as fp:
-                yield fp.read().replace("#tbd", build_html).encode('utf-8')
-        else:
-            with open('app/info.html', 'r', encoding="utf-8") as fp:
-                yield fp.read().format(code="406 Forbidden", msg="授权码验证失败,点击重试！").encode('utf-8')
+@require_auth
+def cfg(_, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    read_config()
+    symbols = get_option_val("trade", "symbol")
+    build_html = ""
+    for symbol in json.loads(symbols):
+        build_html += "<div>"
+        build_html += "<div>[{}]</div>".format(symbol)
+        options = config.options(symbol)
+        for option in options:
+            val = get_option_val(symbol, option)
+            build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}" \
+                          "</a></div>".format(symbol, option, option, symbol, option, val)
+        build_html += "</div>"
+        build_html += "<br/>"
+        build_html += "<div>"
+        build_html += "<div>[{}-stat]</div>".format(symbol)
+        options = config.options("{}-stat".format(symbol))
+        for option in options:
+            val = get_option_val("{}-stat".format(symbol), option)
+            build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}" \
+                          "</a></div>".format(symbol + "-stat", option, option, symbol + "-stat", option, val)
+        build_html += "</div><hr/>"
+    with open('app/config.html', 'r', encoding="utf-8") as fp:
+        yield fp.read().replace("#tbd", build_html).encode('utf-8')
 
 
-def generate_auth():
-    with open(r'auth', 'w') as f:
-        auth_code = str(uuid.uuid1()).split("-")[0]
-        f.write(auth_code)
-        return auth_code
+def edit(_, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    with open('app/edit.html', 'r', encoding="utf-8") as fp:
+        yield fp.read().replace("#config", get_config_text()).encode('utf-8')
 
 
 def calc_avg_price(section):
@@ -106,6 +144,15 @@ def calc_avg_price(section):
         config.set(section, "avgprice", str(avg_price))
 
 
+@require_auth
+def save(environ, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    params = environ['params']
+    write_config_text(params.get("data"))
+    yield "ok".encode('utf-8')
+
+
+@require_auth
 def modify_val(environ, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     params = environ['params']
@@ -150,6 +197,7 @@ def modify_val(environ, start_response):
     yield "ok".encode('utf-8')
 
 
+@require_auth
 def pull(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     cmd = """cd /home/balance
@@ -163,6 +211,7 @@ nohup python3 cf-server.py>/home/balance/cfg.out 2>&1 &"""
     yield "ok".encode('utf-8')
 
 
+@require_auth
 def restart(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     cmd = """echo '----- pull code -----'
@@ -182,6 +231,7 @@ nohup python3 OKClient.py>/home/balance/ok/nohup.out 2>&1 &"""
     yield "ok".encode('utf-8')
 
 
+@require_auth
 def shutdown(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     cmd = """ps -ef | grep OKClient.py | grep -v grep | awk '{print $2}' | xargs kill -9
@@ -190,12 +240,14 @@ def shutdown(_, start_response):
     yield "ok".encode('utf-8')
 
 
+@require_auth
 def log(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     with open('app/log.html', 'r', encoding="utf-8") as fp:
         yield fp.read().format(text=get_log(LOG_FILE)).encode('utf-8')
 
 
+@require_auth
 def running_log(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     with open('app/log.html', 'r', encoding="utf-8") as fp:
@@ -209,9 +261,11 @@ if __name__ == '__main__':
     # Create the dispatcher and register functions
     dispatcher = PathDispatcher()
     dispatcher.register('GET', '/', hello)
-    dispatcher.register('GET', '/pull', pull)
     dispatcher.register('GET', '/auth', auth)
+    dispatcher.register('GET', '/pull', pull)
     dispatcher.register('GET', '/cfg', cfg)
+    dispatcher.register('GET', '/edit', edit)
+    dispatcher.register('POST', '/save', save)
     dispatcher.register('GET', '/modify', modify_val)
     dispatcher.register('GET', '/restart', restart)
     dispatcher.register('GET', '/shutdown', shutdown)

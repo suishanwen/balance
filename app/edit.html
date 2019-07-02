@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>auth</title>
+    <script src="https://bitcoinrobot.cn/file/assets/jquery.2.2.2/jquery.min.js"></script>
+    <style>
+        textarea {
+            width: 400px;
+            height: 800px;
+        }
+
+        .back, .save {
+            color: white;
+            cursor: pointer;
+            font-size: 30px;
+            position: fixed;
+            border: 1px solid gray;
+            background: green;
+        }
+
+        .back {
+            bottom: 100px;
+            right: 100px;
+        }
+
+        .save {
+            left: 100px;
+            bottom: 100px;
+        }
+    </style>
+</head>
+<body style="font-size: 30px">
+<div style="width:450px;margin: 0 auto;">
+    <textarea id="config">#config</textarea>
+</div>
+<a onclick="location.href='/'" class="back">返回</a>
+<a onclick="save()" class="save">保存</a>
+<script>
+    const path = location.href.split(":")[0] + "://" + document.location.host;
+    save = () => {
+        const val = document.getElementById("config").value;
+        if (val) {
+            $.post(`${path}/save`, {data: val}, (data) => {
+                alert(data);
+                location.reload()
+            });
+        } else {
+            alert("配置不能为空!");
+        }
+    };
+</script>
+</body>
+</html>

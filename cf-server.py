@@ -17,6 +17,7 @@ RUNNING_LOG_FILE = "ok/nohup.out"
 
 
 def read_config():
+    config.clear()
     config.read(CONFIG_FILE)
 
 

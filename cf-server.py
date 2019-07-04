@@ -131,10 +131,19 @@ def cfg(_, start_response):
         yield fp.read().replace("#tbd", build_html).encode('utf-8')
 
 
+@require_auth
 def edit(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     with open('app/edit.html', 'r', encoding="utf-8") as fp:
         yield fp.read().replace("#config", get_config_text()).encode('utf-8')
+
+
+@require_auth
+def save(environ, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    params = environ['params']
+    write_config_text(params.get("data"))
+    yield "ok".encode('utf-8')
 
 
 def calc_avg_price(section):
@@ -145,14 +154,6 @@ def calc_avg_price(section):
         if transaction > 0 and amount > 0:
             avg_price = -avg_price
         config.set(section, "avgprice", str(avg_price))
-
-
-@require_auth
-def save(environ, start_response):
-    start_response('200 OK', [('Content-type', 'text/html')])
-    params = environ['params']
-    write_config_text(params.get("data"))
-    yield "ok".encode('utf-8')
 
 
 @require_auth

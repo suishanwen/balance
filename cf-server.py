@@ -76,9 +76,9 @@ def require_auth(func):
         index2 = cookies.find(";")
         if index2 < index1:
             index2 = len(cookies)
-        auth_code_in = cookies[index1:index2]
+        auth_code_in = cookies[index1:index2].strip()
         with open(r'auth', 'r') as f:
-            auth_code = f.read()
+            auth_code = f.read().strip()
             if auth_code != auth_code_in:
                 return auth_fail(*args)
         return func(*args, **kw)

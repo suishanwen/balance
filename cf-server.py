@@ -121,11 +121,14 @@ def cfg(_, start_response):
         build_html += "<br/>"
         build_html += "<div>"
         build_html += "<div>[{}-stat]</div>".format(symbol)
-        options = config.options("{}-stat".format(symbol))
-        for option in options:
-            val = get_option_val("{}-stat".format(symbol), option)
-            build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}" \
-                          "</a></div>".format(symbol + "-stat", option, option, symbol + "-stat", option, val)
+        try:
+            options = config.options("{}-stat".format(symbol))
+            for option in options:
+                val = get_option_val("{}-stat".format(symbol), option)
+                build_html += "<div id='{}_{}'>{} = <a style='cursor:pointer;' onclick='modify(\"{}\",\"{}\")'>{}" \
+                              "</a></div>".format(symbol + "-stat", option, option, symbol + "-stat", option, val)
+        except Exception as e:
+            logger.warning(str(e))
         build_html += "</div><hr/>"
     with open('app/config.html', 'r', encoding="utf-8") as fp:
         yield fp.read().replace("#tbd", build_html).encode('utf-8')

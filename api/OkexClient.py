@@ -23,8 +23,8 @@ okcoinSpot = OkexSpot(okcoinRESTURL, apikey, secretkey)
 
 
 class OkexClient(object):
-    BALANCE_USDT = "usdt"
     BALANCE_T = ""
+    BALANCE_E = ""
 
     SYMBOL_T = ""
 
@@ -54,7 +54,7 @@ class OkexClient(object):
     kline_data = []
 
     # global variable
-    accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}
+    accountInfo = {BALANCE_E: {"total": 0, "available": 0, "freezed": 0}}
 
     priceInfo = {"version": 0, SYMBOL_T: {"asks": [], "bids": []}}
 
@@ -215,7 +215,7 @@ class OkexClient(object):
             if my_account_info.get('result'):
                 freezed = from_dict(my_account_info, "info", "funds", "freezed")
                 free = from_dict(my_account_info, "info", "funds", "free")
-                print(u"USDT", free["usdt"], "freezed", freezed["usdt"])
+                print(self.BALANCE_E, free[self.BALANCE_E], "freezed", freezed[self.BALANCE_E])
                 print(self.BALANCE_T.upper(), free[self.BALANCE_T], "freezed", freezed[self.BALANCE_T])
             else:
                 print("getAccountInfo Fail,Try again!")

@@ -15,8 +15,8 @@ from util.MyUtil import from_dict, from_time_stamp, write_log, send_email
 class HuobiProClient(object):
     ACCOUNT_ID = ""
 
-    BALANCE_USDT = "usdt"
     BALANCE_T = ""
+    BALANCE_E = ""
 
     SYMBOL_T = ""
 
@@ -45,7 +45,7 @@ class HuobiProClient(object):
     kline_data = []
 
     # global variable
-    accountInfo = {BALANCE_USDT: {"total": 0, "available": 0, "freezed": 0}}
+    accountInfo = {BALANCE_E: {"total": 0.0, "available": 0.0, "freezed": 0.0}}
 
     priceInfo = {"version": 0, SYMBOL_T: {"asks": [], "bids": []}}
 
@@ -265,7 +265,7 @@ class HuobiProClient(object):
                 spot_account = list(filter(lambda x: x["type"] == 'spot', accounts.get("data")))
                 self.ACCOUNT_ID = spot_account[0].get('id')
                 my_account_info = get_balance(self.ACCOUNT_ID)
-                symbols = [self.BALANCE_USDT, self.BALANCE_T]
+                symbols = [self.BALANCE_E, self.BALANCE_T]
                 if my_account_info.get('status') == 'ok':
                     data = from_dict(my_account_info, "data", "list")
                     for symbol in symbols:

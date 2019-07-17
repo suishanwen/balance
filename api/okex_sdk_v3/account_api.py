@@ -4,7 +4,7 @@ from .consts import *
 
 class AccountAPI(Client):
 
-    def __init__(self, api_key, api_seceret_key, passphrase, use_server_time=True):
+    def __init__(self, api_key, api_seceret_key, passphrase, use_server_time=False):
         Client.__init__(self, api_key, api_seceret_key, passphrase, use_server_time)
 
     # get all currencies list

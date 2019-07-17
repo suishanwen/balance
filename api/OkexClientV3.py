@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # encoding: utf-8
 
-import configparser
 import time
 import datetime
 import gevent
@@ -11,23 +10,6 @@ import api.okex_sdk_v3.spot_api as spot
 from util.MyUtil import from_time_stamp
 from util.Logger import logger
 from websocket import create_connection
-from codegen.generator import write
-
-write("dec", '../key.ini')
-# read config
-configBase = configparser.ConfigParser()
-config = configparser.ConfigParser()
-configBase.read("../key.ini")
-config.read("config.ini")
-write("enc", '../key.ini')
-
-# init apikey,secretkey,passphrase
-api_key = configBase.get("okex-v3", "API_KEY")
-seceret_key = configBase.get("okex-v3", "SECRET_KEY")
-passphrase = configBase.get("okex-v3", "PASSPHRASE")
-
-# currentAPIV3
-spotAPI = spot.SpotAPI(api_key, seceret_key, passphrase, True)
 
 granularityDict = {
     "1min": 60,
@@ -46,6 +28,10 @@ granularityDict = {
 
 
 class OkexClient(object):
+
+    def __init__(self, api_key, seceret_key, passphrase):
+        self.spotAPI = spot.SpotAPI(api_key, seceret_key, passphrase, True)
+
     BALANCE_T = ""
     BALANCE_E = ""
 
@@ -89,13 +75,12 @@ class OkexClient(object):
     def get_coin_num(self, symbol):
         return self.accountInfo[symbol]["available"]
 
-    @classmethod
-    def make_order(cls, my_order_info):
+    def make_order(self, my_order_info):
         logger.info('-----------------------------------------spot order----------------------------------------------')
         result = {}
         try:
-            result = spotAPI.take_order(my_order_info.orderType, my_order_info.symbol, 2, my_order_info.price,
-                                        my_order_info.amount)
+            result = self.spotAPI.take_order(my_order_info.orderType, my_order_info.symbol, 2, my_order_info.price,
+                                             my_order_info.amount)
         except Exception as e:
             logger.error("***trade:%s" % e)
         if result is not None and result.get('result'):
@@ -116,7 +101,7 @@ class OkexClient(object):
         order_result = {}
         try:
             logger.info("check order status {}".format(wait_count))
-            order_result = spotAPI.get_order_info(my_order_info.orderId, my_order_info.symbol)
+            order_result = self.spotAPI.get_order_info(my_order_info.orderId, my_order_info.symbol)
         except Exception as e:
             logger.error("***orderinfo:%s" % e)
         if order_result is not None and order_result.get('order_id') == my_order_info.orderId:
@@ -180,7 +165,7 @@ class OkexClient(object):
     # def get_coin_price(self, symbol):
     #     data = {}
     #     try:
-    #         data = spotAPI.get_depth(symbol)
+    #         data = self.spotAPI.get_depth(symbol)
     #     except Exception as e:
     #         logger.error("***depth:%s" % e)
     #     price_info = self.priceInfo[symbol]
@@ -289,7 +274,7 @@ class OkexClient(object):
         try:
             accounts = [self.BALANCE_E.upper(), self.BALANCE_T.upper()]
             for symbol in accounts:
-                t_account = spotAPI.get_coin_account_info(symbol)
+                t_account = self.spotAPI.get_coin_account_info(symbol)
                 if t_account.get('currency') == symbol:
                     logger.info("%s:balance %s available %s frozen %s" % (symbol, t_account["balance"],
                                                                           t_account["available"],
@@ -314,7 +299,7 @@ class OkexClient(object):
         start = datetime.datetime.fromtimestamp(start_s).strftime("%Y-%m-%dT%H:%M:%S.000Z")
         end = datetime.datetime.fromtimestamp(end_s).strftime("%Y-%m-%dT%H:%M:%S.000Z")
         try:
-            result = spotAPI.get_kline(symbol, start, end, granularity)
+            result = self.spotAPI.get_kline(symbol, start, end, granularity)
         except Exception as e:
             logger.error("***klines:%s" % e)
         is_list = isinstance(result, list)

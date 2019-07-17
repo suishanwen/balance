@@ -20,6 +20,9 @@ def dec(path):
 
 
 def write(_type, path):
-    code = dec(path) if _type == "dec" else enc(path)
-    with open(path, 'w') as f:
-        f.write(code)
+    try:
+        code = dec(path) if _type == "dec" else enc(path)
+        with open(path, 'w') as f:
+            f.write(code)
+    except Exception as e:
+        print(str(e))

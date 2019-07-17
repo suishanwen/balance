@@ -10,6 +10,7 @@ import os
 
 from api.okex_sdk_v3.account_api import AccountAPI
 from util.Logger import logger
+from codegen.generator import write
 
 # read config
 config = configparser.ConfigParser()
@@ -18,11 +19,19 @@ CONFIG_FILE = "ok/config.ini"
 LOG_FILE = "ok/log.txt"
 RUNNING_LOG_FILE = "ok/nohup.out"
 
-accounts_init = []
+accounts_init = {}
 try:
     for _, _, files in os.walk("keys"):
-        accounts_init = files
-        accounts_init.sort()
+        files.sort()
+        for file_name in files:
+            write("dec", "keys/" + file_name)
+            _config = configparser.ConfigParser()
+            _config.read("keys/" + file_name)
+            apikey = _config.get("info", "apikey")
+            secretkey = _config.get("info", "secretkey")
+            passphrase = _config.get("info", "passphrase")
+            accounts_init[file_name] = (apikey, secretkey, passphrase)
+            write("encode", "keys/" + file_name)
 except FileNotFoundError:
     logger.warning("keys not found")
 
@@ -275,7 +284,10 @@ def running_log(_, start_response):
 @require_auth
 def accounts(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
-    yield json.dumps(accounts_init).encode('utf-8')
+    account_list = []
+    for key in accounts_init:
+        account_list.append(key)
+    yield json.dumps(account_list).encode('utf-8')
 
 
 @require_auth
@@ -290,24 +302,23 @@ def transfer(environ, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     params = environ['params']
     _type = params["type"].split("-")
-    accounts_all = [params["account"]]
-    if accounts_all[0] == "0":
-        accounts_all = accounts_init
+    key_list = []
+    if params["account"] == "0":
+        for name in accounts_init:
+            key_list.append(accounts_init[name])
+    else:
+        key_list.append(accounts_init[params["account"]])
     success = 0
-    for account in accounts_all:
-        success += transfer_one(account, params["symbol"], params["amount"], _type[0], _type[1])
-    if success == len(accounts_all):
+    for key in key_list:
+        success += transfer_one(key, params["symbol"], params["amount"], _type[0], _type[1])
+    if success == len(key_list):
         yield "ok".encode('utf-8')
     else:
-        yield "总共:{},成功:{}".format(len(accounts_all), success).encode('utf-8')
+        yield "总共:{},成功:{}".format(len(key_list), success).encode('utf-8')
 
 
-def transfer_one(account, symbol, amount, _from, _to):
-    config.read("keys/" + account)
-    apikey = config.get("info", "apikey")
-    secretkey = config.get("info", "secretkey")
-    passphrase = config.get("info", "passphrase")
-    account_api = AccountAPI(apikey, secretkey, passphrase)
+def transfer_one(key, symbol, amount, _from, _to):
+    account_api = AccountAPI(key[0], key[1], key[2])
     try:
         account_api.coin_transfer(symbol, amount, _from, _to)
         return 1

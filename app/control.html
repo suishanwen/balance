@@ -102,11 +102,11 @@
         $.post(`${path}/get_currency`, {symbol: symbol, account: account}, (data) => {
             let fund = "";
             let coin = "";
-            data = JSON.parse(data);
             if (data === "查询异常") {
                 fund = "查询异常";
                 coin = "查询异常";
             } else {
+                data = JSON.parse(data);
                 if (data["fund"].length === 0) {
                     fund = 0;
                 } else {

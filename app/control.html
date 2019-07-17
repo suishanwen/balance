@@ -12,54 +12,115 @@
 <div>
     <form class="form-inline">
         <div class="form-group mb-2">
+            <label class="form-control">余额查询</label>
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control" id="symbol_q" placeholder="币种">
+        </div>
+        <button type="button" class="btn btn-primary mb-2" onclick="get_currencys()">查询</button>
+    </form>
+    <form class="form-inline">
+        <div class="form-group mb-2">
+            <label class="form-control">钱包划转</label>
+        </div>
+        <div class="form-group mb-2">
             <select id="account">
                 <option value="0">全部</option>
             </select>
         </div>
         <div class="form-group mb-2">
-            <input type="text" class="form-control input-mini" id="symbol" placeholder="币种">
+            <input type="text" class="form-control" id="symbol" placeholder="币种">
         </div>
         <div class="form-group mb-2">
-            <input type="text" class="form-control input-mini" id="amount" placeholder="数量">
+            <input type="text" class="form-control" id="amount" placeholder="数量">
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="type" id="inlineRadio1" value="1-6">
+            <input class="form-check-input" type="radio" name="transfer_type" id="inlineRadio1" value="1-6">
             <label class="form-check-label" for="inlineRadio1">币币->资金</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="type" id="inlineRadio2" value="6-1">
+            <input class="form-check-input" type="radio" name="transfer_type" id="inlineRadio2" value="6-1">
             <label class="form-check-label" for="inlineRadio2">资金->币币</label>
         </div>
-        <button type="button" class="btn btn-primary mb-2" onclick="transfer()">Confirm</button>
+        <button type="button" class="btn btn-primary mb-2" onclick="transfer()">确认</button>
     </form>
+    <table class="table">
+        <thead>
+        <tr id="thead">
+            <th scope="col">账户</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+
+        </tbody>
+    </table>
 </div>
 <script>
     const path = location.href.split(":")[0] + "://" + document.location.host;
+    let account_list = [];
     transfer = () => {
         const account = $("#account").val();
         const symbol = $("#symbol").val();
         const amount = $("#amount").val();
-        const type = $("input[name='type']").val();
+        const type = $("input[name='transfer_type']:checked").val();
         if (symbol && amount && type) {
             $.post(`${path}/transfer`, {account: account, symbol: symbol, amount: amount, type: type}, (data) => {
                 alert(data);
-                if (data === "ok") {
-                    location.reload()
-                }
             });
         } else {
             alert("参数均不能为空!");
         }
     };
 
-    (() => {
+    get_accounts = () => {
         $.post(`${path}/accounts`, {param: null}, (data) => {
-            const list = JSON.parse(data);
-            list.forEach(item => {
+            account_list = JSON.parse(data);
+            account_list.forEach(item => {
                 const option = `<option value="${item}">${item}</option>`;
-                $("#account").append(option)
+                const tr = `<tr id="${item}"><td>${item}</td></tr>`;
+                $("#account").append(option);
+                $("#tbody").append(tr);
             })
         });
+    };
+
+    get_currencys = () => {
+        const symbol = $("#symbol_q").val();
+        if (symbol) {
+            $("#thead").html(`<th scope="col">账户</th><th scope="col">${symbol} 资金</th><th scope="col">${symbol} 币币</th>`);
+            account_list.forEach((account) => {
+                $("#" + account).html(`<td>${account}</td><td id="${account}_fund"></td><td id="${account}_coin"></td>`);
+                get_currency(symbol, account);
+            });
+        } else {
+            alert("币种不能为空!");
+        }
+
+    };
+
+    get_currency = (symbol, account) => {
+        $.post(`${path}/get_currency`, {symbol: symbol, account: account}, (data) => {
+            let fund = "";
+            let coin = "";
+            data = JSON.parse(data);
+            if (data === "查询异常") {
+                fund = "查询异常";
+                coin = "查询异常";
+            } else {
+                if (data["fund"].length === 0) {
+                    fund = 0;
+                } else {
+                    fund = data["fund"][0]["balance"];
+                }
+                coin = data["coin"]["balance"];
+            }
+            $(`#${account}_fund`).text(fund);
+            $(`#${account}_coin`).text(coin);
+        });
+    };
+
+    (() => {
+        get_accounts();
     })()
 </script>
 </body>

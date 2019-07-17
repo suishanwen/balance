@@ -9,6 +9,7 @@ import pytz
 import os
 
 from api.okex_sdk_v3.account_api import AccountAPI
+from api.okex_sdk_v3.spot_api import SpotAPI
 from util.Logger import logger
 from codegen.generator import write
 
@@ -285,8 +286,8 @@ def running_log(_, start_response):
 def accounts(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     account_list = []
-    for key in accounts_init:
-        account_list.append(key)
+    for name in accounts_init:
+        account_list.append(name)
     yield json.dumps(account_list).encode('utf-8')
 
 
@@ -320,11 +321,27 @@ def transfer(environ, start_response):
 def transfer_one(key, symbol, amount, _from, _to):
     account_api = AccountAPI(key[0], key[1], key[2])
     try:
-        account_api.coin_transfer(symbol, amount, _from, _to)
+        account_api.coin_transfer(symbol, float(amount), int(_from), int(_to))
         return 1
     except Exception as e:
         logger.error(str(e))
         return 0
+
+
+@require_auth
+def get_currency(environ, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    params = environ['params']
+    symbol = params["symbol"]
+    key = accounts_init[params["account"]]
+    account_api = AccountAPI(key[0], key[1], key[2])
+    spot_api = SpotAPI(key[0], key[1], key[2])
+    try:
+        yield json.dumps({"fund": account_api.get_currency(symbol),
+                          "coin": spot_api.get_coin_account_info(symbol)}).encode('utf-8')
+    except Exception as e:
+        logger.error(str(e))
+        yield "查询异常".encode('utf-8')
 
 
 if __name__ == '__main__':
@@ -347,6 +364,7 @@ if __name__ == '__main__':
     dispatcher.register('GET', '/control', control)
     dispatcher.register('POST', '/accounts', accounts)
     dispatcher.register('POST', '/transfer', transfer)
+    dispatcher.register('POST', '/get_currency', get_currency)
     # dispatcher.register('POST', '/order', order)
     # dispatcher.register('POST', '/withdraw', withdraw)
 

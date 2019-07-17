@@ -4,7 +4,8 @@
 import sys
 
 from api.HuobiProAPI import *
-from util.MyUtil import from_dict, from_time_stamp, write_log, send_email
+from util.MyUtil import from_dict, from_time_stamp, write_log
+from util.MailUtil import send_email
 
 
 # from websocket import create_connection

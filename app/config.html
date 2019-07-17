@@ -29,6 +29,7 @@
     <div class="operate" onclick="shutdown()"><span>结束</span></div>
     <div class="operate" onclick="log()"><span>日志</span></div>
     <div class="operate" onclick="runningLog()"><span>输出</span></div>
+    <div class="operate" onclick="control()"><span>控制</span></div>
 </div>
 <br>
 #tbd
@@ -138,5 +139,9 @@
     runningLog = () => {
         location.href = `${path}/log-run`;
     };
+
+    control = () => {
+        location.href = `${path}/control`;
+    }
 </script>
 </html>

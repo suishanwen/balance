@@ -6,6 +6,9 @@ import json
 import time
 import datetime
 import pytz
+import os
+
+from api.okex_sdk_v3.account_api import AccountAPI
 from util.Logger import logger
 
 # read config
@@ -14,6 +17,14 @@ config = configparser.ConfigParser()
 CONFIG_FILE = "ok/config.ini"
 LOG_FILE = "ok/log.txt"
 RUNNING_LOG_FILE = "ok/nohup.out"
+
+accounts_init = []
+try:
+    for _, _, files in os.walk("keys"):
+        accounts_init = files
+        accounts_init.sort()
+except FileNotFoundError:
+    logger.warning("keys not found")
 
 
 def read_config():
@@ -261,6 +272,50 @@ def running_log(_, start_response):
         yield fp.read().format(text=get_log(RUNNING_LOG_FILE)).encode('utf-8')
 
 
+@require_auth
+def accounts(_, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    yield json.dumps(accounts_init).encode('utf-8')
+
+
+@require_auth
+def control(_, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    with open('app/control.html', 'r', encoding="utf-8") as fp:
+        yield fp.read().encode('utf-8')
+
+
+@require_auth
+def transfer(environ, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    params = environ['params']
+    _type = params["type"].split("-")
+    accounts_all = [params["account"]]
+    if accounts_all[0] == "0":
+        accounts_all = accounts_init
+    success = 0
+    for account in accounts_all:
+        success += transfer_one(account, params["symbol"], params["amount"], _type[0], _type[1])
+    if success == len(accounts_all):
+        yield "ok".encode('utf-8')
+    else:
+        yield "总共:{},成功:{}".format(len(accounts_all), success).encode('utf-8')
+
+
+def transfer_one(account, symbol, amount, _from, _to):
+    config.read("keys/" + account)
+    apikey = config.get("info", "apikey")
+    secretkey = config.get("info", "secretkey")
+    passphrase = config.get("info", "passphrase")
+    account_api = AccountAPI(apikey, secretkey, passphrase)
+    try:
+        account_api.coin_transfer(symbol, amount, _from, _to)
+        return 1
+    except Exception as e:
+        logger.error(str(e))
+        return 0
+
+
 if __name__ == '__main__':
     from util.Resty import PathDispatcher
     from wsgiref.simple_server import make_server
@@ -278,6 +333,11 @@ if __name__ == '__main__':
     dispatcher.register('GET', '/shutdown', shutdown)
     dispatcher.register('GET', '/log', log)
     dispatcher.register('GET', '/log-run', running_log)
+    dispatcher.register('GET', '/control', control)
+    dispatcher.register('POST', '/accounts', accounts)
+    dispatcher.register('POST', '/transfer', transfer)
+    # dispatcher.register('POST', '/order', order)
+    # dispatcher.register('POST', '/withdraw', withdraw)
 
     # Launch a basic server
     httpd = make_server('', 7777, dispatcher)

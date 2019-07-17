@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Control</title>
+    <script src="https://bitcoinrobot.cn/file/assets/jquery.2.2.2/jquery.min.js"></script>
+    <link href="https://bitcoinrobot.cn/file/assets/bootstrap.4.1.3/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<a onclick="location.href='/'"
+   style="color: white;cursor: pointer;font-size: 30px;position: fixed;bottom:100px;right: 100px;border: 1px solid gray;background: green;">返回</a>
+<div>
+    <form class="form-inline">
+        <div class="form-group mb-2">
+            <select id="account">
+                <option value="0">全部</option>
+            </select>
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control input-mini" id="symbol" placeholder="币种">
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control input-mini" id="amount" placeholder="数量">
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="type" id="inlineRadio1" value="1-6">
+            <label class="form-check-label" for="inlineRadio1">币币->资金</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="type" id="inlineRadio2" value="6-1">
+            <label class="form-check-label" for="inlineRadio2">资金->币币</label>
+        </div>
+        <button type="button" class="btn btn-primary mb-2" onclick="transfer()">Confirm</button>
+    </form>
+</div>
+<script>
+    const path = location.href.split(":")[0] + "://" + document.location.host;
+    transfer = () => {
+        const account = $("#account").val();
+        const symbol = $("#symbol").val();
+        const amount = $("#amount").val();
+        const type = $("input[name='type']").val();
+        if (symbol && amount && type) {
+            $.post(`${path}/transfer`, {account: account, symbol: symbol, amount: amount, type: type}, (data) => {
+                alert(data);
+                if (data === "ok") {
+                    location.reload()
+                }
+            });
+        } else {
+            alert("参数均不能为空!");
+        }
+    };
+
+    (() => {
+        $.post(`${path}/accounts`, {param: null}, (data) => {
+            const list = JSON.parse(data);
+            list.forEach(item => {
+                const option = `<option value="${item}">${item}</option>`;
+                $("#account").append(option)
+            })
+        });
+    })()
+</script>
+</body>
+</html>

@@ -116,7 +116,9 @@
     pullAll = () => {
         $.get(`${path}/pull`, null, (data) => {
             alert(data);
-            document.location.reload();
+            setTimeout(() => {
+                document.location.reload()
+            }, 2000)
         });
     };
 

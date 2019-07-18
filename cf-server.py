@@ -10,6 +10,7 @@ import os
 
 from api.okex_sdk_v3.account_api import AccountAPI
 from api.okex_sdk_v3.spot_api import SpotAPI
+from api.Result import Result
 from util.Logger import logger
 from codegen.generator import write
 
@@ -31,7 +32,8 @@ try:
             apikey = _config.get("info", "apikey")
             secretkey = _config.get("info", "secretkey")
             passphrase = _config.get("info", "passphrase")
-            accounts_init[file_name] = (apikey, secretkey, passphrase)
+            trxpass = _config.get("info", "trxpass")
+            accounts_init[file_name] = (apikey, secretkey, passphrase, trxpass)
             write("encode", "keys/" + file_name)
 except FileNotFoundError:
     logger.warning("keys not found")
@@ -300,48 +302,105 @@ def control(_, start_response):
 
 @require_auth
 def transfer(environ, start_response):
-    start_response('200 OK', [('Content-type', 'text/html')])
+    start_response('200 OK', [('Content-type', 'application/json')])
     params = environ['params']
     _type = params["type"].split("-")
+    account = params["account"]
+    symbol = params["symbol"]
+    amount = params.get("amount")
     key_list = []
-    if params["account"] == "0":
+    if account == "0":
         for name in accounts_init:
             key_list.append(accounts_init[name])
     else:
-        key_list.append(accounts_init[params["account"]])
+        key_list.append(accounts_init[account])
     success = 0
+    msg_list = []
     for key in key_list:
-        success += transfer_one(key, params["symbol"], params["amount"], _type[0], _type[1])
+        status, msg = transfer_one(key, symbol, amount, _type[0], _type[1])
+        success += status
+        msg_list.append(msg)
     if success == len(key_list):
-        yield "ok".encode('utf-8')
+        yield Result(True, "ok").response()
     else:
-        yield "总共:{},成功:{}".format(len(key_list), success).encode('utf-8')
+        yield Result(False, "总共:{},成功:{}\n{}".format(len(key_list), success, '\n'.join(msg_list))).response()
 
 
 def transfer_one(key, symbol, amount, _from, _to):
     account_api = AccountAPI(key[0], key[1], key[2])
     try:
+        if not amount:
+            if _from == "6":
+                amount = get_account_currency(symbol, key)[0]["available"]
+            else:
+                amount = get_spot_currency(symbol, key)["available"]
         account_api.coin_transfer(symbol, float(amount), int(_from), int(_to))
-        return 1
+        return 1, "ok"
     except Exception as e:
         logger.error(str(e))
-        return 0
+        return 0, str(e)
 
 
 @require_auth
 def get_currency(environ, start_response):
-    start_response('200 OK', [('Content-type', 'text/html')])
+    start_response('200 OK', [('Content-type', 'application/json')])
     params = environ['params']
     symbol = params["symbol"]
     key = accounts_init[params["account"]]
-    account_api = AccountAPI(key[0], key[1], key[2])
-    spot_api = SpotAPI(key[0], key[1], key[2])
     try:
-        yield json.dumps({"fund": account_api.get_currency(symbol),
-                          "coin": spot_api.get_coin_account_info(symbol)}).encode('utf-8')
+        yield Result(True, "", {"fund": get_account_currency(symbol, key),
+                                "coin": get_spot_currency(symbol, key)}).response()
     except Exception as e:
         logger.error(str(e))
-        yield "查询异常".encode('utf-8')
+        yield Result(False, str(e)).response()
+
+
+def get_account_currency(symbol, key):
+    account_api = AccountAPI(key[0], key[1], key[2])
+    return account_api.get_currency(symbol)
+
+
+def get_spot_currency(symbol, key):
+    spot_api = SpotAPI(key[0], key[1], key[2])
+    return spot_api.get_coin_account_info(symbol)
+
+
+@require_auth
+def withdraw(environ, start_response):
+    start_response('200 OK', [('Content-type', 'application/json')])
+    params = environ['params']
+    account = params["account"]
+    symbol = params["symbol"]
+    amount = params.get("amount")
+    to_address = params.get("toAddress")
+    key_list = []
+    if account == "0":
+        for name in accounts_init:
+            key_list.append(accounts_init[name])
+    else:
+        key_list.append(accounts_init[account])
+    success = 0
+    msg_list = []
+    for key in key_list:
+        status, msg = withdraw_one(key, symbol, amount, to_address)
+        success += status
+        msg_list.append(msg)
+    if success == len(key_list):
+        yield Result(True, "ok").response()
+    else:
+        yield Result(False, "总共:{},成功:{}\n{}".format(len(key_list), success, '\n'.join(msg_list))).response()
+
+
+def withdraw_one(key, symbol, amount, to_address):
+    account_api = AccountAPI(key[0], key[1], key[2])
+    try:
+        if not amount:
+            amount = get_account_currency(symbol, key)[0]["available"]
+        account_api.coin_withdraw(symbol, float(amount), 3, to_address, key[3], 0)
+        return 1, "ok"
+    except Exception as e:
+        logger.error(str(e))
+        return 0, str(e)
 
 
 if __name__ == '__main__':
@@ -365,8 +424,8 @@ if __name__ == '__main__':
     dispatcher.register('POST', '/accounts', accounts)
     dispatcher.register('POST', '/transfer', transfer)
     dispatcher.register('POST', '/get_currency', get_currency)
+    dispatcher.register('POST', '/withdraw', withdraw)
     # dispatcher.register('POST', '/order', order)
-    # dispatcher.register('POST', '/withdraw', withdraw)
 
     # Launch a basic server
     httpd = make_server('', 7777, dispatcher)

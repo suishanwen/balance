@@ -403,6 +403,49 @@ def withdraw_one(key, symbol, amount, to_address):
         return 0, str(e)
 
 
+@require_auth
+def order(environ, start_response):
+    start_response('200 OK', [('Content-type', 'application/json')])
+    params = environ['params']
+    account = params["account"]
+    symbol = params["symbol"]
+    order_type = params.get("orderType")
+    price = params.get("price")
+    amount = params.get("amount")
+    key_list = []
+    if account == "0":
+        for name in accounts_init:
+            key_list.append(accounts_init[name])
+    else:
+        key_list.append(accounts_init[account])
+    success = 0
+    msg_list = []
+    for key in key_list:
+        status, msg = order_one(key, order_type, symbol, price, amount)
+        success += status
+        msg_list.append(msg)
+    if success == len(key_list):
+        yield Result(True, "ok").response()
+    else:
+        yield Result(False, "总共:{},成功:{}\n{}".format(len(key_list), success, '\n'.join(msg_list))).response()
+
+
+def order_one(key, order_type, symbol, price, amount):
+    spot_api = SpotAPI(key[0], key[1], key[2])
+    try:
+        if not amount:
+            amount = get_spot_currency(symbol.split("_"[0]), key)["available"]
+        result = spot_api.take_order(order_type, symbol, 2, price, amount)
+        if result is not None and result.get('result'):
+            return 1, result['order_id']
+        else:
+            return 0, "下单未成功"
+
+    except Exception as e:
+        logger.error(str(e))
+        return 0, str(e)
+
+
 if __name__ == '__main__':
     from util.Resty import PathDispatcher
     from wsgiref.simple_server import make_server
@@ -425,7 +468,7 @@ if __name__ == '__main__':
     dispatcher.register('POST', '/transfer', transfer)
     dispatcher.register('POST', '/get_currency', get_currency)
     dispatcher.register('POST', '/withdraw', withdraw)
-    # dispatcher.register('POST', '/order', order)
+    dispatcher.register('POST', '/order', order)
 
     # Launch a basic server
     httpd = make_server('', 7777, dispatcher)

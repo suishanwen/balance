@@ -30,7 +30,7 @@ granularityDict = {
 class OkexClient(object):
 
     def __init__(self, api_key, seceret_key, passphrase):
-        self.spotAPI = spot.SpotAPI(api_key, seceret_key, passphrase, True)
+        self.spotAPI = spot.SpotAPI(api_key, seceret_key, passphrase)
 
     BALANCE_T = ""
     BALANCE_E = ""

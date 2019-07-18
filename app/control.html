@@ -44,7 +44,7 @@
             <input class="form-check-input" type="radio" name="transfer_type" id="inlineRadio2" value="6-1">
             <label class="form-check-label" for="inlineRadio2">资金->币币</label>
         </div>
-        <button type="button" class="btn btn-primary mb-2" onclick="transfer()">确认</button>
+        <button type="button" class="btn btn-primary mb-2" onclick="transfer()">划转</button>
     </form>
     <form class="form-inline">
         <div class="form-group mb-2">
@@ -53,7 +53,25 @@
         <div class="form-group mb-2">
             <input type="text" class="form-control" id="toAddress" placeholder="认证账户">
         </div>
-        <button type="button" class="btn btn-primary mb-2" onclick="withdraw()">确认</button>
+        <button type="button" class="btn btn-primary mb-2" onclick="withdraw()">提币</button>
+    </form>
+    <form class="form-inline">
+        <div class="form-group mb-2">
+            <label class="form-control">FillOrKill</label>
+        </div>
+        <div class="form-group mb-2">
+            <select id="orderType">
+                <option value="sell">卖</option>
+                <option value="buy">买</option>
+            </select>
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control" id="exchange" placeholder="交换币种">
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control" id="price" placeholder="价格">
+        </div>
+        <button type="button" class="btn btn-primary mb-2" onclick="order()">下单</button>
     </form>
     <table class="table">
         <thead>
@@ -154,6 +172,29 @@
             });
         } else {
             alert("币种、提现账户不能为空!");
+        }
+    };
+
+    order = () => {
+        const account = $("#account").val();
+        const amount = $("#amount").val();
+        const orderType = $("#orderType").val();
+        const symbol = $("#symbol").val();
+        const exchange = $("#exchange").val();
+        const price = $("#price").val();
+        if (symbol && exchange && price) {
+            $.post(`${path}/order`, {
+                account: account,
+                symbol: symbol + "_" + exchange,
+                amount: amount,
+                price: price,
+                orderType: orderType
+            }, (result) => {
+                setTimeout(get_currencys, 1000);
+                alert(result.msg);
+            });
+        } else {
+            alert("币种、交换币种、价格不能为空!");
         }
     };
 

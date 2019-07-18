@@ -319,7 +319,7 @@ def transfer(environ, start_response):
 
 
 def transfer_one(key, symbol, amount, _from, _to):
-    account_api = AccountAPI(key[0], key[1], key[2], True)
+    account_api = AccountAPI(key[0], key[1], key[2])
     try:
         account_api.coin_transfer(symbol, float(amount), int(_from), int(_to))
         return 1
@@ -334,8 +334,8 @@ def get_currency(environ, start_response):
     params = environ['params']
     symbol = params["symbol"]
     key = accounts_init[params["account"]]
-    account_api = AccountAPI(key[0], key[1], key[2], True)
-    spot_api = SpotAPI(key[0], key[1], key[2], True)
+    account_api = AccountAPI(key[0], key[1], key[2])
+    spot_api = SpotAPI(key[0], key[1], key[2])
     try:
         yield json.dumps({"fund": account_api.get_currency(symbol),
                           "coin": spot_api.get_coin_account_info(symbol)}).encode('utf-8')

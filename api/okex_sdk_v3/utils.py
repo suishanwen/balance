@@ -37,7 +37,7 @@ def parse_params_to_str(params):
 def get_timestamp():
     now = datetime.datetime.utcnow()
     t = now.isoformat("T")
-    return t + "Z"
+    return t[0:len(t) - 3] + "Z"
 
 
 def signature(timestamp, method, request_path, body, secret_key):

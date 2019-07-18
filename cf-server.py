@@ -24,7 +24,7 @@ RUNNING_LOG_FILE = "ok/nohup.out"
 accounts_init = {}
 try:
     for _, _, files in os.walk("keys"):
-        files.sort()
+        files.sort(key=lambda x: int(x.split("-")[0]))
         for file_name in files:
             write("dec", "keys/" + file_name)
             _config = configparser.ConfigParser()

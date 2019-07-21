@@ -10,7 +10,7 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 receivers = [config.get("trade", "email")]
 
-token = "905510819:AAHENewu_2fH78tM_aDYXRwaTqCRWhZm9Ck"
+token = ""
 
 
 def get_chat_id():
@@ -32,6 +32,7 @@ def send_message(message, chat_id):
     }
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     print(requests.post(url, data=data).json()["ok"])
+
 
 def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
     # 第三方 SMTP 服务

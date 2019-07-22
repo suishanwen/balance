@@ -2,7 +2,7 @@
 *idea
 *.ini
 *log
-*.out
+*out
 codegen/generator.py
 ok/*.txt
 huobi/*.txt

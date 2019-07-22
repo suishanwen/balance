@@ -33,6 +33,15 @@ def send_message(message, chat_id):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     print(requests.post(url, data=data).json()["ok"])
 
+def notice(order_info):
+    order_type = "买入" if order_info.orderType == "buy" else "卖出"
+    coin = order_info.symbol.split("_")[0]
+    currency = order_info.symbol.split("_")[1]
+    message = f"{order_type} {coin} {order_info.totalDealAmount}个，" \
+              f"均价 {order_info.avgPrice} {currency},类型 {order_info.trigger}"
+    send_tg(message)
+
+
 def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
     # 第三方 SMTP 服务
     send_tg(content)

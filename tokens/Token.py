@@ -6,7 +6,7 @@ import time
 import traceback
 import api.OrderInfo as OrderInfo
 from util.MyUtil import write_log, from_time_stamp, get_day_bj
-from util.MailUtil import send_email
+from util.MailUtil import send_tg,notice,send_tg
 from util.Logger import logger
 from util.Statistic import analyze_log, generate_email
 
@@ -280,7 +280,7 @@ def check_timer_task(client):
         else:
             client.amount = round(float(config.get(client.SYMBOL_T, "amount")) * client.percentage / ori_percentage)
         logger.warning("send statistic email")
-        if send_email(generate_email(client.SYMBOL_T, analyze_log()), "html", "收益统计[bitcoinrobot]"):
+        if send_tg(generate_email(client.SYMBOL_T, analyze_log()), "html", "收益统计[bitcoinrobot]"):
             client.emailDay = dd
         return True
     elif client.nightMode and 6 <= hh < 23:
@@ -302,7 +302,7 @@ def kill_checker(buy, sell, kill, symbol, killer):
         killer_cur = 2
     if killer and killer_cur != killer:
         logger.warning("{} killed at buy:{},sell:{} ".format(symbol, buy, sell))
-        send_email("{} killed at buy:{},sell:{} ".format(symbol, buy, sell))
+        send_tg("{} killed at buy:{},sell:{} ".format(symbol, buy, sell))
         exit()
     return killer_cur
 
@@ -419,7 +419,7 @@ def __main__(client, symbol):
                     with open("config.ini", "w") as fp:
                         config.write(fp)
                     next_buy, next_buy_val, next_sell, next_sell_val = get_next_buy_sell_info(client)
-                    send_email(str(order_info))
+                    notice(order_info)
             counter += 1
             if period == '4hour':
                 time.sleep(10)
@@ -448,5 +448,5 @@ def __main__(client, symbol):
                         info))
     except Exception as e:
         logger.error("[unhandled exception]{}:{}".format(e, traceback.format_exc()))
-        send_email("%s:unhandled exception:%s" % (symbol, traceback.format_exc()))
+        send_tg("%s:unhandled exception:%s" % (symbol, traceback.format_exc()))
         exit()

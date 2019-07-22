@@ -1,9 +1,5 @@
 import configparser
-import smtplib
 import requests
-from email.mime.text import MIMEText
-from email.header import Header
-from util.Logger import logger
 
 # read config
 config = configparser.ConfigParser()
@@ -36,8 +32,10 @@ def deal_notice(order_info, token):
     order_type = "买入" if order_info.orderType == "buy" else "卖出"
     coin = order_info.symbol.split("_")[0]
     currency = order_info.symbol.split("_")[1]
-    message = f"{order_type} {coin} {order_info.totalDealAmount}个，" \
-              f"均价 {order_info.avgPrice} {currency},类型 {order_info.trigger}"
+    message = f"{order_type} {coin} {order_info.totalDealAmount}个\n" \
+              f"均价 {order_info.avgPrice} {currency}, " \
+              f"总成交额 {round(order_info.totalDealAmount * order_info.avgPrice, 2)}\n" \
+              f"类型 {order_info.trigger}"
     send_tg(message, token)
 
 

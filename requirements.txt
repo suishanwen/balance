@@ -4,3 +4,4 @@ pytz==2018.9
 ecdsa==0.13
 gevent==1.4.0
 websocket_client==0.56.0
+pathlib

@@ -1,7 +1,12 @@
+import os
 import sys
 import importlib
+from pathlib import Path
 
-sys.path.append("/home/balance")
+project_path = str(Path(os.getcwd()).parent)
+
+sys.path.append(project_path)
+
 importlib.reload(sys)
 import tokens.Token as Token
 import api.HuobiProClient as Client

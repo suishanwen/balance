@@ -10,7 +10,11 @@ config = configparser.ConfigParser()
 config.read("config.ini")
 receivers = [config.get("trade", "email")]
 
+<<<<<<< HEAD
 token = "905510819:AAHENewu_2fH78tM_aDYXRwaTqCRWhZm9Ck"
+=======
+token = ""
+>>>>>>> d155e870f67651f3696bad50af28b4932c2bbbde
 
 
 def get_chat_id():
@@ -33,6 +37,7 @@ def send_message(message, chat_id):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     print(requests.post(url, data=data).json()["ok"])
 
+<<<<<<< HEAD
 def notice(order_info):
     order_type = "买入" if order_info.orderType == "buy" else "卖出"
     coin = order_info.symbol.split("_")[0]
@@ -41,6 +46,8 @@ def notice(order_info):
               f"均价 {order_info.avgPrice} {currency},类型 {order_info.trigger}"
     send_tg(message)
 
+=======
+>>>>>>> d155e870f67651f3696bad50af28b4932c2bbbde
 
 def send_email(content, _subtype='plain', _subject="bitcoinrobot"):
     # 第三方 SMTP 服务

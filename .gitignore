@@ -1,3 +1,8 @@
 *.pyc
 *idea
+*.ini
 *log
+*out
+codegen/generator.py
+ok/*.txt
+huobi/*.txt

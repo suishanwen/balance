@@ -1,37 +1,52 @@
 import configparser
-import smtplib
 import requests
-from email.mime.text import MIMEText
-from email.header import Header
-from util.Logger import logger
 
 # read config
 config = configparser.ConfigParser()
 config.read("config.ini")
 receivers = [config.get("trade", "email")]
 
-token = ""
 
-
-def get_chat_id():
+def get_chat_id(token):
     url = f"https://api.telegram.org/bot{token}/getUpdates"
     resp = requests.post(url).json()
     chat_id = resp["result"][0]["message"]["chat"]["id"]
     return chat_id
 
 
-def send_tg(message):
-    chat_id = get_chat_id()
-    send_message(message, chat_id)
+def send_tg(message, token):
+    chat_id = get_chat_id(token)
+    return send_message(message, chat_id, token)
 
 
-def send_message(message, chat_id):
+def send_message(message, chat_id, token):
     data = {
         "chat_id": chat_id,
         "text": message
     }
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    print(requests.post(url, data=data).json()["ok"])
+    return requests.post(url, data=data).json()["ok"]
+
+
+def deal_notice(order_info, token):
+    order_type = "买入" if order_info.orderType == "buy" else "卖出"
+    coin = order_info.symbol.split("_")[0]
+    currency = order_info.symbol.split("_")[1]
+    message = f"{order_type} {coin} {order_info.totalDealAmount}个\n" \
+              f"均价 {order_info.avgPrice} {currency}, " \
+              f"总成交额 {round(order_info.totalDealAmount * order_info.avgPrice, 2)}\n" \
+              f"类型 {order_info.trigger}"
+    send_tg(message, token)
+
+
+def daily_report_notice(report, token):
+    try:
+        if send_tg(report, token):
+            return True
+        else:
+            return False
+    except:
+        return False
 
 
 def send_email(content, _subtype='plain', _subject="bitcoinrobot"):

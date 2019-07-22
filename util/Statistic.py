@@ -106,32 +106,56 @@ def generate_email(symbol, order_list):
         change_type = "增"
     else:
         change_type = "减"
-    email_content += "\n<div>"
-    email_content += "\n<h3>%s</h3>" % symbol
-    email_content += "\n<table>"
-    email_content += get_tr("总交易次数", trx_count_total)
-    email_content += get_tr("部分成交撤单次数", trx_count_canceled)
-    email_content += get_tr("策略交易次数", trx_count_valid)
-    email_content += get_tr("策略交易次数（买）", trx_count_valid_buy)
-    email_content += get_tr("策略交易次数（卖）", trx_count_valid_sell)
-    email_content += get_tr("反转触发次数", trx_count_reverse)
-    email_content += get_tr("插针触发次数", trx_count_needle)
-    email_content += get_tr("总成交金额$", trx_usdt_total)
-    email_content += get_tr("总成交数量", trx_quantity_total)
-    email_content += get_tr("总成交数量（买）", trx_quantity_buy)
-    email_content += get_tr("总成交数量（卖）", trx_quantity_sell)
-    email_content += get_tr("总交易均价$", trx_price_avg)
-    email_content += get_tr("余额变化$", usdt_change)
-    email_content += get_tr("持仓变化", quantity_change)
-    email_content += get_tr("{}仓均价$".format(change_type), quantity_change_price)
-    email_content += get_tr("理论收益$", reward_weight_usdt)
-    email_content += get_tr("点卡消耗", points_consume)
-    email_content += "\n</table>"
-    email_content += "\n</div><br/>"
-    email_content += "\n<h4>交易单</h4>"
-    email_content += "\n<div>" + order_sheet + "\n</div>"
-    email_content += "\n</div>\n</body>\n</html>"
-    return email_content
+
+    # email_content += "\n<div>"
+    # email_content += "\n<h3>%s</h3>" % symbol
+    # email_content += "\n<table>"
+    # email_content += get_tr("总交易次数", trx_count_total)
+    # email_content += get_tr("部分成交撤单次数", trx_count_canceled)
+    # email_content += get_tr("策略交易次数", trx_count_valid)
+    # email_content += get_tr("策略交易次数（买）", trx_count_valid_buy)
+    # email_content += get_tr("策略交易次数（卖）", trx_count_valid_sell)
+    # email_content += get_tr("反转触发次数", trx_count_reverse)
+    # email_content += get_tr("插针触发次数", trx_count_needle)
+    # email_content += get_tr("总成交金额$", trx_usdt_total)
+    # email_content += get_tr("总成交数量", trx_quantity_total)
+    # email_content += get_tr("总成交数量（买）", trx_quantity_buy)
+    # email_content += get_tr("总成交数量（卖）", trx_quantity_sell)
+    # email_content += get_tr("总交易均价$", trx_price_avg)
+    # email_content += get_tr("余额变化$", usdt_change)
+    # email_content += get_tr("持仓变化", quantity_change)
+    # email_content += get_tr("{}仓均价$".format(change_type), quantity_change_price)
+    # email_content += get_tr("理论收益$", reward_weight_usdt)
+    # email_content += get_tr("点卡消耗", points_consume)
+    #
+    # email_content += "\n</table>"
+    # email_content += "\n</div><br/>"
+    # email_content += "\n<h4>交易单</h4>"
+    # email_content += "\n<div>" + order_sheet + "\n</div>"
+    # email_content += "\n</div>\n</body>\n</html>"
+
+    report_content = f"""
+            总交易次数 {trx_count_total}
+            部分成交撤单次数 {trx_count_canceled}
+            策略交易次数 {trx_count_valid}
+            策略交易次数（买）{trx_count_valid_buy}
+            策略交易次数（卖）{trx_count_valid_sell}
+            反转触发次数 {trx_count_reverse}
+            插针触发次数 {trx_count_needle}
+            总成交金额$ {trx_usdt_total}
+            总成交数量 {trx_quantity_total}
+            总成交数量（买）{trx_quantity_buy}
+            总成交数量（卖）{trx_quantity_sell}
+            总交易均价$ {trx_price_avg}
+            余额变化$ {usdt_change}
+            持仓变化 {quantity_change}
+            {change_type}仓均价$ {quantity_change_price}
+            理论收益$ {reward_weight_usdt}
+            点卡消耗 {points_consume}
+            
+    """
+
+    return report_content
 
 
 def get_tr(title, content):

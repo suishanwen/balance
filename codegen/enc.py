@@ -1,7 +1,11 @@
+import os
 import sys
 import importlib
 
-sys.path.append("/home/balance")
+from pathlib import Path
+
+project_path = str(Path(os.getcwd()).parent)
+sys.path.append(project_path)
 importlib.reload(sys)
 from codegen.generator import write
 

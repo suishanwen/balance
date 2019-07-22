@@ -1,0 +1,7 @@
+*.pyc
+*idea
+*.ini
+*log
+*out
+ok/*.txt
+huobi/*.txt

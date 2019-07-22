@@ -3,3 +3,4 @@
 *.ini
 *log
 *.out
+codegen/generator.py

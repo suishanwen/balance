@@ -1,7 +1,7 @@
 import cgi
 
 
-def notfound_404(environ, start_response):
+def notfound_404(_, start_response):
     start_response('404 Not Found', [('Content-type', 'text/plain')])
     return [b'Not Found']
 

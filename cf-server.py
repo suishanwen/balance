@@ -11,8 +11,8 @@ import os
 from api.okex_sdk_v3.account_api import AccountAPI
 from api.okex_sdk_v3.spot_api import SpotAPI
 from api.Result import Result
-from util.Logger import logger
-from codegen.generator import write
+from module.Logger import logger
+from codegen.generator import decrypt_f, encrypt_f
 
 # read config
 config = configparser.ConfigParser()
@@ -26,7 +26,7 @@ try:
     for _, _, files in os.walk("keys"):
         files.sort(key=lambda x: int(x.split("-")[0]))
         for file_name in files:
-            write("dec", "keys/" + file_name)
+            decrypt_f(f"keys/{file_name}")
             _config = configparser.ConfigParser()
             _config.read("keys/" + file_name)
             apikey = _config.get("info", "apikey")
@@ -34,7 +34,7 @@ try:
             passphrase = _config.get("info", "passphrase")
             trxpass = _config.get("info", "trxpass")
             accounts_init[file_name] = (apikey, secretkey, passphrase, trxpass)
-            write("encode", "keys/" + file_name)
+            encrypt_f(f"keys/{file_name}")
 except FileNotFoundError:
     logger.warning("keys not found")
 
@@ -447,7 +447,7 @@ def order_one(key, order_type, symbol, price, amount):
 
 
 if __name__ == '__main__':
-    from util.Resty import PathDispatcher
+    from module.Resty import PathDispatcher
     from wsgiref.simple_server import make_server
 
     # Create the dispatcher and register functions

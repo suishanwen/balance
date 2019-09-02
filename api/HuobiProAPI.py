@@ -5,7 +5,7 @@
 # @QQ      : 375235513
 # @github  : https://github.com/KlausQIU
 
-from util.Utils import *
+from util.HuobiUtils import *
 
 '''
 Market data API
@@ -20,7 +20,7 @@ def get_kline(symbol, period, size=150):
     :param size: 可选值： [1,2000]
     :return:
     """
-    params = {'symbol': symbol,
+    params = {'symbol': symbol.replace("_", ""),
               'period': period,
               'size': size}
 
@@ -35,7 +35,7 @@ def get_depth(symbol, _type='step0'):
     :param _type: 可选值：{ percent10, step0, step1, step2, step3, step4, step5 }
     :return:
     """
-    params = {'symbol': symbol,
+    params = {'symbol': symbol.replace("_", ""),
               'type': _type}
 
     url = MARKET_URL + '/market/depth'
@@ -48,7 +48,7 @@ def get_trade(symbol):
     :param symbol
     :return:
     """
-    params = {'symbol': symbol}
+    params = {'symbol': symbol.replace("_", "")}
 
     url = MARKET_URL + '/market/trade'
     return http_get_request(url, params)
@@ -60,7 +60,7 @@ def get_ticker(symbol):
     :param symbol:
     :return:
     """
-    params = {'symbol': symbol}
+    params = {'symbol': symbol.replace("_", "")}
 
     url = MARKET_URL + '/market/detail/merged'
     return http_get_request(url, params)
@@ -72,7 +72,7 @@ def get_detail(symbol):
     :param symbol
     :return:
     """
-    params = {'symbol': symbol}
+    params = {'symbol': symbol.replace("_", "")}
 
     url = MARKET_URL + '/market/detail'
     return http_get_request(url, params)
@@ -141,7 +141,7 @@ def send_order(acct_id, amount, symbol, _type, price=0):
 
     params = {"account-id": acct_id,
               "amount": amount,
-              "symbol": symbol,
+              "symbol": symbol.replace("_", ""),
               "type": _type}
     if price:
         params["price"] = price
@@ -201,7 +201,7 @@ def orders_list(symbol, states, types=None, size=None, start_date=None, end_date
     :param size:
     :return:
     """
-    params = {'symbol': symbol,
+    params = {'symbol': symbol.replace("_", ""),
               'states': states}
 
     if types:
@@ -233,7 +233,7 @@ def orders_matchresults(symbol, types=None, size=None, start_date=None, end_date
     :param size:
     :return:
     """
-    params = {'symbol': symbol}
+    params = {'symbol': symbol.replace("_", "")}
 
     if types:
         params[types] = types

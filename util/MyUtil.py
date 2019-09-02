@@ -1,13 +1,11 @@
 import datetime
 import time
-import configparser
 import json
 import pytz
-from util.Logger import logger
+from module.Logger import logger
+from module.CfEnv import config, get_log_path
 
-# read config
-config = configparser.ConfigParser()
-config.read("config.ini")
+log_path = get_log_path()
 
 
 def has_attr(_dict, args):
@@ -33,21 +31,23 @@ def get_day_bj():
 
 
 def write_log(text=""):
-    with open('log.txt') as f:
-        s = f.read()
+    try:
+        with open(log_path) as f:
+            s = f.read()
+    except FileNotFoundError:
+        s = ""
     mm = str(from_time_stamp())[0:7]
-    if s.find(mm) != -1:
-        with open(r'log.txt', 'w') as f:
+    if s == "" or s.find(mm) != -1:
+        with open(log_path, 'w') as f:
             f.write(text + "\n" + s)
     else:
-        with open(r'log.txt', 'a') as f:
+        with open(log_path, 'a') as f:
             f.writelines("\n")
         # write old logs
         with open(str(from_time_stamp(int(time.time()) - 86400 * 10))[0:7] + '.txt', 'w') as old_f:
-            with open('log.txt') as f:
+            with open(log_path) as f:
                 old_f.writelines(f.readlines()[::-1])
             # write count
-            config.read("config.ini")
             symbols = json.loads(config.get("trade", "symbol"))
             for symbol in symbols:
                 cfg_field = symbol + "-stat"
@@ -57,5 +57,5 @@ def write_log(text=""):
                 except Exception as err:
                     logger.error("Error: write_log,{}".format(err))
                 old_f.writelines(symbol + " [" + str(sum_count) + "]")
-        with open(r'log.txt', 'w') as f:
+        with open(log_path, 'w') as f:
             f.write(text)

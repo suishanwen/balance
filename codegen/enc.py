@@ -1,8 +1,4 @@
-import sys
-import importlib
+from module.CfEnv import TOKEN_PY_PATH
+from codegen.generator import encrypt_f
 
-sys.path.append("/home/balance")
-importlib.reload(sys)
-from codegen.generator import write
-
-write("enc", '../tokens/Token.py')
+encrypt_f(TOKEN_PY_PATH)

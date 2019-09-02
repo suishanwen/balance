@@ -1,23 +1,8 @@
-import sys
-import importlib
-
-sys.path.append("/home/balance")
-importlib.reload(sys)
+from module.CfEnv import config, configBase
 import tokens.Token as Token
 import api.OkexClientV3 as Client
-import configparser
 import json
 import threading
-from codegen.generator import write
-
-# read config
-config = configparser.ConfigParser()
-config.read("config.ini")
-# read key
-write("dec", '../key.ini')
-configBase = configparser.ConfigParser()
-configBase.read("../key.ini")
-write("enc", '../key.ini')
 
 # init apikey,secretkey,passphrase
 api_key = configBase.get("okex-v3", "API_KEY")

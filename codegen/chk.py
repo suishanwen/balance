@@ -1,18 +1,15 @@
-import sys
-import importlib
 import os
+from module.CfEnv import KEY_PATH, SUB_KEY_PATH
 
-sys.path.append("/home/balance")
-importlib.reload(sys)
-from codegen.generator import write
+from codegen.generator import decrypt_f
 
-write("dec", '../key.ini')
+decrypt_f(KEY_PATH)
 accounts_init = []
 try:
-    for _, _, files in os.walk("../keys"):
+    for _, _, files in os.walk(SUB_KEY_PATH):
         accounts_init = files
 except FileNotFoundError:
     print("keys not found")
 
 for account in accounts_init:
-    write("dec", '../keys/' + account)
+    decrypt_f(f"{SUB_KEY_PATH}/{account}")

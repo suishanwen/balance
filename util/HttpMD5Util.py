@@ -8,7 +8,7 @@ import json
 import hashlib
 import ssl
 import configparser
-from util.Socks5 import open_socks
+from module.Socks5 import open_socks
 
 # read config
 configBase = configparser.ConfigParser()

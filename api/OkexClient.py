@@ -49,6 +49,7 @@ class OkexClient(object):
     buyRate = 1
     sellRate = 1
     nightMode = False
+    nightRate = 1
     kill = 0
     maOff = False
     kline_data = []

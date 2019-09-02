@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>日志</title>
+    <script src="https://bitcoinrobot.cn/file/assets/bootstrap.4.1.3/js/jquery.slim.min.js"></script>
+    <style>
+        body {
+            margin: 0 auto;
+            padding: 0;
+            line-height: 1.5em;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 14px;
+            color: #000000;
+        }
+
+        #log-container {
+            overflow-y: hidden;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        #log-container div ul {
+            list-style: none;
+            height: 800px;
+        }
+
+        #log-container div ul li {
+            padding: 30px 0;
+        }
+
+        #heart {
+            position: absolute;
+        }
+
+        @media screen and (min-width: 1000px) {
+            #log-container {
+                width: 1000px
+            }
+        }
+
+        @media screen and (max-width: 999px) {
+            body {
+                line-height: 1.5em;
+                font-size: 30px;
+            }
+
+            #log-container div ul {
+                list-style: none;
+                height: 1000px;
+            }
+
+            #log-container {
+                width: 100%
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="log-container">
+    <div>
+        <ul></ul>
+    </div>
+    <img id="heart" src="https://bitcoinrobot.cn/file/Heart.png"/>
+</div>
+</body>
+<script>
+    $(document).ready(function () {
+        var table = document.getElementById("log-container");
+        var pong = false;
+        var websocket = null;
+        var timer = null;
+        var pingTimer = null;
+        var pongTimer = null;
+        var baseInterVal = 6;
+        var runInterval = baseInterVal;
+        var interval = baseInterVal;
+        table.scrollTop = 0;
+        var hash = window.location.hash;
+        var sockerId = 2;
+        if (hash) {
+            sockerId = window.location.hash.replace("#/", "");
+        }
+
+        function remove() {
+            var container = $("#log-container div ul")[0];
+            var childs = container.children;
+            if (childs.length > 10) {
+                for (i = 0; i < childs.length - 10; i++) {
+                    container.removeChild(childs[i]);
+                }
+            }
+            table.scrollTop = table.scrollHeight - 828;
+            interval = baseInterVal;
+            window.clearInterval(timer);
+        }
+
+        function play(interval) {
+            if (interval === runInterval) {
+                return;
+            }
+            window.clearInterval(timer);
+            timer = setInterval(function () {
+                if (table.scrollHeight === table.scrollTop + 828) {
+                    remove();
+                } else {
+                    table.scrollTop += 1 + (baseInterVal - interval) * 0.2;
+                }
+            }, interval);
+            runInterval = interval;
+        }
+
+        function heartBeat1() {
+            const heart = $("#heart")[0];
+            if (heart.height === 1) {
+                window.clearInterval(pingTimer);
+            } else {
+                heart.height = --heart.height;
+                heart.width = --heart.width;
+            }
+        }
+
+        function heartBeat2() {
+            const heart = $("#heart")[0];
+            if (heart.height === 32) {
+                window.clearInterval(pongTimer);
+            } else {
+                heart.height = ++heart.height;
+                heart.width = ++heart.width;
+            }
+        }
+
+
+        function append(data) {
+            if (data === "ping") {
+                console.log("ping");
+                pong = false;
+                pingTimer = setInterval(heartBeat1, 10);
+                return;
+            } else if (data === "pong") {
+                console.log("pong");
+                window.clearInterval(pingTimer);
+                pongTimer = setInterval(heartBeat2, 10);
+                pong = true;
+                return;
+            }
+            // 接收服务端的实时日志并添加到HTML页面中
+            $("#log-container div ul").append("<li>" + data + "</li>");
+            interval = interval - Math.floor((table.scrollHeight - 828 - table.scrollTop) / 30);
+            interval = interval <= 0 ? 1 : interval;
+            play(interval);
+        }
+
+        function conn() {
+            var pingTimer = null;
+            append("连接socket......");
+            // 指定websocket路径
+            websocket = new WebSocket("wss://socket.bitcoinrobot.cn/" + sockerId);
+            websocket.onmessage = function (event) {
+                append(event.data)
+            };
+            websocket.onopen = function (event) {
+                append("socket已连接！");
+                pingTimer = setInterval(function () {
+                    append("ping");
+                    websocket.send("ping");
+                    setTimeout(function () {
+                        if (!pong) {
+                            append("未收到心跳包，重置连接!");
+                            websocket.close();
+                            window.clearInterval(pingTimer);
+                            conn();
+                        }
+                    }, 10000)
+                }, 15000)
+            };
+            websocket.onclose = function (event) {
+                append("连接已关闭！");
+            };
+        }
+
+        function heartPosition() {
+            const heart = $("#heart")[0];
+            heart.style.bottom = "20px";
+            heart.style.right = "200px";
+        }
+
+        conn();
+        play(interval);
+        setTimeout(heartPosition, 100);
+        $(window).resize(() => {
+            setTimeout(heartPosition)
+        });
+    });
+</script>
+</html>

@@ -17,11 +17,8 @@ import requests
 import configparser
 from ecdsa import SigningKey
 from hashlib import sha256
-from util.Socks5 import open_socks
-
-# read config
-configBase = configparser.ConfigParser()
-configBase.read("../key.ini")
+from module.Socks5 import open_socks
+from module.CfEnv import configBase
 
 # 此处填写APIKEY
 # init apikey,secretkey,url
@@ -30,7 +27,7 @@ SECRET_KEY = configBase.get("huobipro", "secret_key")
 
 # Need to replace with the actual value generated from below command
 # openssl ecparam -name secp256k1 -genkey -noout -out secp256k1-key.pem
-PRIVATE_KEY = configBase.get("huobipro", "private_key").replace("|", "\n")
+# PRIVATE_KEY = configBase.get("huobipro", "private_key").replace("|", "\n")
 
 # API request URL
 MARKET_URL = "https://api.huobi.pro"
@@ -40,11 +37,16 @@ TRADE_URL = "https://api.huobi.pro"
 ACCOUNT_ID = None
 
 # local socks5 proxy
-OPEN_SOCKS = configBase.get("huobipro", "socks")
+
+try:
+    OPEN_SOCKS = configBase.get("huobipro", "socks")
+except configparser.NoOptionError:
+    OPEN_SOCKS = "0"
 if OPEN_SOCKS == "1":
     open_socks()
 
 # 'Timestamp': '2017-06-02T06:13:49'
+
 
 def http_get_request(url, params, add_to_headers=None):
     headers = {
@@ -105,7 +107,7 @@ def api_key_get(params, request_path):
     host_name = host_name.lower()
     signature = createSign(params, method, host_name, request_path, SECRET_KEY)
     params['Signature'] = signature
-    params['PrivateSignature'] = createPrivateSignature(signature, PRIVATE_KEY)
+    # params['PrivateSignature'] = createPrivateSignature(signature, PRIVATE_KEY)
     url = host_url + request_path
     return http_get_request(url, params)
 
@@ -123,7 +125,7 @@ def api_key_post(params, request_path):
     host_name = host_name.lower()
     signature = createSign(params_to_sign, method, host_name, request_path, SECRET_KEY)
     params_to_sign['Signature'] = signature
-    params_to_sign['PrivateSignature'] = createPrivateSignature(signature, PRIVATE_KEY)
+    # params_to_sign['PrivateSignature'] = createPrivateSignature(signature, PRIVATE_KEY)
     url = host_url + request_path + '?' + urllib.parse.urlencode(params_to_sign)
     return http_post_request(url, params)
 

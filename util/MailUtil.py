@@ -1,13 +1,11 @@
-import configparser
 import smtplib
-from email.mime.text import MIMEText
 from email.header import Header
-from util.Logger import logger
+from email.mime.text import MIMEText
+from module.Logger import logger
+from module.CfEnv import configBase
 
 # read config
-config = configparser.ConfigParser()
-config.read("config.ini")
-receivers = [config.get("trade", "email")]
+receivers = [configBase.get("email", "receiver")]
 
 
 def send_email(content, _subtype='plain', _subject="bitcoinrobot"):

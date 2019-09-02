@@ -8,7 +8,7 @@ import zlib
 import json
 import api.okex_sdk_v3.spot_api as spot
 from util.MyUtil import from_time_stamp
-from util.Logger import logger
+from module.Logger import logger
 from websocket import create_connection
 
 granularityDict = {
@@ -58,6 +58,7 @@ class OkexClient(object):
     buyRate = 1
     sellRate = 1
     nightMode = False
+    nightRate = 1
     kill = 0
     maOff = False
     kline_data = []
@@ -178,7 +179,7 @@ class OkexClient(object):
     def ws_connect(self):
         if self.ws is None or not self.ws.connected:
             try:
-                self.ws = create_connection("wss://real.okex.com:10442/ws/v3", timeout=5)
+                self.ws = create_connection("wss://real.okex.com:8443/ws/v3", timeout=5)
                 logger.info('websocket connected!')
                 pair = self.SYMBOL_T.upper().replace("_", "-")
                 sub_param = {"op": "subscribe", "args": ["spot/depth5:{}".format(pair)]}

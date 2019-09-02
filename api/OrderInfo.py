@@ -36,6 +36,14 @@ class MyOrderInfo(object):
             data.append('[已撤销]')
         return ' '.join(data)
 
+    def tl_msg(self, client):
+        order_type = "买入" if self.orderType == client.TRADE_BUY else "卖出"
+        coin = self.symbol.split("_")[0]
+        currency = self.symbol.split("_")[1]
+        message = f"[{self.trigger.upper()[0:1]}] {order_type} {coin} {self.totalDealAmount}个，均价 {self.avgPrice}\n" \
+            f"总成交额 {round(self.transaction, 2)} {currency}，收益 {self.count}"
+        return message
+
     @classmethod
     def get_trigger(cls, trigger):
         if abs(trigger) == 1:

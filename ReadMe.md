@@ -1,5 +1,5 @@
 
-
+export PYTHONPATH=$PYTHONPATH:/home/balance
 
 
 

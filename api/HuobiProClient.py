@@ -5,7 +5,7 @@ import sys
 
 from api.HuobiProAPI import *
 from util.MyUtil import from_dict, from_time_stamp, write_log
-from util.MailUtil import send_email
+from module.Notification import send_msg
 
 
 # from websocket import create_connection
@@ -21,8 +21,8 @@ class HuobiProClient(object):
 
     SYMBOL_T = ""
 
-    TRADE_BUY = "buy-limit"
-    TRADE_SELL = "sell-limit"
+    TRADE_BUY = "buy-ioc"
+    TRADE_SELL = "sell-ioc"
 
     FILLED_STATUS = 'filled'
 
@@ -41,6 +41,7 @@ class HuobiProClient(object):
     buyRate = 1
     sellRate = 1
     nightMode = False
+    nightRate = 1
     kill = 0
     maOff = False
     kline_data = []
@@ -92,7 +93,7 @@ class HuobiProClient(object):
                                 my_order_info.price)
         except Exception as e:
             print("***send_order:%s" % e)
-            send_email("%s:send_order failed:%s" % (my_order_info.symbol, e))
+            send_msg("%s:send_order failed:%s" % (my_order_info.symbol, e))
             result = self.check_order_list(my_order_info)
         if result is not None and result.get('status') == 'ok':
             print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,

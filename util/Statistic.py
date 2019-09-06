@@ -75,7 +75,7 @@ def generate_report(symbol, order_list):
         order_sheet += "\n<p>" + order.__str__() + "</p>"
         if order.canceled == 0:
             trx_count_valid += 1
-            if order.orderType == "buy":
+            if order.orderType.find("buy") != -1:
                 trx_count_valid_buy += 1
                 trx_quantity_buy += order.totalAmount
             else:

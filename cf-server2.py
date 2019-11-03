@@ -157,6 +157,11 @@ def cfg(_, start_response):
         yield fp.read().replace("#tbd", build_html).encode('utf-8')
 
 
+def cfg2(_, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    yield get_config_text().encode('utf-8')
+
+
 @require_auth
 def edit(_, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
@@ -456,6 +461,7 @@ if __name__ == '__main__':
     dispatcher.register('GET', '/auth', auth)
     dispatcher.register('GET', '/pull', pull)
     dispatcher.register('GET', '/cfg', cfg)
+    dispatcher.register('GET', '/cfg2', cfg2)
     dispatcher.register('GET', '/edit', edit)
     dispatcher.register('POST', '/save', save)
     dispatcher.register('GET', '/modify', modify_val)

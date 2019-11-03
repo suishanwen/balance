@@ -460,7 +460,7 @@ def miner(environ, start_response):
 ps -ef | grep test.py | grep -v grep | awk '{print $2}' | xargs kill -9"""
     if state:
         cmd += """
-        nohup python3 /home/test.py>/home/nohup.out&"""
+        nohup python3 /home/test.py>/home/nohup.out 2>&1 &"""
     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     yield "ok".encode('utf-8')
 

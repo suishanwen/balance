@@ -235,7 +235,7 @@ rm -rf tokens/Token.py
 git checkout tokens/Token.py
 git pull
 ps -ef | grep cf-server2.py | grep -v grep | awk '{print $2}' | xargs kill -9
-cat /dev/null > nohup.out
+cat /dev/null > /home/balance/cfg.out
 nohup python3 cf-server2.py>/home/balance/cfg.out 2>&1 &"""
     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     yield "ok".encode('utf-8')

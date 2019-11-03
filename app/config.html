@@ -29,7 +29,11 @@
     <div class="operate" onclick="shutdown()"><span>结束</span></div>
     <div class="operate" onclick="log()"><span>日志</span></div>
     <div class="operate" onclick="runningLog()"><span>输出</span></div>
-    <div class="operate" onclick="control()"><span>控制</span></div>
+    <div class="operate" onclick="miner(1)"><span>挖矿</span></div>
+    <div class="operate" onclick="miner(0)"><span>停止</span></div>
+    <div class="operate" onclick="minerLog()"><span>输出</span></div>
+
+    <!--    <div class="operate" onclick="control()"><span>控制</span></div>-->
 </div>
 <br>
 #tbd
@@ -145,5 +149,15 @@
     control = () => {
         location.href = `${path}/control`;
     }
+
+    miner = (state) => {
+        $.get(`${path}/miner?state=${state}`, null, (data) => {
+            alert(data);
+        });
+    }
+
+    minerLog = () => {
+        location.href = `${path}/miner-run`;
+    };
 </script>
 </html>

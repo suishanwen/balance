@@ -451,6 +451,27 @@ def order_one(key, order_type, symbol, price, amount):
         return 0, str(e)
 
 
+@require_auth
+def miner(environ, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    params = environ['params']
+    state = params["state"]
+    cmd = """cat /dev/null > /home/nohup.out
+ps -ef | grep test.py | grep -v grep | awk '{print $2}' | xargs kill -9"""
+    if state:
+        cmd += """
+        nohup python3 /home/test.py>/home/nohup.out&"""
+    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    yield "ok".encode('utf-8')
+
+
+@require_auth
+def miner_log(_, start_response):
+    start_response('200 OK', [('Content-type', 'text/html')])
+    with open('app/log.html', 'r', encoding="utf-8") as fp:
+        yield fp.read().format(text=get_log("/home/nohup.out")).encode('utf-8')
+
+
 if __name__ == '__main__':
     from module.Resty import PathDispatcher
     from wsgiref.simple_server import make_server
@@ -475,6 +496,8 @@ if __name__ == '__main__':
     dispatcher.register('POST', '/get_currency', get_currency)
     dispatcher.register('POST', '/withdraw', withdraw)
     dispatcher.register('POST', '/order', order)
+    dispatcher.register('GET', '/miner', miner)
+    dispatcher.register('GET', '/miner-run', miner_log)
 
     # Launch a basic server
     httpd = make_server('', 8888, dispatcher)

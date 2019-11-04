@@ -456,10 +456,10 @@ def miner(environ, start_response):
     start_response('200 OK', [('Content-type', 'text/html')])
     params = environ['params']
     state = params["state"]
-    cmd = """cat /dev/null > /home/nohup.out
-ps -ef | grep test.py | grep -v grep | awk '{print $2}' | xargs kill -9"""
-    if state:
+    cmd = """ps -ef | grep test.py | grep -v grep | awk '{print $2}' | xargs kill -9"""
+    if state == "1":
         cmd += """
+        cat /dev/null > /home/nohup.out
         nohup python3 /home/test.py>/home/nohup.out 2>&1 &"""
     subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     yield "ok".encode('utf-8')

@@ -64,8 +64,8 @@ def get_log(file):
         lines = fp.readlines()
         _len = len(lines)
         if _len > 1000:
-            _lines = lines[_len - 1000:_len]
-            return "<br/>".join(_lines)
+            lines = lines[_len - 1000:_len]
+        return "<br/>".join(lines)
 
 
 def get_option_val(section, option):

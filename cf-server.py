@@ -61,7 +61,11 @@ def write_config_text(text):
 
 def get_log(file):
     with open(file) as fp:
-        return fp.read().replace("\n", "<br/>")
+        lines = fp.readlines()
+        _len = len(lines)
+        if _len > 1000:
+            _lines = lines[_len - 1000:_len]
+            return "<br/>".join(_lines)
 
 
 def get_option_val(section, option):

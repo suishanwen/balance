@@ -6,6 +6,7 @@ import sys
 from api.HuobiProAPI import *
 from util.MyUtil import from_dict, from_time_stamp, write_log
 from module.Notification import send_msg
+from module.Logger import logger, logger_join
 
 
 # from websocket import create_connection
@@ -59,10 +60,10 @@ class HuobiProClient(object):
     #         while True:
     #             try:
     #                 cls.ws = create_connection("wss://api.huobipro.com/ws", timeout=5)
-    #                 print('\nwebsocket connected!')
+    #                 logger.info('\nwebsocket connected!')
     #                 break
     #             except socket.timeout:
-    #                 print('\nconnect ws error,retry...')
+    #                 ogger.info('\nconnect ws error,retry...')
     #                 time.sleep(5)
 
     def get_coin_num(self, symbol):
@@ -74,7 +75,7 @@ class HuobiProClient(object):
             result = orders_list(my_order_info.symbol, 'pre-submitted,submitting,submitted,partial-filled,filled',
                                  my_order_info.orderType, 1)
         except Exception as e:
-            print("***orders_list:%s" % e)
+            logger.error("***orders_list:%s" % e)
         if result is not None and result.get('status') == 'ok':
             order = result.get("data")[0]
             if float(order.get("price")) == my_order_info.price:
@@ -82,38 +83,38 @@ class HuobiProClient(object):
             else:
                 return {}
         else:
-            print(my_order_info.symbol, "check_order_list failed,try again.")
+            logger_join(my_order_info.symbol, "check_order_list failed,try again.")
             return self.check_order_list(my_order_info)
 
     def make_order(self, my_order_info):
-        print(
+        logger.info(
             u'\n-------------------------------------------spot order------------------------------------------------')
         try:
             result = send_order(self.ACCOUNT_ID, my_order_info.amount, my_order_info.symbol, my_order_info.orderType,
                                 my_order_info.price)
         except Exception as e:
-            print("***send_order:%s" % e)
+            logger.error("***send_order:%s" % e)
             send_msg("%s:send_order failed:%s" % (my_order_info.symbol, e))
             result = self.check_order_list(my_order_info)
         if result is not None and result.get('status') == 'ok':
-            print("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                  my_order_info.amount, "  ", from_time_stamp())
+            logger_join("OrderId", result['data'], my_order_info.symbol, my_order_info.orderType, my_order_info.price,
+                        my_order_info.amount, "  ", from_time_stamp())
             return result['data']
         else:
-            print("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,
-                  my_order_info.amount)
+            logger_join("order failed！", my_order_info.symbol, my_order_info.orderType, my_order_info.price,
+                        my_order_info.amount)
             return "-1"
 
     def cancel_my_order(self, my_order_info):
-        print(
+        logger.info(
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = {}
         try:
             result = cancel_order(my_order_info.orderId)
         except Exception as e:
-            print("***cancel_order:%s" % e)
+            logger.info("***cancel_order:%s" % e)
         if result is None or result.get('status') != 'ok':
-            print(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
+            logger_join(u"order", my_order_info.orderId, "not canceled or cancel failed！！！")
         state = self.check_order_status(my_order_info)
         if state == 'canceled' or state == 'partial-canceled':
             write_log("order " + my_order_info.orderId + " canceled")
@@ -128,7 +129,7 @@ class HuobiProClient(object):
         try:
             order_result = order_info(order_id)
         except Exception as e:
-            print("***order_info:%s" % e)
+            logger.info("***order_info:%s" % e)
         if order_result is not None and order_result.get('status') == 'ok':
             order = order_result["data"]
             order_id = order["id"]
@@ -137,29 +138,29 @@ class HuobiProClient(object):
             if my_order_info.dealAmount > 0:
                 my_order_info.set_avg_price(float(order["field-cash-amount"]) / float(order["field-amount"]))
             if state == 'canceled':
-                print("order", order_id, "canceled")
+                logger_join("order", order_id, "canceled")
             elif state == 'partial-canceled':
-                print("part dealed ", my_order_info.dealAmount, " and canceled")
+                logger_join("part dealed ", my_order_info.dealAmount, " and canceled")
                 if my_order_info.dealAmount == 0.0:
-                    print("data error!check order status again!")
+                    logger.info("data error!check order status again!")
                     return self.check_order_status(my_order_info, wait_count)
             elif state == 'partial-filled':
                 if wait_count == self.TRADE_WAIT_COUNT:
-                    print("part dealed ", my_order_info.dealAmount)
+                    logger_join("part dealed ", my_order_info.dealAmount)
                 else:
-                    print("part dealed ", my_order_info.dealAmount, end=" ")
+                    logger_join("part dealed ", my_order_info.dealAmount)
                     sys.stdout.flush()
             elif state == 'filled':
-                print("order", order_id, "complete deal")
+                logger_join("order", order_id, "complete deal")
             else:
                 if wait_count == self.TRADE_WAIT_COUNT:
-                    print("timeout no deal")
+                    logger.info("timeout no deal")
                 else:
-                    print("no deal", end=" ")
+                    logger.info("no deal")
                     sys.stdout.flush()
             return state
         else:
-            print(order_id, "checkOrderStatus failed,try again.")
+            logger_join(order_id, "checkOrderStatus failed,try again.")
             return self.check_order_status(my_order_info, wait_count)
 
     def trade(self, my_order_info):
@@ -201,7 +202,7 @@ class HuobiProClient(object):
         try:
             data = get_depth(symbol)
         except Exception as e:
-            print("***get_depth:%s" % e)
+            logger.error("***get_depth:%s" % e)
         if data is not None and data.get('status') == 'ok':
             # check version
             last_version = self.priceInfo["version"]
@@ -259,7 +260,7 @@ class HuobiProClient(object):
             return self.priceInfo[symbol]["bids"][0][0]
 
     def get_account_info(self):
-        print(
+        logger.info(
             u'---------------------------------------spot account info------------------------------------------------')
         try:
             accounts = get_accounts()
@@ -276,14 +277,14 @@ class HuobiProClient(object):
                         symbol_info["available"] = float(symbol_infos[0]["balance"])
                         symbol_info["freezed"] = float(symbol_infos[1]["balance"])
                         symbol_info["total"] = symbol_info["available"] + symbol_info["freezed"]
-                        print(symbol.upper(), symbol_info["total"], "available", symbol_info["available"],
-                              "freezed", symbol_info["freezed"])
+                        logger_join(symbol.upper(), symbol_info["total"], "available", symbol_info["available"],
+                                    "freezed", symbol_info["freezed"])
                 else:
                     self.get_account_info()
             else:
                 self.get_account_info()
         except Exception as err:
-            print(err)
+            logger.error(err)
             self.get_account_info()
 
     @classmethod
@@ -295,7 +296,7 @@ class HuobiProClient(object):
         try:
             result = get_kline(symbol, period, size)
         except Exception as e:
-            print("***get_kline:%s" % e)
+            logger.error("***get_kline:%s" % e)
         if result is not None and result.get('status') == 'ok':
             self.kline_data = list(map(self.get_line_data, result.get('data')))
         else:

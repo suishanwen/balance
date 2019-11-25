@@ -32,6 +32,7 @@ SECRET_KEY = configBase.get("huobipro", "secret_key")
 # API request URL
 MARKET_URL = "https://api.huobi.pro"
 TRADE_URL = "https://api.huobi.pro"
+CONTRACT_URL = "https://api.hbdm.com"
 
 # Can first request to call get_accounts()to find the target acct_id,later can just specify the actual acc_id in the api call
 ACCOUNT_ID = None
@@ -44,6 +45,7 @@ except configparser.NoOptionError:
     OPEN_SOCKS = "0"
 if OPEN_SOCKS == "1":
     open_socks()
+
 
 # 'Timestamp': '2017-06-02T06:13:49'
 
@@ -112,7 +114,7 @@ def api_key_get(params, request_path):
     return http_get_request(url, params)
 
 
-def api_key_post(params, request_path):
+def api_key_post(params, request_path, host_url=TRADE_URL):
     method = 'POST'
     timestamp = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
     params_to_sign = {'AccessKeyId': ACCESS_KEY,
@@ -120,7 +122,6 @@ def api_key_post(params, request_path):
                       'SignatureVersion': '2',
                       'Timestamp': timestamp}
 
-    host_url = TRADE_URL
     host_name = urllib.parse.urlparse(host_url).hostname
     host_name = host_name.lower()
     signature = createSign(params_to_sign, method, host_name, request_path, SECRET_KEY)

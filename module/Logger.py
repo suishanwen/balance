@@ -6,3 +6,9 @@ logging.basicConfig(level=logging.INFO,
                     filemode='a')
 
 logger = logging.getLogger()
+
+
+def logger_join(*args):
+    data = list(map(lambda x: str(x), args))
+    msg = " ".join(data)
+    logger.info(msg)

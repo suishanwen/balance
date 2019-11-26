@@ -118,10 +118,13 @@ def get_depth(symbol, _type='step0'):
     """
     params = {'symbol': get_contract_symbol(symbol),
               'type': _type}
-
-    return http_get_request(
+    result = http_get_request(
         get_full_url("/market/depth"),
         params)
+    if result.get("tick") is not None and result.get("tick").get("asks") is not None:
+        result["tick"]["asks"] = list(map(lambda x: [x[0], x[1] * 10 / x[0]], result["tick"]["asks"]))
+        result["tick"]["bids"] = list(map(lambda x: [x[0], x[1] * 10 / x[0]], result["tick"]["bids"]))
+    return result
 
 
 # 获取tradedetail
@@ -427,4 +430,4 @@ def orders_matchresults(symbol, types=None, size=None, start_date=None, end_date
 
 
 if __name__ == "__main__":
-    print(get_depth("eos_usdt"))
+    data = get_depth("eos_usdt")

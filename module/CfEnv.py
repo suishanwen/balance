@@ -45,6 +45,8 @@ class TradeType:
 
 TRADE_TYPE = TradeType.SPOT
 TRADE_LIMIT = 1000
+TRADE_LEVEL = 1
+
 try:
     TRADE_TYPE = config.get("trade", "type")
 except configparser.NoOptionError:
@@ -54,3 +56,8 @@ try:
     TRADE_LIMIT = int(config.get("trade", "limit"))
 except configparser.NoOptionError:
     logger_join("DEFAULT TRADE LIMIT", TRADE_LIMIT)
+
+try:
+    TRADE_LEVEL = int(config.get("trade", "level"))
+except configparser.NoOptionError:
+    logger_join("DEFAULT TRADE LEVEL", TRADE_LEVEL)

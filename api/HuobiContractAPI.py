@@ -10,7 +10,7 @@
 import time
 import math
 from util.HuobiUtils import *
-from module.CfEnv import TRADE_LIMIT
+from module.CfEnv import TRADE_LIMIT, TRADE_LEVEL
 
 order_symbol = {}
 
@@ -189,7 +189,7 @@ def send_order(acct_id, amount, symbol, _type, price=0):
     contract_symbol = symbol.split("_")[0].upper()
     contract_type = "quarter"
     offset = "close" if direction == "sell" else "open"
-    lever_rate = 1
+    lever_rate = TRADE_LEVEL
 
     def send_contract_order(symbol, contract_type, contract_code,
                             client_order_id, price, volume, direction, offset,

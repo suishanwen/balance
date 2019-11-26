@@ -2,8 +2,7 @@
 # encoding: utf-8
 
 import sys
-
-from api.HuobiProAPI import *
+from module.CfEnv import TRADE_TYPE, TradeType
 from util.MyUtil import from_dict, from_time_stamp, write_log
 from module.Notification import send_msg
 from module.Logger import logger, logger_join
@@ -15,6 +14,16 @@ from module.Logger import logger, logger_join
 
 
 class HuobiProClient(object):
+    def __init__(self):
+        self.API = None
+        if TradeType == TRADE_TYPE.SPOT:
+            import api.HuobiProAPI as spotAPI
+            self.API = spotAPI
+        else:
+            import api.HuobiContractAPI as futureAPI
+            self.API = futureAPI
+            HuobiProClient.MIN_AMOUNT = 1
+
     ACCOUNT_ID = ""
 
     BALANCE_T = ""
@@ -72,8 +81,9 @@ class HuobiProClient(object):
     def check_order_list(self, my_order_info):
         result = {}
         try:
-            result = orders_list(my_order_info.symbol, 'pre-submitted,submitting,submitted,partial-filled,filled',
-                                 my_order_info.orderType, 1)
+            result = self.API.orders_list(my_order_info.symbol,
+                                          'pre-submitted,submitting,submitted,partial-filled,filled',
+                                          my_order_info.orderType, 1)
         except Exception as e:
             logger.error("***orders_list:%s" % e)
         if result is not None and result.get('status') == 'ok':
@@ -90,8 +100,9 @@ class HuobiProClient(object):
         logger.info(
             u'\n-------------------------------------------spot order------------------------------------------------')
         try:
-            result = send_order(self.ACCOUNT_ID, my_order_info.amount, my_order_info.symbol, my_order_info.orderType,
-                                my_order_info.price)
+            result = self.API.send_order(self.ACCOUNT_ID, my_order_info.amount, my_order_info.symbol,
+                                         my_order_info.orderType,
+                                         my_order_info.price)
         except Exception as e:
             logger.error("***send_order:%s" % e)
             send_msg("%s:send_order failed:%s" % (my_order_info.symbol, e))
@@ -110,7 +121,7 @@ class HuobiProClient(object):
             u'\n---------------------------------------spot cancel order--------------------------------------------')
         result = {}
         try:
-            result = cancel_order(my_order_info.orderId)
+            result = self.API.cancel_order(my_order_info.orderId)
         except Exception as e:
             logger.info("***cancel_order:%s" % e)
         if result is None or result.get('status') != 'ok':
@@ -118,6 +129,9 @@ class HuobiProClient(object):
         state = self.check_order_status(my_order_info)
         if state == 'canceled' or state == 'partial-canceled':
             write_log("order " + my_order_info.orderId + " canceled")
+            if "_type" in result and result["_type"] == "contract":
+                from api.HuobiContractAPI import security
+                security.close(my_order_info.amount)
         elif state != self.FILLED_STATUS:
             # not canceled or cancel failed(part dealed) and not complete continue cancelling
             return self.cancel_my_order(my_order_info)
@@ -127,7 +141,7 @@ class HuobiProClient(object):
         order_id = my_order_info.orderId
         order_result = {}
         try:
-            order_result = order_info(order_id)
+            order_result = self.API.order_info(order_id)
         except Exception as e:
             logger.info("***order_info:%s" % e)
         if order_result is not None and order_result.get('status') == 'ok':
@@ -200,7 +214,7 @@ class HuobiProClient(object):
     def get_coin_price(self, symbol):
         data = {}
         try:
-            data = get_depth(symbol)
+            data = self.API.get_depth(symbol)
         except Exception as e:
             logger.error("***get_depth:%s" % e)
         if data is not None and data.get('status') == 'ok':
@@ -263,11 +277,11 @@ class HuobiProClient(object):
         logger.info(
             u'---------------------------------------spot account info------------------------------------------------')
         try:
-            accounts = get_accounts()
+            accounts = self.API.get_accounts()
             if accounts.get('status') == 'ok':
                 spot_account = list(filter(lambda x: x["type"] == 'spot', accounts.get("data")))
                 self.ACCOUNT_ID = spot_account[0].get('id')
-                my_account_info = get_balance(self.ACCOUNT_ID)
+                my_account_info = self.API.get_balance(self.ACCOUNT_ID)
                 symbols = [self.BALANCE_E, self.BALANCE_T]
                 if my_account_info.get('status') == 'ok':
                     data = from_dict(my_account_info, "data", "list")
@@ -294,7 +308,7 @@ class HuobiProClient(object):
     def get_klines(self, symbol, period, size):
         result = {}
         try:
-            result = get_kline(symbol, period, size)
+            result = self.API.get_kline(symbol, period, size)
         except Exception as e:
             logger.error("***get_kline:%s" % e)
         if result is not None and result.get('status') == 'ok':

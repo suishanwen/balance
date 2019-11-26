@@ -1,6 +1,6 @@
 from ecies import encrypt, decrypt
 
-prv_key = '574922a3972946b7d76c3d72110d639898586564e44a6a88fb07e8d60a2526c8'
+prv_key = ''
 pub_key = '03b2559f961bad62be7bcd89c51d3387776ab63759b25dbc18d5355b59857a8d66'
 
 

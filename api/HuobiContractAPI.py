@@ -7,9 +7,37 @@
 @file: HuobiContractAPI.py
 @time: 2019/11/25
 """
+import time
+import math
 from util.HuobiUtils import *
+from module.CfEnv import TRADE_LIMIT
 
 order_symbol = {}
+
+
+class Security(object):
+
+    def __init__(self):
+        self.volume = 0
+        self.begin_time = time.time()
+
+    def re_init(self):
+        self.volume = 0
+        self.begin_time = time.time()
+
+    def open(self, volume):
+        if time.time() - self.begin_time >= 24 * 60 * 60:
+            self.re_init()
+        self.volume += volume
+
+    def close(self, volume):
+        self.volume -= volume
+
+    def get_volume(self):
+        return self.volume
+
+
+security = Security()
 
 
 class ContractInfo(object):
@@ -65,7 +93,7 @@ def get_full_url(path):
     return f"{CONTRACT_URL}{path}"
 
 
-def get_k_line(symbol, period, size=150):
+def get_kline(symbol, period, size=150):
     """
     :param symbol
     :param period: 可选值：{1min, 5min, 15min, 30min, 60min, 1day, 1mon, 1week, 1year }
@@ -78,7 +106,7 @@ def get_k_line(symbol, period, size=150):
               'size': size}
     return http_get_request(
         get_full_url("/market/history/kline"),
-        params)["data"]
+        params)
 
 
 # 获取marketdepth
@@ -93,7 +121,7 @@ def get_depth(symbol, _type='step0'):
 
     return http_get_request(
         get_full_url("/market/depth"),
-        params)["tick"]
+        params)
 
 
 # 获取tradedetail
@@ -119,13 +147,29 @@ def get_ticker(symbol):
     return http_get_request(get_full_url('/market/detail/merged'), params)["tick"]
 
 
-# def get_accounts():
-#     """
-#     :return:
-#     """
-#     path = "/v1/account/accounts"
-#     params = {}
-#     return api_key_get(params, path)
+def get_accounts():
+    """
+    :return:
+    """
+    path = "/v1/account/accounts"
+    params = {}
+    return api_key_get(params, path)
+
+
+# 获取当前账户资产
+def get_balance(acct_id=None):
+    """
+    :param acct_id
+    :return:
+    """
+
+    if not acct_id:
+        accounts = get_accounts()
+        acct_id = accounts['data'][0]['id']
+
+    url = "/v1/account/accounts/{0}/balance".format(acct_id)
+    params = {"account-id": acct_id}
+    return api_key_get(params, url)
 
 
 # 创建并执行订单
@@ -139,7 +183,7 @@ def send_order(acct_id, amount, symbol, _type, price=0):
     :return:
     """
     # 合约下单
-    order_price_type = _type.split("-")[1]
+    order_price_type = "limit"
     direction = _type.split("-")[0]
     contract_code = contract_info.get_contract_code(symbol)
     contract_symbol = symbol.split("_")[0].upper()
@@ -183,13 +227,27 @@ def send_order(acct_id, amount, symbol, _type, price=0):
         request_path = '/api/v1/contract_order'
         return api_key_post(params, request_path, CONTRACT_URL)
 
-    result = send_contract_order(contract_symbol, contract_type, contract_code, "", price, amount, direction, offset,
-                                 lever_rate,
-                                 order_price_type)
+    amount = math.ceil(amount)
+    if security.get_volume() <= TRADE_LIMIT:
+        result = send_contract_order(contract_symbol, contract_type, contract_code, "", price, amount,
+                                     direction,
+                                     offset,
+                                     lever_rate,
+                                     order_price_type)
 
-    order_symbol[result["data"]["order_id"]] = contract_symbol
-    # order_ts[result["data"]["order_id"]] = result["ts"]
-    return {"data": result["data"]["order_id"]}
+        order_symbol[str(result["data"]["order_id"])] = contract_symbol
+        if "ok" == result["status"]:
+            if direction == "buy":
+                security.open(amount)
+            else:
+                security.close(amount)
+        # order_ts[result["data"]["order_id"]] = result["ts"]
+        return {"data": str(result["data"]["order_id"]), "status": result["status"]}
+    else:
+        from module.Notification import send_msg
+        send_msg("amount:{} volume:{} limit:{}".format(amount, security.get_volume(), TRADE_LIMIT))
+        exit()
+    return {"data": [], "status": "ok"}
 
 
 # 撤销订单
@@ -223,7 +281,7 @@ def cancel_order(order_id):
     result = cancel_contract_order(symbol=symbol, order_id=order_id)
 
     if order_id in result["successes"]:
-        return {"data": order_id}
+        return {"data": order_id, "_type": "contract"}
     else:
         return {
             "status": "error",
@@ -274,12 +332,99 @@ def order_info(order_id):
 
     symbol = order_symbol[order_id]
     result = get_contract_order_info(symbol, order_id)
-    data = result["data"]["0"]
+    data = result["data"][0]
     data["amount"] = data["volume"]
     data["price"] = data["price"]
+    data["id"] = str(data["order_id"])
     data["field-amount"] = data["trade_volume"]
     data["field-cash-amount"] = data["trade_turnover"]
     data["state"] = status_map[str(data["status"])]
     return {
-        "data": data
+        "data": data, "status": result["status"]
     }
+
+
+# 查询当前委托、历史委托
+def orders_list(symbol, states, types=None, size=None, start_date=None, end_date=None, _from=None, direct=None):
+    """
+
+    :param symbol:
+    :param states: 可选值 {pre-submitted 准备提交, submitted 已提交, partial-filled 部分成交,
+     partial-canceled 部分成交撤销, filled 完全成交, canceled 已撤销}
+    :param types: 可选值 {buy-market：市价买, sell-market：市价卖, buy-limit：限价买, sell-limit：限价卖}
+    :param start_date:
+    :param end_date:
+    :param _from:
+    :param direct: 可选值{prev 向前，next 向后}
+    :param size:
+    :return:
+    """
+
+    # 获取合约历史委托
+    def get_contract_history_orders(symbol, trade_type, type, status, create_date,
+                                    page_index=None, page_size=None):
+        """
+        参数名称     是否必须  类型     描述	    取值范围
+        symbol      true	    string  品种代码  "BTC","ETH"...
+        trade_type  true	    int     交易类型  0:全部,1:买入开多,2: 卖出开空,3: 买入平空,4: 卖出平多,5: 卖出强平,6: 买入强平,7:交割平多,8: 交割平空
+        type        true	    int     类型     1:所有订单、2：结束汏订单
+        status      true	    int     订单状态  0:全部,3:未成交, 4: 部分成交,5: 部分成交已撤单,6: 全部成交,7:已撤单
+        create_date true	    int     日期     7，90（7天或者90天）
+        page_index  false   int     页码，不填默认第1页
+        page_size   false   int     不填默认20，不得多于50
+        """
+
+        params = {"symbol": symbol,
+                  "trade_type": trade_type,
+                  "type": type,
+                  "status": status,
+                  "create_date": create_date}
+        if page_index:
+            params["page_index"] = page_index
+        if page_size:
+            params["page_size"] = page_size
+
+        request_path = '/api/v1/contract_hisorders'
+        return api_key_post(params, request_path, CONTRACT_URL)
+
+    result = get_contract_history_orders(get_currency_name(symbol), 0, 1, 0, 7)
+
+    reponse = ""
+    if "ok" == result["status"]:
+        response = result["data"]["orders"]
+        for order in response:
+            order["amount"] = order["volume"]
+            order["field-amount"] = order["trade_volume"]
+            order["field-cash-amount"] = order["trade_turnover"]
+            order["state"] = status_map[str(order["status"])]
+            order["id"] = str(order["order_id"])
+    return {"data": response, "status": result["status"]}
+
+
+# 查询当前成交、历史成交
+def orders_matchresults(symbol, types=None, size=None, start_date=None, end_date=None, _from=None, direct=None):
+    """
+
+    :param symbol:
+    :param types: 可选值 {buy-market：市价买, sell-market：市价卖, buy-limit：限价买, sell-limit：限价卖}
+    :param start_date:
+    :param end_date:
+    :param _from:
+    :param direct: 可选值{prev 向前，next 向后}
+    :param size:
+    :return:
+    """
+    params = {'symbol': get_contract_symbol(symbol), "trade_type": 0, "create_data": 7}
+
+    request_path = 'api/v1/contract_matchresults'
+    result = api_key_post(params, request_path, CONTRACT_URL)
+    response = result["data"]["trades"]
+    for order in response:
+        order["filled-amount"] = order["trade_volume"]
+        order["price"] = order["trade_price"]
+        order["id"] = str(order["order_id"])
+    return {"data": response}
+
+
+if __name__ == "__main__":
+    print(get_depth("eos_usdt"))

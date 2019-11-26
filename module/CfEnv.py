@@ -2,6 +2,7 @@ import os
 import configparser
 from pathlib import Path
 from codegen.generator import decrypt_f, encrypt_f
+from module.Logger import logger_join
 
 START_PATH = str(Path(os.getcwd()))
 PROJECT_PATH = str(Path(os.getcwd()).parent)
@@ -35,3 +36,21 @@ encrypt_f(KEY_PATH)
 
 config = configparser.ConfigParser()
 config.read(get_cf_path())
+
+
+class TradeType:
+    SPOT = "spot"
+    FUTURE = "future"
+
+
+TRADE_TYPE = TradeType.SPOT
+TRADE_LIMIT = 1000
+try:
+    TRADE_TYPE = config.get("trade", "type")
+except configparser.NoOptionError:
+    logger_join("DEFAULT TRADE TYPE", TRADE_TYPE)
+
+try:
+    TRADE_LIMIT = config.get("trade", "limit")
+except configparser.NoOptionError:
+    logger_join("DEFAULT TRADE LIMIT", TRADE_LIMIT)

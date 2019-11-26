@@ -227,7 +227,7 @@ def send_order(acct_id, amount, symbol, _type, price=0):
         request_path = '/api/v1/contract_order'
         return api_key_post(params, request_path, CONTRACT_URL)
 
-    amount = math.ceil(amount)
+    amount = math.ceil(amount * price / 10)
     if security.get_volume() <= TRADE_LIMIT:
         result = send_contract_order(contract_symbol, contract_type, contract_code, "", price, amount,
                                      direction,

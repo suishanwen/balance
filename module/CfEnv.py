@@ -51,6 +51,6 @@ except configparser.NoOptionError:
     logger_join("DEFAULT TRADE TYPE", TRADE_TYPE)
 
 try:
-    TRADE_LIMIT = config.get("trade", "limit")
+    TRADE_LIMIT = int(config.get("trade", "limit"))
 except configparser.NoOptionError:
     logger_join("DEFAULT TRADE LIMIT", TRADE_LIMIT)

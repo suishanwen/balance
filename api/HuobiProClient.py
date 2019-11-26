@@ -16,7 +16,7 @@ from module.Logger import logger, logger_join
 class HuobiProClient(object):
     def __init__(self):
         self.API = None
-        if TradeType == TRADE_TYPE.SPOT:
+        if TRADE_TYPE == TradeType.SPOT:
             import api.HuobiProAPI as spotAPI
             self.API = spotAPI
         else:

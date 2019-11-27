@@ -1,6 +1,7 @@
 import re
 
 from util.MyUtil import from_time_stamp
+from module.CfEnv import TRADE_TYPE, TradeType
 
 
 class MyOrderInfo(object):
@@ -37,10 +38,14 @@ class MyOrderInfo(object):
         return ' '.join(data)
 
     def tl_msg(self, client):
+        if TRADE_TYPE != TradeType.SPOT:
+            unit = "张"
+        else:
+            unit = "个"
         order_type = "买入" if self.orderType == client.TRADE_BUY else "卖出"
         coin = self.symbol.split("_")[0]
         currency = self.symbol.split("_")[1]
-        message = f"[{self.trigger.upper()[0:1]}] {order_type} {coin} {self.totalDealAmount}个，均价 {self.avgPrice}\n" \
+        message = f"[{self.trigger.upper()[0:1]}] {order_type} {coin} {self.totalDealAmount}{unit}，均价 {self.avgPrice}\n" \
             f"总成交额 {round(self.transaction, 2)} {currency}，收益 {self.count}"
         return message
 

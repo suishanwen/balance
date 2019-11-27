@@ -338,7 +338,7 @@ def order_info(order_id):
     result = get_contract_order_info(symbol, order_id)
     data = result["data"][0]
     data["amount"] = data["volume"]
-    data["price"] = data["price"]
+    data["price"] = data["trade_avg_price"]
     data["id"] = str(data["order_id"])
     data["field-amount"] = data["trade_volume"]
     data["field-cash-amount"] = data["trade_turnover"]

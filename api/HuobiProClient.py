@@ -16,7 +16,8 @@ from module.Logger import logger, logger_join
 class HuobiProClient(object):
     def __init__(self):
         self.API = None
-        if TRADE_TYPE == TradeType.SPOT:
+        self.IS_SPOT = TRADE_TYPE == TradeType.SPOT
+        if self.IS_SPOT:
             import api.HuobiProAPI as spotAPI
             self.API = spotAPI
         else:
@@ -150,7 +151,11 @@ class HuobiProClient(object):
             state = order["state"]
             my_order_info.set_deal_amount(float(order["field-amount"]))
             if my_order_info.dealAmount > 0:
-                my_order_info.set_avg_price(float(order["field-cash-amount"]) / float(order["field-amount"]))
+                if self.IS_SPOT:
+                    my_order_info.set_avg_price(float(order["field-cash-amount"]) / float(order["field-amount"]))
+                else:
+                    my_order_info.set_avg_price(float(order["price"]))
+
             if state == 'canceled':
                 logger_join("order", order_id, "canceled")
             elif state == 'partial-canceled':

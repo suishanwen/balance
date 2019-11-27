@@ -1,7 +1,7 @@
 eciespy==0.1.9
 requests==2.21.0
 pytz==2018.9
-ecdsa==0.13
+ecdsa==0.13.3
 gevent==1.4.0
 websocket_client==0.56.0
 pathlib

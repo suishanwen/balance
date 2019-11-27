@@ -13,6 +13,7 @@ from api.okex_sdk_v3.spot_api import SpotAPI
 from api.Result import Result
 from module.Logger import logger
 from codegen.generator import decrypt_f, encrypt_f
+from file_read_backwards import FileReadBackwards
 
 # read config
 config = configparser.ConfigParser()
@@ -60,12 +61,14 @@ def write_config_text(text):
 
 
 def get_log(file):
-    with open(file) as fp:
-        lines = fp.readlines()
-        _len = len(lines)
-        if _len > 1000:
-            lines = lines[_len - 1000:_len]
-        return "<br/>".join(lines)
+    with FileReadBackwards(file, encoding="utf-8") as frb:
+        lines = []
+        while len(lines) < 1000:
+            line = frb.readline()
+            if not line:
+                break
+            lines.append(line)
+    return "<br/>".join(lines)
 
 
 def get_option_val(section, option):

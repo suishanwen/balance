@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Control</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<a onclick="location.href='/'"
+   style="color: white;cursor: pointer;font-size: 30px;position: fixed;bottom:100px;right: 100px;border: 1px solid gray;background: green;">返回</a>
+<div>
+    <form class="form-inline">
+        <div class="form-group mb-2">
+            <label class="form-control">币种</label>
+        </div>
+        <div class="form-group mb-2">
+            <select id="account">
+                <option value="0">全部</option>
+            </select>
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control" id="symbol" placeholder="币种">
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control" id="amount" placeholder="数量">
+        </div>
+    </form>
+    <form class="form-inline">
+        <div class="form-group mb-2">
+            <label class="form-control">余额查询</label>
+        </div>
+        <button type="button" class="btn btn-primary mb-2" onclick="get_currencys()">查询</button>
+    </form>
+    <form class="form-inline">
+        <div class="form-group mb-2">
+            <label class="form-control">钱包划转</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="transfer_type" id="inlineRadio1" value="1-6">
+            <label class="form-check-label" for="inlineRadio1">币币->资金</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="transfer_type" id="inlineRadio2" value="6-1">
+            <label class="form-check-label" for="inlineRadio2">资金->币币</label>
+        </div>
+        <button type="button" class="btn btn-primary mb-2" onclick="transfer()">划转</button>
+    </form>
+    <form class="form-inline">
+        <div class="form-group mb-2">
+            <label class="form-control">站内提现</label>
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control" id="toAddress" placeholder="认证账户">
+        </div>
+        <button type="button" class="btn btn-primary mb-2" onclick="withdraw()">提币</button>
+    </form>
+    <form class="form-inline">
+        <div class="form-group mb-2">
+            <label class="form-control">FillOrKill</label>
+        </div>
+        <div class="form-group mb-2">
+            <select id="orderType">
+                <option value="sell">卖</option>
+                <option value="buy">买</option>
+            </select>
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control" id="exchange" placeholder="交换币种">
+        </div>
+        <div class="form-group mb-2">
+            <input type="text" class="form-control" id="price" placeholder="价格">
+        </div>
+        <button type="button" class="btn btn-primary mb-2" onclick="order()">下单</button>
+    </form>
+    <table class="table">
+        <thead>
+        <tr id="thead">
+            <th scope="col">账户</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+
+        </tbody>
+    </table>
+</div>
+<script>
+    const path = location.href.split(":")[0] + "://" + document.location.host;
+    let account_list = [];
+
+    get_accounts = () => {
+        $.post(`${path}/accounts`, {param: null}, (data) => {
+            account_list = JSON.parse(data);
+            account_list.forEach(item => {
+                const option = `<option value="${item}">${item}</option>`;
+                const tr = `<tr id="${item}"><td>${item}</td></tr>`;
+                $("#account").append(option);
+                $("#tbody").append(tr);
+            })
+        });
+    };
+
+    get_currencys = () => {
+        const symbol = $("#symbol").val();
+        if (symbol) {
+            $("#thead").html(`<th scope="col">账户</th><th scope="col">${symbol} 资金</th><th scope="col">${symbol} 币币</th>`);
+            const account = $("#account").val();
+            if (account === "0") {
+                account_list.forEach((account) => {
+                    $("#" + account).html(`<td>${account}</td><td id="${symbol}_${account}_fund"></td><td id="${symbol}_${account}_coin"></td>`);
+                    get_currency(symbol, account);
+                });
+            } else {
+                $("#" + account).html(`<td>${account}</td><td id="${symbol}_${account}_fund"></td><td id="${symbol}_${account}_coin"></td>`);
+                get_currency(symbol, account);
+            }
+        } else {
+            alert("币种不能为空!");
+        }
+
+    };
+
+    get_currency = (symbol, account) => {
+        $.post(`${path}/get_currency`, {symbol: symbol, account: account}, (result) => {
+            let fund = "";
+            let coin = "";
+            if (!result.status) {
+                fund = result.msg;
+                coin = "";
+            } else {
+                if (result.data["fund"].length === 0) {
+                    fund = 0;
+                } else {
+                    fund = result.data["fund"][0]["balance"];
+                }
+                coin = result.data["coin"]["balance"];
+            }
+            $(`#${symbol}_${account}_fund`).text(fund);
+            $(`#${symbol}_${account}_coin`).text(coin);
+        });
+    };
+
+    transfer = () => {
+        const account = $("#account").val();
+        const symbol = $("#symbol").val();
+        const amount = $("#amount").val();
+        const type = $("input[name='transfer_type']:checked").val();
+        if (symbol && type) {
+            $.post(`${path}/transfer`, {account: account, symbol: symbol, amount: amount, type: type}, (result) => {
+                get_currencys();
+                alert(result.msg);
+            });
+        } else {
+            alert("币种、划转类型不能为空!");
+        }
+    };
+
+    withdraw = () => {
+        const account = $("#account").val();
+        const symbol = $("#symbol").val();
+        const amount = $("#amount").val();
+        const toAddress = $("#toAddress").val();
+        if (symbol && toAddress) {
+            $.post(`${path}/withdraw`, {
+                account: account,
+                symbol: symbol,
+                amount: amount,
+                toAddress: toAddress
+            }, (result) => {
+                get_currencys();
+                alert(result.msg);
+            });
+        } else {
+            alert("币种、提现账户不能为空!");
+        }
+    };
+
+    order = () => {
+        const account = $("#account").val();
+        const amount = $("#amount").val();
+        const orderType = $("#orderType").val();
+        const symbol = $("#symbol").val();
+        const exchange = $("#exchange").val();
+        const price = $("#price").val();
+        if (symbol && exchange && price) {
+            $.post(`${path}/order`, {
+                account: account,
+                symbol: symbol + "_" + exchange,
+                amount: amount,
+                price: price,
+                orderType: orderType
+            }, (result) => {
+                setTimeout(get_currencys, 1000);
+                alert(result.msg);
+            });
+        } else {
+            alert("币种、交换币种、价格不能为空!");
+        }
+    };
+
+    (() => {
+        get_accounts();
+    })()
+</script>
+</body>
+</html>

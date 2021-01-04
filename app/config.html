@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Config</title>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .operate {
+            width: 100px;
+            height: 100px;
+            background: gray;
+            display: inline-block;
+            cursor: pointer;
+            margin-right: 20px;
+        }
+
+        .operate span {
+            line-height: 100px;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body style="font-size: 30px">
+<div>
+    <div class="operate" onclick="edit()"><span>编辑</span></div>
+    <div class="operate" onclick="pullAll()"><span>更新</span></div>
+    <div class="operate" onclick="restart()"><span>重启</span></div>
+    <div class="operate" onclick="shutdown()"><span>结束</span></div>
+    <div class="operate" onclick="log()"><span>日志</span></div>
+    <div class="operate" onclick="runningLog()"><span>输出</span></div>
+<!--    <div class="operate" onclick="restartEosMiner()"><span>ERT</span></div>-->
+    <div class="operate" onclick="eosLog()"><span>ELG</span></div>
+    <!--    <div class="operate" onclick="miner(1)"><span>挖矿</span></div>-->
+    <!--    <div class="operate" onclick="miner(0)"><span>停止</span></div>-->
+    <!--    <div class="operate" onclick="minerLog()"><span>输出</span></div>-->
+
+    <!--    <div class="operate" onclick="control()"><span>控制</span></div>-->
+</div>
+<br>
+#tbd
+</body>
+<script>
+    const path = location.href.split(":")[0] + "://" + document.location.host;
+
+
+    edit = () => {
+        location.href = `${path}/edit`;
+    };
+
+    modify = (symbol, option) => {
+        const isStat = symbol.indexOf("-stat") !== -1;
+        if (isStat && option === "avgprice") {
+            return;
+        }
+        const id = `${symbol}_${option}`;
+        let ele = $(`#${id}`);
+        let form = $(`#${symbol}_${option}_form`);
+        if (form.length === 0) {
+            if (isStat) {
+                form = $(`<div id="${symbol}_${option}_form" class="form-row align-items-center">
+    <div class="col-auto">
+        <div class="input-group mb-2">
+            <div class="input-group-prepend" id="${symbol}_${option}_plus" style="cursor: pointer"
+                 onclick="update('${symbol}','${option}','plus')">
+                <span class="input-group-text">➕</span>
+            </div>
+            <input type="text" class="inlineFormInputGroup" id="${symbol}_${option}_val_plus"
+                   aria-describedby="${symbol}_${option}_plus">
+        </div>
+    </div>
+    <div class="col-auto">
+        <div class="input-group mb-2">
+            <div class="input-group-prepend" id="${symbol}_${option}_minus" style="cursor: pointer"
+                 onclick="update('${symbol}','${option}','minus')">
+                <span class="input-group-text">➖</span>
+            </div>
+            <input type="text" class="inlineFormInputGroup" id="${symbol}_${option}_val_minus"
+                   aria-describedby="${symbol}_${option}_minus">
+        </div>
+    </div>
+</div>`);
+            } else {
+                form = $(`<div id="${symbol}_${option}_form" class="input-group mb-3">
+    <div class="input-group-prepend" id="${symbol}_${option}_equal" style="cursor: pointer"
+         onclick="update('${symbol}','${option}','')">
+        <span class="input-group-text">修改</span>
+    </div>
+    <input type="text" class="col-xs-3" id="${symbol}_${option}_val_"
+           aria-describedby="${symbol}_${option}_equal">
+</div>`);
+            }
+            ele.append(form);
+            if (!isStat) {
+                setTimeout(() => {
+                    $(`#${symbol}_${option}_val_`).focus();
+                })
+            }
+        } else {
+            form.remove();
+        }
+    };
+
+    update = (symbol, option, type) => {
+        const id = `${symbol}_${option}_val_${type}`;
+        const input = $(`#${id}`);
+        const val = input.val();
+        if (!input.val()) {
+            alert("值不能为空！");
+            return false;
+        }
+        const url = `${path}/modify?section=${symbol}&option=${option}&val=${val}&type=${type}`;
+        console.log(url);
+        $.get(url, null, (data) => {
+            if (data === "ok") {
+                $(`#${symbol}_${option}_form`).remove();
+                document.location.reload();
+            }
+        });
+    };
+
+    pullAll = () => {
+        $.get(`${path}/pull`, null, (data) => {
+            alert(data);
+            setTimeout(() => {
+                document.location.reload()
+            }, 2000)
+        });
+    };
+
+    restart = () => {
+        $.get(`${path}/restart`, null, (data) => {
+            alert(data);
+        });
+    };
+
+    shutdown = () => {
+        $.get(`${path}/shutdown`, null, (data) => {
+            alert(data);
+        });
+    };
+
+    log = () => {
+        location.href = `${path}/log`;
+    };
+
+    runningLog = () => {
+        location.href = `${path}/log-run`;
+    };
+
+    restartEosMiner = () => {
+        $.get(`${path}/restart-eosminer`, null, (data) => {
+            alert(data);
+        });
+    };
+
+    eosLog = () => {
+        location.href = `${path}/log-eos`;
+    };
+
+    control = () => {
+        location.href = `${path}/control`;
+    }
+
+    miner = (state) => {
+        $.get(`${path}/miner?state=${state}`, null, (data) => {
+            alert(data);
+        });
+    }
+
+    minerLog = () => {
+        location.href = `${path}/miner-run`;
+    };
+</script>
+</html>

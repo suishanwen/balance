@@ -1,4 +1,6 @@
 import re
+import time
+import datetime
 
 from util.MyUtil import from_time_stamp
 from module.CfEnv import TRADE_TYPE, TradeType
@@ -113,8 +115,6 @@ class MyOrderInfo(object):
 
     def from_log(self, line):
         match_obj = re.match("(.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.* .*) (.*)", line, re.M | re.I)
-        if not match_obj:
-            match_obj = re.match("(.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.* .*)", line, re.M | re.I)
         if match_obj:
             self.orderId = match_obj.group(1)
             self.symbol = match_obj.group(2)
@@ -129,7 +129,7 @@ class MyOrderInfo(object):
             self.transaction = float(match_obj.group(9))
             self.count = float(re.search("[0-9]+(.[0-9]+)?", match_obj.group(10)).group())
             self.timestamp = match_obj.group(11)
-            if match_obj.lastindex == 12:
-                self.trigger = match_obj.group(12)
-            else:
-                self.trigger = "ma"
+            self.trigger = match_obj.group(12)
+
+    def get_seconds(self):
+        return int(time.mktime(time.strptime(self.timestamp, '%Y-%m-%d %H:%M:%S')))

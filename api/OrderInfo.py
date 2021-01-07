@@ -104,11 +104,16 @@ class MyOrderInfo(object):
         return round(self.totalAmount - self.totalDealAmount, accuracy)
 
     def set_count(self, client):
+        is_trx_u = client.mode == "transaction" and client.currentBase >= client.earnCoin
+        if is_trx_u:
+            trx_adjust = client.rateP
+        else:
+            trx_adjust = 1
         if client.mode == "transaction":
-            count = round(abs(self.transaction) / client.transaction, 3)
+            count = round(abs(self.transaction) / trx_adjust / client.transaction, 3)
         else:
             count = round(self.totalDealAmount / client.amount, 3)
-        per_count = round(abs(self.transaction) / count * client.percentage / 100, 4)
+        per_count = round(abs(self.transaction) / trx_adjust / count * client.percentage / 100, 4)
         if self.orderType == client.TRADE_BUY:
             count -= 1
         self.count = round(((1 + count) * count / 2 * per_count), 3)

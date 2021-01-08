@@ -105,7 +105,7 @@ class MyOrderInfo(object):
 
     def set_count(self, client):
         is_trx_u = client.mode == "transaction" and client.currentBase >= client.earnCoin
-        if is_trx_u:
+        if is_trx_u and self.orderType == client.TRADE_SELL:
             trx_adjust = client.rateP
         else:
             trx_adjust = 1

@@ -319,7 +319,7 @@ class HuobiProClient(object):
             result = self.API.get_kline(symbol, period, size)
         except Exception as e:
             logger.error("***get_kline:%s" % e)
-        if result is not None and result.get('status') == 'ok':
+        if result is not None and result.get('status') == 'ok' and len(result.get('data')) >= size:
             self.kline_data = list(map(self.get_line_data, result.get('data')))
         else:
             self.get_klines(symbol, period, size)

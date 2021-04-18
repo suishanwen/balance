@@ -114,7 +114,8 @@ class MyOrderInfo(object):
         else:
             count = round(self.totalDealAmount / client.amount, 3)
         per_count = round(abs(self.transaction) / trx_adjust / count * client.percentage / 100, 4)
-        if self.orderType == client.TRADE_BUY:
+        if ((client.IS_SPOT and self.orderType == client.TRADE_BUY) or
+                (not client.IS_SPOT and self.orderType == client.TRADE_SELL)):
             count -= 1
         self.count = round(((1 + count) * count / 2 * per_count), 3)
 

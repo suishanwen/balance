@@ -1,6 +1,5 @@
 import re
 import time
-import datetime
 
 from util.MyUtil import from_time_stamp
 from module.CfEnv import TRADE_TYPE, TradeType
@@ -102,22 +101,6 @@ class MyOrderInfo(object):
 
     def get_unhandled_amount(self, accuracy=2):
         return round(self.totalAmount - self.totalDealAmount, accuracy)
-
-    def set_count(self, client):
-        is_trx_u = client.mode == "transaction" and client.currentBase >= client.earnCoin
-        if is_trx_u and self.orderType == client.TRADE_SELL:
-            trx_adjust = client.rateP
-        else:
-            trx_adjust = 1
-        if client.mode == "transaction":
-            count = round(abs(self.transaction) / trx_adjust / client.transaction, 3)
-        else:
-            count = round(self.totalDealAmount / client.amount, 3)
-        per_count = round(abs(self.transaction) / trx_adjust / count * client.percentage / 100, 4)
-        if ((client.IS_SPOT and self.orderType == client.TRADE_BUY) or
-                (not client.IS_SPOT and self.orderType == client.TRADE_SELL)):
-            count -= 1
-        self.count = round(((1 + count) * count / 2 * per_count), 3)
 
     def from_log(self, line):
         match_obj = re.match("(.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.* .*) (.*)", line, re.M | re.I)

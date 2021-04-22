@@ -48,8 +48,7 @@ class OkexClient(object):
     emailDay = 0
     buyRate = 1
     sellRate = 1
-    nightMode = False
-    nightRate = 1
+    timeout = 6
     kill = 0
     maOff = False
     kline_data = []

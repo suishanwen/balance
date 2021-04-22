@@ -53,9 +53,8 @@ class HuobiProClient(object):
     emailDay = 0
     buyRate = 1
     sellRate = 1
-    nightMode = False
-    nightRate = 1
     kill = 0
+    timeout = 6
     maOff = False
     kline_data = []
 

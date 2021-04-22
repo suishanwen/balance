@@ -55,6 +55,7 @@ class HuobiProClient(object):
     sellRate = 1
     kill = 0
     timeout = 6
+    fee = 0.002
     maOff = False
     kline_data = []
 

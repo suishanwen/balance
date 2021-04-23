@@ -11,6 +11,7 @@ class MyOrderInfo(object):
         self.symbol = symbol
         self.orderType = order_type
         self.price = price
+        self.offset = "close"
         self.totalAmount = amount
         self.base = base
         self.totalDealAmount = 0

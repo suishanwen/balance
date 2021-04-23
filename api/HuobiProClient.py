@@ -105,7 +105,7 @@ class HuobiProClient(object):
         try:
             result = self.API.send_order(self.ACCOUNT_ID, my_order_info.amount, my_order_info.symbol,
                                          my_order_info.orderType,
-                                         my_order_info.price)
+                                         my_order_info.price, my_order_info.offset)
         except Exception as e:
             logger.error("***send_order:{}".format(e, traceback.format_exc()))
             send_msg("%s:send_order failed:%s" % (my_order_info.symbol, e))

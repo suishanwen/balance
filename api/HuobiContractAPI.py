@@ -204,7 +204,7 @@ def get_balance(acct_id=None):
 
 
 # 获取用户持仓信息
-def get_contract_position_info(self, symbol='EOS'):
+def get_contract_position_info(symbol='EOS'):
     """
     :param symbol: "BTC","ETH"...如果缺省，默认返回所有品种
     :return:
@@ -212,22 +212,24 @@ def get_contract_position_info(self, symbol='EOS'):
 
     params = {}
     if symbol:
-        params["symbol"] = symbol
+        params["symbol"] = symbol.split("_")[0].upper()
 
     request_path = '/api/v1/contract_position_info'
-    data = api_key_post(params, request_path)
-    volume = data["data"]["volume"]
-    return volume, data["direction"]
+    data = api_key_post(params, request_path, CONTRACT_URL)
+    volume = data["data"][0]["available"]
+    direction = data["data"][0]["direction"]
+    return volume, direction
 
 
 # 创建并执行订单
-def send_order(acct_id, amount, symbol, _type, price=0):
+def send_order(acct_id, amount, symbol, _type, price=0, offset="close"):
     """
     :param acct_id:
     :param amount:
     :param symbol:
     :param _type: 可选值 {buy-market：市价买, sell-market：市价卖, buy-limit：限价买, sell-limit：限价卖}
     :param price:
+    :param offset:
     :return:
     """
     # 合约下单
@@ -236,9 +238,9 @@ def send_order(acct_id, amount, symbol, _type, price=0):
     contract_code = contract_info.get_contract_code(symbol)
     contract_symbol = symbol.split("_")[0].upper()
     contract_type = global_type
-    sell_offset = "open" if price > 4 else "close"
-    buy_offset = "close" if price > 4 else "open"
-    offset = sell_offset if direction == "sell" else buy_offset
+    # sell_offset = "open" if price > 4 else "close"
+    # buy_offset = "close" if price > 4 else "open"
+    # offset = sell_offset if direction == "sell" else buy_offset
     lever_rate = TRADE_LEVEL
 
     def send_contract_order(symbol, contract_type, contract_code,

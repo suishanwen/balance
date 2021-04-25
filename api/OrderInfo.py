@@ -24,6 +24,11 @@ class MyOrderInfo(object):
         self.timestamp = from_time_stamp()
         self.canceled = 0
 
+    def replicate(self):
+        order_info = MyOrderInfo(self.symbol, self.orderType, self.price, self.amount, self.base)
+        order_info.trigger = self.trigger
+        return order_info
+
     def __repr__(self):
         data = [str(self.orderId), self.symbol, self.orderType,
                 str(self.base),

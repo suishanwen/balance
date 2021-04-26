@@ -17,6 +17,7 @@ class MyOrderInfo(object):
         self.totalDealAmount = 0
         self.amount = 0
         self.dealAmount = 0
+        self.realAmount = 0
         self.avgPrice = 0
         self.transaction = 0
         self.count = 0

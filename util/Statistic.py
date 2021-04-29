@@ -28,7 +28,8 @@ def analyze_log():
     return order_list
 
 
-def generate_report(symbol, order_list):
+def generate_report(client, order_list):
+    symbol = client.SYMBOL_T
     # report_content = "<html>\n<body>\n<div>"
     # report_content += "\n<h2>收益统计 {}</h2>".format(str(from_time_stamp())[0:10])
     # 交易币种
@@ -98,7 +99,7 @@ def generate_report(symbol, order_list):
         quantity_change_price = abs(usdt_change / quantity_change)
         if usdt_change > 0 and quantity_change > 0:
             quantity_change_price = -quantity_change_price
-    points_consume = trx_usdt_total * fee_rate
+    fees = trx_usdt_total * client.fee
     if quantity_change >= 0:
         change_type = "增"
     else:
@@ -144,8 +145,8 @@ def generate_report(symbol, order_list):
     report_content += get_tr("余额变化", usdt_change)
     report_content += get_tr("持仓变化", quantity_change)
     report_content += get_tr("{}仓均价".format(change_type), quantity_change_price)
-    report_content += get_tr("理论收益", reward_weight_usdt)
-    report_content += get_tr("点卡消耗", points_consume)
+    report_content += get_tr("净收益额", reward_weight_usdt)
+    report_content += get_tr("交易费用", fees)
     return report_content
 
 

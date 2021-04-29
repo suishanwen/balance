@@ -123,7 +123,7 @@ class MyOrderInfo(object):
             self.totalDealAmount = float(match_obj.group(8))
             self.amount = float(match_obj.group(8))
             self.transaction = float(match_obj.group(9))
-            self.count = float(re.search("[0-9]+(.[0-9]+)?", match_obj.group(10)).group())
+            self.count = float(re.search("-?[0-9]+(.[0-9]+)?", match_obj.group(10)).group())
             self.timestamp = match_obj.group(11)
             self.trigger = match_obj.group(12)
 

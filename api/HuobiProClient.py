@@ -323,3 +323,18 @@ class HuobiProClient(object):
             self.kline_data = list(map(self.get_line_data, result.get('data')))
         else:
             self.get_klines(symbol, period, size)
+
+    def get_contract_position_info(self, symbol='EOS'):
+        return self.API.get_contract_position_info(symbol)
+
+    def get_contract_offset(self, order_type, direction):
+        if order_type.startswith(direction):
+            return True, "open"
+        else:
+            return False, "close"
+
+    def get_contract_opposite_offset(self, contract_pos, direction):
+        if contract_pos == "open":
+            return "close"
+        else:
+            return "open"

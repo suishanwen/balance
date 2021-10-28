@@ -1,13 +1,13 @@
 from module.CfEnv import config, configBase
 import tokens.Token as Token
-import api.OkexClientV3 as Client
+import api.OkexClientV5 as Client
 import json
 import threading
 
 # init apikey,secretkey,passphrase
-api_key = configBase.get("okex-v3", "API_KEY")
-seceret_key = configBase.get("okex-v3", "SECRET_KEY")
-passphrase = configBase.get("okex-v3", "PASSPHRASE")
+api_key = configBase.get("okex-v5", "API_KEY")
+seceret_key = configBase.get("okex-v5", "SECRET_KEY")
+passphrase = configBase.get("okex-v5", "PASSPHRASE")
 
 if __name__ == '__main__':
     symbols = json.loads(config.get("trade", "symbol"))

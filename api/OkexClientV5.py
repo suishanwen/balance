@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # encoding: utf-8
-
+import time
 import api.okex_sdk_v5.Market_api as MarketApi
 import api.okex_sdk_v5.Trade_api as TradeApi
 import api.okex_sdk_v5.Account_api as AccountApi
@@ -194,17 +194,21 @@ class OkexClient(object):
         result = {}
         try:
             result = self.MarketApi.get_history_candlesticks(symbol, period, size)
-            result = result['data']
         except Exception as e:
             logger.error("***klines:%s" % e)
-        is_list = isinstance(result, list)
-        if is_list and len(result) == size:
-            self.kline_data = list(map(self.get_line_data, result))
-        if len(self.kline_data) == 0:
-            logger.error("***klines retry...")
-            self.get_klines(symbol, period, size)
-        elif is_list and len(result) != size and len(result) != size - 1:
-            logger.warning("***klines not refresh,{}".format(result))
+            time.sleep(0.2)
+        if result["code"] == "0":
+            data = result["data"]
+            is_list = isinstance(data, list)
+            if is_list and len(data) == size:
+                self.kline_data = list(map(self.get_line_data, data))
+            if len(self.kline_data) == 0:
+                logger.error("***klines retry...")
+                self.get_klines(symbol, period, size)
+            elif is_list and len(data) != size and len(data) != size - 1:
+                logger.warning("***klines not refresh,{}".format(data))
+        else:
+            logger.error("***klines:%s" % result["msg"])
 
     # 获取用户持仓信息
     def get_contract_position_info(self, symbol):
@@ -216,7 +220,7 @@ class OkexClient(object):
     def get_contract_offset(self, order_type, direction):
         if direction == "short" and order_type == self.TRADE_SELL:
             return True, direction
-        elif direction == "long" and order_info == self.TRADE_BUY:
+        elif direction == "long" and order_type == self.TRADE_BUY:
             return True, direction
         else:
             return False, direction

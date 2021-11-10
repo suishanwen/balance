@@ -489,6 +489,6 @@ if __name__ == '__main__':
     dispatcher.register('POST', '/order', order)
 
     # Launch a basic server
-    httpd = make_server('', 7777, dispatcher)
+    httpd = make_server('', 8888, dispatcher)
     logger.info('Serving on port 7777...')
     httpd.serve_forever()

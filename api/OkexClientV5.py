@@ -147,7 +147,7 @@ class OkexClient(object):
     def get_coin_price(self, symbol):
         data = {}
         try:
-            data = self.MarketApi.get_orderbook(symbol, '10')
+            data = self.MarketApi.get_orderbook(symbol, '20')
             data = data['data'][0]
         except Exception as e:
             logger.error("***depth:%s" % e)

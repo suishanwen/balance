@@ -1,0 +1,12 @@
+cryptography
+requests
+pytz
+gevent
+flask
+flask_cors
+flask_socketio
+websockets
+simple-websocket
+websocket_client
+orjson
+certifi

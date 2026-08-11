@@ -1,6 +1,6 @@
 <div align="center">
 
-# Martin
+# Balance
 
 ### Event-Driven Digital Asset Strategy Engine
 
@@ -18,7 +18,7 @@
 
 ## Overview
 
-Martin 是一个事件驱动的数字资产策略交易后端，将实时行情接入、策略运行时、风险约束、订单执行、历史归档和管理 API 组织为相互独立的模块。
+Balance 是一个事件驱动的数字资产策略交易后端，将实时行情接入、策略运行时、风险约束、订单执行、历史归档和管理 API 组织为相互独立的模块。
 
 项目采用双进程职责划分：
 
@@ -161,7 +161,7 @@ balance/
 
 ## Strategy Portfolio
 
-### K-Line / Martin
+### K-Line / Martingale
 
 基于 K 线窗口、趋势条件、价格间隔和仓位参数维护交易状态，可配置冷却周期、放大系数、止盈和限仓条件。
 

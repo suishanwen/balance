@@ -61,17 +61,6 @@ def get_log(user, file):
     return "<br/>".join(lines)
 
 
-def get_all(file):
-    with open(file, encoding="utf-8") as f:
-        lines = []
-        while True:
-            line = f.readline()
-            if not line:
-                break
-            lines.append(json.loads(line))
-    return lines
-
-
 def get_log_b(file):
     lines = []
     key_error = False

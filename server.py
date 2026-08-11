@@ -10,7 +10,6 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 
 from routes.server_core import coin
-from task import start_job
 from routes.backtest import backtest_bp
 from routes.config import config_bp
 from routes.history import history_bp
@@ -67,5 +66,4 @@ def test():
 
 if __name__ == '__main__':
     threading.Thread(target=do_job, args=(coin,)).start()
-    threading.Thread(target=start_job, args=()).start()
     socketio.run(app, host='0.0.0.0', port=5555, debug=False, log_output=False)

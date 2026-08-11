@@ -25,7 +25,7 @@ from util.ServerUtil import (
     KEY_PATH, admins, auth_user, get_api, get_sid, get_user, require_auth,
     safe_get_val, set_mask_symbol, user_version, write_config, write_key,
 )
-from util.DataUtil import get_all, get_log, get_log_b
+from util.DataUtil import get_log, get_log_b
 from util.ActiveUser import get_alive_users
 from util.IM import push_refresh
 
@@ -260,9 +260,3 @@ def log():
 @require_auth('r')
 def log_bg():
     return get_log_b('nohup.out')
-
-
-@trading_bp.route('/xpl-monitor', methods=['post'])
-@require_auth('r')
-def xpl_monitor():
-    return get_all('xpl_monitor_log.txt')

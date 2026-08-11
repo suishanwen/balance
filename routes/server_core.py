@@ -26,7 +26,6 @@ MARKET_USER_PATH = os.environ.get("MARTIN_MARKET_CONFIG_PATH", str(DATA_PATH / "
 MARKET_PATH = os.environ.get("MARTIN_MARKET_PATH", str(DATA_PATH / "market.ini"))
 FISHNET_PATH = os.environ.get("MARTIN_FISHNET_PATH", str(DATA_PATH / "fishnet.ini"))
 FISHNET_PATH2 = os.environ.get("MARTIN_FISHNET2_PATH", str(DATA_PATH / "fishnet2.ini"))
-CARD_PATH = os.environ.get("MARTIN_CARD_PATH", str(DATA_PATH / "card.ini"))
 NOTE_PATH = os.environ.get("MARTIN_NOTE_PATH", str(DATA_PATH / "note.ini"))
 LOG_PATH = os.environ.get("MARTIN_LOG_PATH", str(DATA_PATH / "ok" / "nohup.out"))
 BG_LOG_PATH = os.environ.get("MARTIN_BG_LOG_PATH", str(DATA_PATH / "nohup.out"))

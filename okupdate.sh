@@ -14,5 +14,4 @@ echo '----- kill okclient -----'
 ps -ef | grep OKClient.py | grep -v grep | awk '{print $2}' | xargs kill -9
 echo '----- start okclient -----'
 cd "$PROJECT_DIR/ok"
-cat /dev/null > nohup.out
 nohup python3 OKClient.py > "$PROJECT_DIR/ok/nohup.out" 2>&1 &

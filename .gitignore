@@ -15,13 +15,11 @@ key.ini.bak
 key.ini.lock
 auth.ini
 login_failures.ini
-task.ini
 market.ini
 market-user.ini
 market.ini.tmp
 fishnet.ini
 fishnet2.ini
-card.ini
 note.ini
 TRANSFER_CACHE
 msgs
@@ -33,5 +31,4 @@ db/
 *.log
 *.out
 *_hf_ratio.json
-xpl_monitor_log.txt
 ok/*.ini
